@@ -1,0 +1,28 @@
+{
+  "name": "layergl",
+  "version": "1.0.0-alpha.1",
+  "description": "a library of geography visualization",
+  "main": "build/layergl.js",
+  "scripts": {
+    "mini": "npm run build && uglifyjs build/layergl.js -c -m -o build/layergl.min.js",
+    "build": "rollup -c"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/huangwei/layer.gl.git"
+  },
+  "author": "huangwei",
+  "license": "ISC",
+  "devDependencies": {
+    "babel-helpers": "^6.24.1",
+    "babel-plugin-transform-remove-console": "^6.9.4",
+    "babel-preset-env": "^1.6.1",
+    "rollup": "^0.41.4",
+    "rollup-plugin-babel": "^2.7.1",
+    "rollup-watch": "^4.3.1",
+    "uglify-js": "^3.1.9"
+  },
+  "dependencies": {
+    "babel-plugin-external-helpers": "^6.22.0"
+  }
+}
