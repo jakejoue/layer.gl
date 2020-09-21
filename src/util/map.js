@@ -1,4 +1,4 @@
-export function getMapBoxGLMap(map) {
+function getMapBoxGLMap(map) {
     return {
         onResize(handler) {
             map.on("resize", function () {
@@ -25,3 +25,7 @@ export function getMapBoxGLMap(map) {
         },
     };
 }
+
+export default {
+    getMapBoxGLMap,
+};
