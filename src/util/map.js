@@ -11,7 +11,7 @@ function getMapBoxGLMap(map) {
             });
         },
         getContainer() {
-            return map.getContainer();
+            return map.getCanvasContainer();
         },
         getSize() {
             return {

@@ -84,8 +84,8 @@ export default class WebglLayer {
         gl.bindFramebuffer(gl.FRAMEBUFFER, this.preFramebuffer);
     }
 
-    onRender(render) {
-        this.renderArr.push(render);
+    onRender(customRender) {
+        this.renderArr.push(customRender);
     }
 
     changeSize() {
@@ -102,6 +102,7 @@ export default class WebglLayer {
                 "px;height:" +
                 size.height +
                 "px;z-index:2;";
+            style.pointerEvents = "none";
             this.gl.viewport(0, 0, canvas.width, canvas.height);
         }
     }
