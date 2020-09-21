@@ -1,6 +1,9 @@
-class View {
+import WebglLayer from "./WebglLayer";
+import LayerManager from "./LayerManager";
+
+export default class View {
     constructor(options) {
-        var self = this;
+        const self = this;
 
         this.options = {
             autoUpdate: false,
@@ -8,58 +11,41 @@ class View {
         Object.assign(this.options, options);
 
         // 联合渲染对象（外部map）
-        this.webglLayer = new Hf(options.map, this.options);
+        this.webglLayer = new WebglLayer(options.map, this.options);
 
         // 图层管理器
-        this.layerManager = new yj({
+        this.layerManager = new LayerManager({
             autoUpdate: this.options.autoUpdate,
             webglLayer: this.webglLayer,
         });
 
-        // 增强渲染器
-        this.effectManager = new sf(this.webglLayer.gl);
-        if (this.options.effects) {
-            this.effectManager.setEffects([
-                // 本地渲染
-                {
-                    render: function (a) {
-                        self.renderCanvas(a);
-                    },
-                },
-                ...this.options.effects,
-            ]);
-        }
-
         // 同步相关事件
-        this.webglLayer.onRender(function (a) {
-            self._render(a);
+        this.webglLayer.onRender(function (evt) {
+            self._render(evt);
         });
-        this.webglLayer.onClick = function (a) {
-            self.layerManager.onClick(a);
+        this.webglLayer.onClick = function (evt) {
+            self.layerManager.onClick(evt);
         };
-        this.webglLayer.onDblClick = function (a) {
-            self.layerManager.onDblClick(a);
+        this.webglLayer.onDblClick = function (evt) {
+            self.layerManager.onDblClick(evt);
         };
-        this.webglLayer.onRightClick = function (a) {
-            self.layerManager.onRightClick(a);
+        this.webglLayer.onRightClick = function (evt) {
+            self.layerManager.onRightClick(evt);
         };
-        this.webglLayer.onMousemove = function (a) {
-            self.layerManager.onMousemove(a);
+        this.webglLayer.onMousemove = function (evt) {
+            self.layerManager.onMousemove(evt);
         };
-        this.webglLayer.map.onResize(function () {
-            self.effectManager.onResize();
-        });
     }
 
     /**
      * @private
      * 渲染图层内容
-     * @param {*} a
+     * @param {*} transferOptions
      */
-    renderCanvas(a) {
-        this.layerManager.renderThreeLayers(a);
-        this.layerManager.renderThreeLayer(a);
-        this.layerManager.renderGLLayers(a);
+    renderCanvas(transferOptions) {
+        this.layerManager.renderThreeLayers(transferOptions);
+        this.layerManager.renderThreeLayer(transferOptions);
+        this.layerManager.renderGLLayers(transferOptions);
     }
 
     /**
@@ -71,21 +57,16 @@ class View {
 
     /**
      * 渲染事件，包括增强器
-     * @param {*} a
+     * @param {*} transferOptions
      */
-    _render(a) {
-        const effects = this.options.effects;
-        if (effects && effects.length > 0) {
-            this.effectManager.render();
-        } else {
-            this.webglLayer.saveFramebuffer();
-            this.renderCanvas(a);
-            this.webglLayer.restoreFramebuffer();
-        }
+    _render(transferOptions) {
+        this.webglLayer.saveFramebuffer();
+        this.renderCanvas(transferOptions);
+        this.webglLayer.restoreFramebuffer();
     }
 
-    onRender(a) {
-        this.webglLayer.onRender(a);
+    onRender(func) {
+        this.webglLayer.onRender(func);
     }
 
     destroy() {

@@ -1,100 +1,108 @@
+import StateManager from "./StateManager";
+
 export default class WebglLayer {
     constructor(map, options = {}) {
         this.map = map;
         this.options = options;
 
+        // 渲染队列
         this.renderArr = [];
 
-        (map = options.canvas) || (map = document.createElement("canvas"));
-        this.canvas = map;
-        this.gl = options.gl ? options.gl : ee(map);
+        // 画布和webgl对象
+        const canvas = options.canvas
+            ? options.canvas
+            : document.createElement("canvas");
+        this.canvas = canvas;
+        this.gl = options.gl ? options.gl : canvas.getContext("webgl");
         this.gl.getExtension("OES_element_index_uint");
+        // 修改画布样式
         this.changeSize();
 
+        // 动画和更新事件
         this._animation = this.animation.bind(this);
         this._update = this.update.bind(this);
         this.options.onRender && this.renderArr.push(this.options.onRender);
-        this.stateManager = new rf({
+
+        // webgl状态修改器
+        this.stateManager = new StateManager({
             gl: this.gl,
         });
-        this.pickFBO = new wa(this.gl);
+
+        // 绘画相关参数
         this.transferOptions = {};
+
+        // 绑定同步事件
         this.bind();
     }
 
     bind() {
-        var a = this,
-            b = this.map;
-        b.onResize(function () {
-            a.changeSize();
-            a.render();
+        const self = this,
+            map = this.map;
+        // 画布缩放事件
+        map.onResize(function () {
+            self.changeSize();
+            self.render();
         });
-        b.onUpdate(this._update);
-        b.onClick &&
-            b.onClick(function (b) {
-                a.onClick && a.onClick(b);
+        // 更新时间
+        map.onUpdate(this._update);
+
+        // 其余可能支持的事件
+        map.onClick &&
+            map.onClick(function (evt) {
+                self.onClick && self.onClick(evt);
             });
-        b.onDblClick &&
-            b.onDblClick(function (b) {
-                a.onDblClick && a.onDblClick(b);
+        map.onDblClick &&
+            map.onDblClick(function (evt) {
+                self.onDblClick && self.onDblClick(evt);
             });
-        b.onRightClick &&
-            b.onRightClick(function (b) {
-                a.onRightClick && a.onRightClick(b);
+        map.onRightClick &&
+            map.onRightClick(function (evt) {
+                self.onRightClick && self.onRightClick(evt);
             });
-        b.onMousemove &&
-            b.onMousemove(function (b) {
-                a.onMousemove && a.onMousemove(b);
+        map.onMousemove &&
+            map.onMousemove(function (evt) {
+                self.onMousemove && self.onMousemove(evt);
             });
-        this.options.canvas || b.getContainer().appendChild(this.canvas);
+        // 附加画布
+        this.options.canvas || map.getContainer().appendChild(this.canvas);
     }
 
-    setOptions(a) {
-        this.options = a;
-    }
-
-    onInitialize(a) {
-        a && (this.transferOptions = a.bind(this)(this.gl) || {});
-    }
-
-    bindFramebuffer(a) {
-        var b = this.gl;
-        a
-            ? b.bindFramebuffer(b.FRAMEBUFFER, a.framebuffer)
-            : b.bindFramebuffer(b.FRAMEBUFFER, null);
+    bindFramebuffer(bufferData) {
+        const gl = this.gl;
+        bufferData
+            ? gl.bindFramebuffer(gl.FRAMEBUFFER, bufferData.framebuffer)
+            : gl.bindFramebuffer(gl.FRAMEBUFFER, null);
     }
 
     saveFramebuffer() {
-        var a = this.gl;
-        this.preFramebuffer = a.getParameter(a.FRAMEBUFFER_BINDING);
+        const gl = this.gl;
+        this.preFramebuffer = gl.getParameter(gl.FRAMEBUFFER_BINDING);
     }
 
     restoreFramebuffer() {
-        var a = this.gl;
-        a.bindFramebuffer(a.FRAMEBUFFER, this.preFramebuffer);
+        const gl = this.gl;
+        gl.bindFramebuffer(gl.FRAMEBUFFER, this.preFramebuffer);
     }
 
-    onRender(a) {
-        this.renderArr.push(a);
+    onRender(render) {
+        this.renderArr.push(render);
     }
 
     changeSize() {
-        var a = this.canvas;
-        if (a) {
-            var b = a.style,
-                c = this.map.getSize(),
-                e = window.devicePixelRatio;
-            a.width = c.width * e;
-            a.height = c.height * e;
-            b.cssText =
+        const canvas = this.canvas;
+        if (canvas) {
+            const style = canvas.style,
+                size = this.map.getSize(),
+                devicePixelRatio = window.devicePixelRatio;
+            canvas.width = size.width * devicePixelRatio;
+            canvas.height = size.height * devicePixelRatio;
+            style.cssText =
                 "position: absolute;left:0;top:0;width:" +
-                c.width +
+                size.width +
                 "px;height:" +
-                c.height +
+                size.height +
                 "px;z-index:2;";
-            c = this.options;
-            "cesium" !== c.mapType || c.canvas || (b.pointerEvents = "none");
-            this.gl.viewport(0, 0, a.width, a.height);
+            this.gl.viewport(0, 0, canvas.width, canvas.height);
         }
     }
 
@@ -104,81 +112,25 @@ export default class WebglLayer {
 
     render() {
         if (this.map) {
-            var a = this.options,
-                b = this.projectionMatrix,
-                c = this.viewMatrix;
-            if ("three" === a.mapType)
-                (c = this.map.map.camera),
-                    (b = c.projectionMatrix.elements),
-                    (c = c.matrixWorldInverse.elements);
-            else if ("cesium" === a.mapType) {
-                c = this.map.map;
-                var e = c.camera.frustum.projectionMatrix;
-                b = new Float32Array([
-                    e[0],
-                    e[1],
-                    e[2],
-                    e[3],
-                    e[4],
-                    e[5],
-                    e[6],
-                    e[7],
-                    e[8],
-                    e[9],
-                    e[10],
-                    e[11],
-                    e[12],
-                    e[13],
-                    e[14],
-                    e[15],
-                ]);
-                e = c.camera.viewMatrix;
-                c = new Float32Array([
-                    e[0],
-                    e[1],
-                    e[2],
-                    e[3],
-                    e[4],
-                    e[5],
-                    e[6],
-                    e[7],
-                    e[8],
-                    e[9],
-                    e[10],
-                    e[11],
-                    e[12],
-                    e[13],
-                    e[14],
-                    e[15],
-                ]);
-            } else
-                "B_EARTH_MAP" === this.map.map.mapType
-                    ? ((b = this.map.map
-                          .getEarth()
-                          .scene._camera.getProjectionMatrix()),
-                      (c = this.map.map
-                          .getEarth()
-                          .scene._camera.getModelViewMatrix()))
-                    : (this.updateProjectionMatrix(),
-                      this.updateModelViewMatrix());
-            e = C.multiply(this.matrix, b, c);
-            T(this.transferOptions, {
-                gl: this.gl,
-                matrix: e,
-                pointToPixelMatrix: this.pointToPixelMatrix,
-                pixelToViewMatrix: this.pixelToViewMatrix,
-                projectionMatrix: b,
-                orthoMatrix: this.orthoMatrix,
-                viewMatrix: c,
-                stateManager: this.stateManager,
-            });
-            "three" !== a.mapType &&
-                "cesium" !== a.mapType &&
-                false !== a.autoUpdate &&
-                this.clear();
-            for (a = 0; a < this.renderArr.length; a++)
-                this.renderArr[a] &&
-                    this.renderArr[a].bind(this)(this.transferOptions);
+            // 更新渲染参数
+            Object.assign(
+                this.transferOptions,
+                {
+                    gl: this.gl,
+                    matrix: this.map.getMatirx(),
+                    stateManager: this.stateManager,
+                },
+                this.map.getTransferOptions ? this.map.getTransferOptions() : {}
+            );
+
+            // 是否为手动更新
+            false !== this.options.autoUpdate && this.clear();
+
+            for (let i = 0; i < this.renderArr.length; i++) {
+                if (this.renderArr[i]) {
+                    this.renderArr[i].bind(this)(this.transferOptions);
+                }
+            }
         }
     }
 
@@ -187,48 +139,11 @@ export default class WebglLayer {
         this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
     }
 
-    updateProjectionMatrix() {
-        var a = this.gl.canvas.width / this.gl.canvas.height,
-            b = this.options.cameraNear || 1,
-            c = this.options.cameraFar || 4e3;
-        C.perspective(this.projectionMatrix, la(this.fovy), a, b, c);
-        a = this.map.getSize();
-        C.ortho(
-            this.orthoMatrix,
-            -a.width / 2,
-            a.width / 2,
-            -a.height / 2,
-            a.height / 2,
-            b,
-            c
-        );
-    }
-
-    updateModelViewMatrix() {
-        var a = this.map,
-            b = this.viewMatrix,
-            c = this.pointToPixelMatrix,
-            e = this.pixelToViewMatrix;
-        C.identity(b);
-        C.identity(c);
-        C.identity(e);
-        var g = a.getSize();
-        g = Math.round(-g.height / (2 * Math.tan(la(this.fovy) / 2)));
-        C.translate(e, e, [0, 0, g]);
-        C.rotate(e, e, la(a.getTilt()), [-1, 0, 0]);
-        C.rotate(e, e, la(a.getHeading()), [0, 0, -1]);
-        g = a.getCenter();
-        var k = this.options.pointOffset || [0, 0];
-        a = a.getZoomUnits();
-        C.translate(c, c, [(k[0] - g.lng) / a, (k[1] - g.lat) / a, 0]);
-        a = 1 / a;
-        C.scale(c, c, [a, a, a]);
-        C.multiply(b, e, c);
-    }
-
     destroy() {
         this.stopAnimation();
-        this.map.getContainer().removeChild(this.canvas);
+        if (this.canvas.parentNode) {
+            this.canvas.parentNode.removeChild(this.canvas);
+        }
         this.canvas = null;
     }
 

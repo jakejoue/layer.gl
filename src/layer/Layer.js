@@ -1,7 +1,6 @@
 export default class Layer {
     constructor(options) {
-        this.options = this.getCommonDefaultOptions();
-        Object.assign(this.options, this.getDefaultOptions(), options);
+        this.options = Object.assign(this.getDefaultOptions(), options);
 
         this.autoUpdate = false;
 
@@ -11,15 +10,11 @@ export default class Layer {
         }
     }
 
-    getCommonDefaultOptions() {
-        return {};
-    }
-
     getDefaultOptions() {
         return {};
     }
 
-    initialize(options) {}
+    initialize(gl) {}
 
     destroy() {
         this.onDestroy();
