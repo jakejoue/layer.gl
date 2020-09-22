@@ -8,12 +8,12 @@ export default class SparkLayer extends Layer {
     constructor(options) {
         super(options);
 
-        this.bufferData = [];
-        this.startTime = Number(this.options.startTime) || 0;
-        this.endTime = Number(this.options.endTime);
-        this.time = this.startTime;
-        this.segs = Number(this.options.segs) || 10;
         this.autoUpdate = true;
+        this.bufferData = [];
+
+        this.startTime = Number(this.options.startTime) || 0;
+        this.endTime = Number(this.options.endTime) || 10;
+        this.time = this.startTime;
     }
 
     getDefaultOptions() {
@@ -53,80 +53,85 @@ export default class SparkLayer extends Layer {
                     gl_FragColor = vec4(uFragColor, 1.0 * vTime);
                 }`,
         });
-        this.buffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
+
+        // 顶点相关数据
+        this.buffer = new Buffer({
+            gl: gl,
+            target: "ARRAY_BUFFER",
+            usage: "STATIC_DRAW",
+        });
+        const attributes = [
+            {
+                name: "aPos",
+                buffer: this.buffer,
+                size: 4,
+                type: "FLOAT",
+                offset: 0,
+            },
+        ];
+        this.vertexArray = new VertexArray({
+            gl: gl,
+            program: this.program,
+            attributes: attributes,
+        });
     }
 
     onChanged(options, data) {
         const gl = this.gl;
         if (gl) {
-            this.buffer = gl.createBuffer();
-            gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
-
             const arrayData = [],
-                geth = options.height;
+                getH = options.height,
+                segs = Number(options.segs) || 10;
+
             for (let i = 0; i < data.length; i++) {
                 const coord = data[i].geometry.coordinates;
                 const point = this.normizedPoint([
                     coord[0],
                     coord[1],
-                    typeof geth === "function" ? geth(data[i]) : Number(geth),
+                    typeof getH === "function" ? getH(data[i]) : Number(getH),
                 ]);
 
-                for (let p = 0, m = 0; m < this.segs; m++) {
-                    arrayData.push(point[0], point[1], p);
-                    void 0 === coord[2]
-                        ? arrayData.push(m)
-                        : arrayData.push(Number(coord[2]));
+                for (let h = 0, j = 0; j < segs; j++) {
+                    arrayData.push(point[0], point[1], h, j);
 
-                    p += point[2] / this.segs;
-                    arrayData.push(point[0], point[1], p);
-                    void 0 === coord[2]
-                        ? arrayData.push(m + 1)
-                        : arrayData.push(Number(coord[2]));
+                    h += point[2] / segs;
+                    arrayData.push(point[0], point[1], h, j + 1);
                 }
             }
-            void 0 === options.endTime && (this.endTime = this.segs);
+
             this.bufferData = arrayData;
-            gl.bufferData(
-                gl.ARRAY_BUFFER,
-                new Float32Array(arrayData),
-                gl.STATIC_DRAW
-            );
-            this.webglLayer && this.webglLayer.render();
+            this.buffer.updateData(new Float32Array(arrayData));
         }
+    }
+
+    destroy() {
+        this.gl = this.program = this.buffer = this.vertexArray = this.bufferData = null;
     }
 
     render(transferOptions) {
         const gl = transferOptions.gl,
-            matrix = transferOptions.matrix,
-            program = this.program;
+            matrix = transferOptions.matrix;
 
-        gl.useProgram(program.program);
-        gl.uniformMatrix4fv(program.uniforms.u_matrix, false, matrix);
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
-        gl.enableVertexAttribArray(program.attributes.aPos);
-        gl.vertexAttribPointer(
-            program.attributes.aPos,
-            4,
-            gl.FLOAT,
-            false,
-            0,
-            0
-        );
-        const color = this.normizedColor(this.options.color);
-        gl.uniform3f(program.uniforms.uFragColor, color[0], color[1], color[2]);
-        gl.uniform1f(program.uniforms.currentTime, this.time);
-        gl.uniform1f(program.uniforms.trailLength, this.options.trailLength);
+        if (this.bufferData.length <= 0) return;
+
+        this.program.use(gl);
+        this.vertexArray.bind();
+
+        const uniforms = {
+            u_matrix: matrix,
+            uFragColor: this.normizedColor(this.options.color),
+            currentTime: this.time,
+            trailLength: this.options.trailLength,
+        };
+        this.program.setUniforms(uniforms);
+
         gl.enable(gl.BLEND);
         gl.polygonOffset(2, 1);
         gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
         gl.blendEquation(gl.FUNC_ADD);
         gl.drawArrays(gl.LINES, 0, this.bufferData.length / 4);
-        gl.bindBuffer(gl.ARRAY_BUFFER, null);
-        gl.disable(gl.BLEND);
+
         this.time += Number(this.options.step);
         this.time > 1.5 * this.endTime && (this.time = this.startTime);
-        gl.useProgram(null);
     }
 }

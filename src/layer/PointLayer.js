@@ -153,7 +153,7 @@ export default class PointLayer extends Layer {
     }
 
     destroy() {
-        this.buffer = this.program = this.bufferData = null;
+        this.gl = this.program = this.buffer = this.vertexArray = this.bufferData = null;
     }
 
     render(transferOptions) {
@@ -161,33 +161,33 @@ export default class PointLayer extends Layer {
             matrix = transferOptions.matrix,
             isPickRender = transferOptions.isPickRender;
 
-        if (this.bufferData.length > 0) {
-            this.program.use(gl);
-            this.vertexArray.bind();
+        if (this.bufferData.length <= 0) return;
 
-            const uniforms = Object.assign(
-                this.getCommonUniforms(transferOptions),
-                {
-                    uShape: PointShapeTypes[this.options.shape] || 1,
-                    uMatrix: matrix,
-                }
-            );
-            this.program.setUniforms(uniforms);
+        this.program.use(gl);
+        this.vertexArray.bind();
 
-            if (isPickRender) {
-                gl.disable(gl.BLEND);
-            } else {
-                gl.enable(gl.BLEND);
-                gl.blendEquation(gl.FUNC_ADD);
-
-                const blend = this.options.blend;
-                if (blend && "lighter" === blend) {
-                    gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
-                } else {
-                    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-                }
+        const uniforms = Object.assign(
+            this.getCommonUniforms(transferOptions),
+            {
+                uShape: PointShapeTypes[this.options.shape] || 1,
+                uMatrix: matrix,
             }
-            gl.drawArrays(gl.POINTS, 0, this.bufferData.length / 8);
+        );
+        this.program.setUniforms(uniforms);
+
+        if (isPickRender) {
+            gl.disable(gl.BLEND);
+        } else {
+            gl.enable(gl.BLEND);
+            gl.blendEquation(gl.FUNC_ADD);
+
+            const blend = this.options.blend;
+            if (blend && "lighter" === blend) {
+                gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
+            } else {
+                gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+            }
         }
+        gl.drawArrays(gl.POINTS, 0, this.bufferData.length / 8);
     }
 }
