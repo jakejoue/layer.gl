@@ -30,7 +30,6 @@ function getMapBoxGLMap(map) {
             const y = transform.mercatorYfromLat(coord[1]);
             const z = transform.mercatorZfromAltitude(coord[2] || 0, coord[1]);
 
-            console.log(x, y, z);
             return [x, y, z];
         },
         getMatirx() {
