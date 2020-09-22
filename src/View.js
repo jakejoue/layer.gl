@@ -6,7 +6,7 @@ export default class View {
         const self = this;
 
         this.options = {
-            autoUpdate: false,
+            autoUpdate: true,
         };
         Object.assign(this.options, options);
 

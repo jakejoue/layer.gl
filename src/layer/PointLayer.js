@@ -44,7 +44,7 @@ export default class PointLayer extends Layer {
                 } else {
                     vColor = vec4(aColor.xyz, 1.0);
                 }
-                gl_Position = uMatrix * vec4(aPos.xyz, 1.0);
+                gl_Position = uMatrix * vec4(aPos, 1.0);
                 gl_PointSize = aSize;
 
                 #if defined(PICK)

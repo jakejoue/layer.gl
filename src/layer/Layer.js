@@ -122,7 +122,7 @@ export default class Layer extends CommonLayer {
     }
 
     normizedPoint(point) {
-        if (!point || !point[0] || !point[1]) return [0, 0, 0];
+        if (!point || isNaN(+point[0]) || isNaN(+point[1])) return [0, 0, 0];
         return this.map.normizedPoint(point);
     }
 

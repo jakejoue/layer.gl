@@ -29,7 +29,7 @@ export default class VertexArray {
             const attribute = this.attributes[i],
                 attribIndex = program.attributes[attribute.name];
 
-            if (attribIndex) {
+            if (attribIndex >= 0) {
                 attribute.buffer.bind(gl);
 
                 gl.vertexAttribPointer(

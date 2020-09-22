@@ -90,7 +90,7 @@ export default class WebglLayer {
 
     changeSize() {
         const canvas = this.canvas;
-        if (canvas) {
+        if (canvas && !this.options.canvas) {
             const style = canvas.style,
                 size = this.map.getSize(),
                 devicePixelRatio = window.devicePixelRatio;
