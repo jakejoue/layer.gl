@@ -271,13 +271,13 @@ export default class Program {
                     );
                     break;
                 case gl.FLOAT_MAT2:
-                    gl.uniformMatrix2fv(uniformLocation, !1, data);
+                    gl.uniformMatrix2fv(uniformLocation, false, data);
                     break;
                 case gl.FLOAT_MAT3:
-                    gl.uniformMatrix3fv(uniformLocation, !1, data);
+                    gl.uniformMatrix3fv(uniformLocation, false, data);
                     break;
                 case gl.FLOAT_MAT4:
-                    gl.uniformMatrix4fv(uniformLocation, !1, data);
+                    gl.uniformMatrix4fv(uniformLocation, false, data);
                     break;
                 default:
                     console.error("Unrecognized uniform type: " + uniformName);

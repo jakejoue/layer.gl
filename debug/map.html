@@ -93,13 +93,19 @@
                     },
                 });
             }
-            console.log(data);
 
             map.on("load", function () {
-                var View = new layergl.View({
+                var view = new layergl.View({
                     map: layergl.map.getMapBoxGLMap(map),
                     autoUpdate: true,
                 });
+                var pointLayer = new layergl.PointLayer({
+                    blend: "lighter",
+                    size: 15,
+                    color: "rgba(102, 0, 204, 0.6)",
+                });
+                view.addLayer(pointLayer);
+                pointLayer.setData(data);
             });
         </script>
     </body>

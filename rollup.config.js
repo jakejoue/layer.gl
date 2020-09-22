@@ -1,12 +1,15 @@
-import babel from "rollup-plugin-babel";
-import resolve from "rollup-plugin-node-resolve";
-import commonjs from "rollup-plugin-commonjs";
+import babel from "@rollup/plugin-babel";
+import commonResolve from "@rollup/plugin-commonjs";
+import nodeResolve from "@rollup/plugin-node-resolve";
 
 export default {
-    entry: "index.js",
-    sourceMap: true,
-    format: "umd",
-    moduleName: "layergl",
+    input: "index.js",
+    output: {
+        name: "layergl",
+        file: "build/layergl.js",
+        format: "umd",
+        sourcemap: true,
+    },
     external: ["maptalks", "openlayers", "leaflet"],
     globals: {
         openlayers: "ol",
@@ -14,11 +17,8 @@ export default {
         maptalks: "maptalks",
     },
     plugins: [
-        babel({
-            runtimeHelpers: true,
-        }),
-        resolve(),
-        commonjs(),
+        commonResolve(),
+        nodeResolve(),
+        babel({ babelHelpers: "bundled" }),
     ],
-    dest: "build/layergl.js",
 };

@@ -66,7 +66,7 @@ export default class PointLayer extends Layer {
                         }
                         float blur = 1.0;
                         blur = 1.0 - smoothstep(0.49, 0.5, d);
-                        color.a* = blur;
+                        color.a *= blur;
                         gl_FragColor = color;
                     } else {
                         gl_FragColor = color;
@@ -165,10 +165,13 @@ export default class PointLayer extends Layer {
             this.program.use(gl);
             this.vertexArray.bind();
 
-            const uniforms = Object(this.getCommonUniforms(transferOptions), {
-                uShape: PointShapeTypes[this.options.shape] || 1,
-                uMatrix: matrix,
-            });
+            const uniforms = Object.assign(
+                this.getCommonUniforms(transferOptions),
+                {
+                    uShape: PointShapeTypes[this.options.shape] || 1,
+                    uMatrix: matrix,
+                }
+            );
             this.program.setUniforms(uniforms);
 
             if (isPickRender) {

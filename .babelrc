@@ -1,16 +1,4 @@
 {
-    "presets": [
-        [
-            "env",
-            {
-                "modules": false
-            }
-        ]
-    ],
-    "plugins": [
-        "external-helpers",
-        ["transform-remove-console", {
-            "exclude": ["error", "warn"]
-        }]
-    ]
+  "presets": [["@babel/env", { "modules": false }]],
+  "plugins": []
 }
