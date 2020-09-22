@@ -60,7 +60,7 @@ export default class PointLayer extends Layer {
                 void main() {
                     vec4 color = vColor;
                     if(uShape == 1) {
-                        float d = distance(gl_PointCoord,vec2(0.5,0.5));
+                        float d = distance(gl_PointCoord, vec2(0.5, 0.5));
                         if(d > 0.5) {
                             discard;
                         }
