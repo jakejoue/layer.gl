@@ -15,15 +15,18 @@
   "license": "ISC",
   "devDependencies": {
     "babel-helpers": "^6.24.1",
+    "babel-plugin-external-helpers": "^6.22.0",
     "babel-plugin-transform-remove-console": "^6.9.4",
-    "babel-preset-env": "^1.6.1",
+    "babel-preset-env": "^1.7.0",
     "eslint": "^7.9.0",
-    "rollup": "^0.41.4",
-    "rollup-plugin-babel": "^2.7.1",
+    "rollup": "^2.28.1",
+    "rollup-plugin-babel": "^4.4.0",
+    "rollup-plugin-commonjs": "^10.1.0",
+    "rollup-plugin-node-resolve": "^5.2.0",
     "rollup-watch": "^4.3.1",
-    "uglify-js": "^3.1.9"
+    "uglify-js": "^3.10.4"
   },
   "dependencies": {
-    "babel-plugin-external-helpers": "^6.22.0"
+    "color": "^3.1.2"
   }
 }
