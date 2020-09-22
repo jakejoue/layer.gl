@@ -32,6 +32,9 @@ function getMapBoxGLMap(map) {
 
             return [x, y, z];
         },
+        worldSize() {
+            return 1;
+        },
         getMatirx() {
             return map.transform.customLayerMatrix();
         },

@@ -6,3 +6,4 @@ export { default as View } from "./src/View";
 
 // 图层
 export { default as PointLayer } from "./src/layer/PointLayer";
+export { default as SparkLayer } from "./src/layer/SparkLayer";

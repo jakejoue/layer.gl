@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Mapbox GL JS debug page</title>
+        <meta charset="utf-8" />
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1.0, user-scalable=no"
+        />
+        <link rel="stylesheet" href="./mapbox-gl/mapbox-gl.css" />
+        <style>
+            body {
+                margin: 0;
+                padding: 0;
+            }
+            html,
+            body,
+            #map {
+                height: 100%;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div id="map"></div>
+
+        <script src="./mapbox-gl/mapbox-gl.js"></script>
+        <script src="./mapbox-gl/access_token_generated.js"></script>
+        <script src="./mapv.min.js"></script>
+        <script src="../build/layergl.js"></script>
+        <script>
+            var map = (window.map = new mapboxgl.Map({
+                container: "map",
+                zoom: 16,
+                pitch: 60,
+                center: [106.559872, 29.566579],
+                style: "mapbox://styles/mapbox/dark-v10",
+                hash: false,
+            }));
+
+            var point = {
+                lng: 106.559872,
+                lat: 29.566579,
+            };
+
+            var sparkData1 = [];
+            var sparkData2 = [];
+            var sparkData3 = [];
+            var randomNum = 40;
+
+            // 随机生成点的偏移尺度，勿修改变量名
+            var RANDOM_SIZE = 0.01;
+            for (var i = 0; i < randomNum; i++) {
+                var coord = [
+                    point.lng + RANDOM_SIZE * Math.random() - RANDOM_SIZE / 2,
+                    point.lat + RANDOM_SIZE * Math.random() - RANDOM_SIZE / 2,
+                ];
+                sparkData1.push({
+                    geometry: {
+                        type: "Point",
+                        coordinates: coord,
+                    },
+                    properties: {
+                        height: parseInt(200 * Math.random(), 10),
+                    },
+                });
+            }
+            for (var i = 0; i < randomNum; i++) {
+                var coord = [
+                    point.lng + RANDOM_SIZE * Math.random() - RANDOM_SIZE / 2,
+                    point.lat + RANDOM_SIZE * Math.random() - RANDOM_SIZE / 2,
+                ];
+                sparkData2.push({
+                    geometry: {
+                        type: "Point",
+                        coordinates: coord,
+                    },
+                    properties: {
+                        height: parseInt(200 * Math.random(), 10),
+                    },
+                });
+            }
+            for (var i = 0; i < randomNum; i++) {
+                var coord = [
+                    point.lng + RANDOM_SIZE * Math.random() - RANDOM_SIZE / 2,
+                    point.lat + RANDOM_SIZE * Math.random() - RANDOM_SIZE / 2,
+                ];
+                sparkData3.push({
+                    geometry: {
+                        type: "Point",
+                        coordinates: coord,
+                    },
+                    properties: {
+                        height: parseInt(200 * Math.random(), 10),
+                    },
+                });
+            }
+
+            var sparkLayer1 = new layergl.SparkLayer({
+                height: function (data) {
+                    return data.properties.height;
+                },
+                step: 0.1,
+                startTime: 1,
+                endTime: 12,
+                color: "rgb(255, 153, 51)",
+            });
+
+            var sparkLayer2 = new layergl.SparkLayer({
+                height: function (data) {
+                    return data.properties.height;
+                },
+                color: "rgb(255, 0, 255)",
+            });
+
+            var sparkLayer3 = new layergl.SparkLayer({
+                height: function (data) {
+                    return data.properties.height;
+                },
+                step: 0.1,
+                startTime: 2,
+                endTime: 10,
+                color: "rgb(0, 204, 255)",
+            });
+
+            map.on("load", function () {
+                var view = new layergl.View({
+                    map: layergl.map.getMapBoxGLMap(map),
+                });
+                view.addLayer(sparkLayer1);
+                view.addLayer(sparkLayer2);
+                view.addLayer(sparkLayer3);
+
+                sparkLayer1.setData(sparkData1);
+                sparkLayer2.setData(sparkData2);
+                sparkLayer3.setData(sparkData3);
+            });
+        </script>
+    </body>
+</html>
