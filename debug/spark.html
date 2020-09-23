@@ -105,14 +105,12 @@
                 endTime: 12,
                 color: "rgb(255, 153, 51)",
             });
-
             var sparkLayer2 = new layergl.SparkLayer({
                 height: function (data) {
                     return data.properties.height;
                 },
                 color: "rgb(255, 0, 255)",
             });
-
             var sparkLayer3 = new layergl.SparkLayer({
                 height: function (data) {
                     return data.properties.height;
@@ -123,18 +121,16 @@
                 color: "rgb(0, 204, 255)",
             });
 
-            map.on("load", function () {
-                var view = new layergl.View({
-                    map: layergl.map.getMapBoxGLMap(map),
-                });
-                view.addLayer(sparkLayer1);
-                view.addLayer(sparkLayer2);
-                view.addLayer(sparkLayer3);
-
-                sparkLayer1.setData(sparkData1);
-                sparkLayer2.setData(sparkData2);
-                sparkLayer3.setData(sparkData3);
+            var view = new layergl.View({
+                map: layergl.map.getMapBoxGLMap(map),
             });
+            view.addLayer(sparkLayer1);
+            view.addLayer(sparkLayer2);
+            view.addLayer(sparkLayer3);
+
+            sparkLayer1.setData(sparkData1);
+            sparkLayer2.setData(sparkData2);
+            sparkLayer3.setData(sparkData3);
         </script>
     </body>
 </html>

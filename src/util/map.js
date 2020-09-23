@@ -1,37 +1,42 @@
 function getMapBoxGLMap(map) {
-    const transform = map.projection.getTransform();
+    let transform = map.projection.getTransform();
+
+    // 所有监听的事件
+    let listeners = [];
+    function listen(type, handler) {
+        listeners.push({ type, handler });
+        map.on(type, handler);
+    }
 
     return {
         mapType: "mapboxgl",
         // 必要的实践
         onResize(handler) {
-            map.on("resize", function () {
-                handler();
-            });
+            listen("resize", handler);
         },
         onUpdate(handler) {
-            map.on("render", function () {
-                handler();
-            });
+            listen("render", handler);
         },
         onClick(handler) {
-            map.on("click", function (evt) {
+            listen("click", function (evt) {
                 handler(evt.originalEvent);
             });
         },
         onDblClick(handler) {
-            map.on("dblclick", function (evt) {
+            listen("dblclick", function (evt) {
                 handler(evt.point);
             });
         },
         onRightClick(handler) {
-            map.on("contextmenu", function (evt) {
+            listen("contextmenu", function (evt) {
                 handler(evt.point);
             });
         },
         onMousemove(handler) {
-            map.on("mousemove", function (evt) {
-                handler(evt.originalEvent);
+            listen("mousemove", function (evt) {
+                if (!map.isMoving()) {
+                    handler(evt.originalEvent);
+                }
             });
         },
         // 容器更新相关
@@ -57,6 +62,13 @@ function getMapBoxGLMap(map) {
         },
         getMatirx() {
             return map.transform.customLayerMatrix();
+        },
+        // 销毁方法
+        destroy() {
+            listeners.forEach((l) => {
+                map.off(l.type, l.handler);
+            });
+            map = transform = listen = listeners = null;
         },
     };
 }
