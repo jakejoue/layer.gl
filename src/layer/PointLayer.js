@@ -49,7 +49,7 @@ export default class PointLayer extends Layer {
 
                 #if defined(PICK)
                 if(mapvIsPicked()) {
-                    vColor=uSelectedColor;
+                    vColor = uSelectedColor;
                 }
                 #endif
             }`,
@@ -138,6 +138,27 @@ export default class PointLayer extends Layer {
             }
             this.bufferData = arrayData;
             this.buffer.updateData(new Float32Array(arrayData));
+
+            options.enablePicked && this.parsePickData(dataArray);
+        }
+    }
+
+    parsePickData(arrayData) {
+        const options = this.getOptions(),
+            dataArray = [];
+        if (options.enablePicked) {
+            for (let i = 0; i < arrayData.length; i++) {
+                const k = this.indexToRgb(i);
+                dataArray.push(k[0] / 255, k[1] / 255, k[2] / 255);
+
+                if (options.repeat) {
+                    dataArray.push(k[0] / 255, k[1] / 255, k[2] / 255);
+                    dataArray.push(k[0] / 255, k[1] / 255, k[2] / 255);
+                }
+            }
+        }
+        if (options.enablePicked) {
+            this.pickBuffer.updateData(new Float32Array(dataArray));
         }
     }
 

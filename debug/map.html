@@ -103,6 +103,11 @@
                     size: 15,
                     color: "rgba(102, 0, 204, 0.6)",
                     repeat: false,
+                    enablePicked: true,
+                    onClick: function (evt) {
+                        console.log(evt);
+                    },
+                    autoSelect: true,
                 });
                 view.addLayer(pointLayer);
                 pointLayer.setData(data);

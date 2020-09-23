@@ -141,70 +141,74 @@ export default class LayerManager {
         }
     }
 
-    onClick(a) {
-        // for (var b = 0; b < this.layers.length; b++) {
-        //     var c = this.layers[b];
-        //     if (
-        //         "threeLayer" !== c.layerType &&
-        //         "ThreeLayer" !== c.layerType &&
-        //         c.options.enablePicked &&
-        //         c.options.onClick &&
-        //         c.pick
-        //     ) {
-        //         var e = c.pick(a.x, a.y);
-        //         c.options.onClick(e, a);
-        //     }
-        // }
+    onClick(point) {
+        for (let i = 0; i < this.layers.length; i++) {
+            const layer = this.layers[i];
+            if (
+                "threeLayer" !== layer.layerType &&
+                "ThreeLayer" !== layer.layerType &&
+                layer.options.enablePicked &&
+                layer.options.onClick &&
+                layer.pick
+            ) {
+                const result = layer.pick(point.x, point.y);
+                layer.options.onClick(result, point);
+            }
+        }
     }
 
-    onDblClick(a) {
-        // for (var b = 0; b < this.layers.length; b++) {
-        //     var c = this.layers[b];
-        //     if (
-        //         "threeLayer" !== c.layerType &&
-        //         "ThreeLayer" !== c.layerType &&
-        //         c.options.enablePicked &&
-        //         c.options.onDblClick &&
-        //         c.pick
-        //     ) {
-        //         var e = c.pick(a.x, a.y);
-        //         c.options.onDblClick(e, a);
-        //     }
-        // }
+    onDblClick(point) {
+        for (let i = 0; i < this.layers.length; i++) {
+            const layer = this.layers[i];
+            if (
+                "threeLayer" !== layer.layerType &&
+                "ThreeLayer" !== layer.layerType &&
+                layer.options.enablePicked &&
+                layer.options.onDblClick &&
+                layer.pick
+            ) {
+                const result = layer.pick(point.x, point.y);
+                layer.options.onDblClick(result, point);
+            }
+        }
     }
 
-    onRightClick(a) {
-        // for (var b = 0; b < this.layers.length; b++) {
-        //     var c = this.layers[b];
-        //     if (
-        //         "threeLayer" !== c.layerType &&
-        //         "ThreeLayer" !== c.layerType &&
-        //         c.options.enablePicked &&
-        //         c.options.onRightClick &&
-        //         c.pick
-        //     ) {
-        //         var e = c.pick(a.x, a.y);
-        //         c.options.onRightClick(e, a);
-        //     }
-        // }
+    onRightClick(point) {
+        for (let i = 0; i < this.layers.length; i++) {
+            const layer = this.layers[i];
+            if (
+                "threeLayer" !== layer.layerType &&
+                "ThreeLayer" !== layer.layerType &&
+                layer.options.enablePicked &&
+                layer.options.onRightClick &&
+                layer.pick
+            ) {
+                const result = layer.pick(point.x, point.y);
+                layer.options.onRightClick(result, point);
+            }
+        }
     }
 
-    onMousemove(a) {
-        // for (var b = false, c = 0; c < this.layers.length; c++) {
-        //     var e = this.layers[c];
-        //     if (
-        //         "threeLayer" !== e.layerType &&
-        //         "ThreeLayer" !== e.layerType &&
-        //         e.options.enablePicked &&
-        //         e.pick
-        //     ) {
-        //         var g = e.pick(a.x, a.y);
-        //         this.webglLayer.map.map.platform.style.cursor =
-        //             -1 === g.dataIndex ? "default" : "pointer";
-        //         if (e.options.onMousemove) e.options.onMousemove(g, a);
-        //         e.options.autoSelect && (b = true);
-        //     }
-        // }
-        // b && (this.webglLayer.isAnimation || this.webglLayer.render());
+    onMousemove(point) {
+        let flag = false;
+        for (let i = 0; i < this.layers.length; i++) {
+            const layer = this.layers[i];
+            if (
+                "threeLayer" !== layer.layerType &&
+                "ThreeLayer" !== layer.layerType &&
+                layer.options.enablePicked &&
+                layer.pick
+            ) {
+                const result = layer.pick(point.x, point.y);
+
+                this.webglLayer.canvas.style.cursor =
+                    -1 === result.dataIndex ? "default" : "pointer";
+
+                if (layer.options.onMousemove)
+                    layer.options.onMousemove(result, result);
+                layer.options.autoSelect && (flag = true);
+            }
+        }
+        flag && (this.webglLayer.isAnimation || this.webglLayer.render());
     }
 }

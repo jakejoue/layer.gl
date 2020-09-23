@@ -1,4 +1,5 @@
-import StateManager from "./StateManager";
+import StateManager from "./core/StateManager";
+import FrameBuffer from "./core/FrameBuffer";
 
 export default class WebglLayer {
     constructor(map, options = {}) {
@@ -27,6 +28,9 @@ export default class WebglLayer {
         this.stateManager = new StateManager({
             gl: this.gl,
         });
+
+        // 帧缓存
+        this.pickFBO = new FrameBuffer(this.gl);
 
         // 绘画相关参数
         this.transferOptions = {};

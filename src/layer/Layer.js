@@ -71,35 +71,41 @@ export default class Layer extends CommonLayer {
     }
 
     // todo
-    pick(a, c) {
+    pick(x, y) {
         const gl = this.gl;
         this.webglLayer.saveFramebuffer();
         this.webglLayer.bindFramebuffer(this.webglLayer.pickFBO);
         this.webglLayer.clear();
-        this.render({
-            gl: gl,
-            isPickRender: true,
-            matrix: this.webglLayer.matrix,
-            projectionMatrix: this.webglLayer.projectionMatrix,
-            viewMatrix: this.webglLayer.viewMatrix,
-            orthoMatrix: this.webglLayer.orthoMatrix,
-        });
-        const d = new Uint8Array(4);
+
+        // 选择渲染
+        this.render(
+            Object.assign(
+                {
+                    isPickRender: true,
+                },
+                this.webglLayer.transferOptions
+            )
+        );
+        // 颜色
+        const color = new Uint8Array(4);
+        // 读取指定区域颜色
         gl.readPixels(
-            a * window.devicePixelRatio,
-            gl.canvas.height - c * window.devicePixelRatio,
+            x * window.devicePixelRatio,
+            gl.canvas.height - y * window.devicePixelRatio,
             1,
             1,
             gl.RGBA,
             gl.UNSIGNED_BYTE,
-            d
+            color
         );
-        a = this.rgbToIndex(d);
-        this.pickedColor = [d[0], d[1], d[2]];
+
+        // 颜色转为索引
+        const index = this.rgbToIndex(color);
+        this.pickedColor = [color[0], color[1], color[2]];
         this.webglLayer.restoreFramebuffer();
         return {
-            dataIndex: a,
-            dataItem: this.data[a],
+            dataIndex: index,
+            dataItem: this.data[index],
         };
     }
 

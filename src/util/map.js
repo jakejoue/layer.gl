@@ -14,6 +14,26 @@ function getMapBoxGLMap(map) {
                 handler();
             });
         },
+        onClick(handler) {
+            map.on("click", function (evt) {
+                handler(evt.originalEvent);
+            });
+        },
+        onDblClick(handler) {
+            map.on("dblclick", function (evt) {
+                handler(evt.point);
+            });
+        },
+        onRightClick(handler) {
+            map.on("contextmenu", function (evt) {
+                handler(evt.point);
+            });
+        },
+        onMousemove(handler) {
+            map.on("mousemove", function (evt) {
+                handler(evt.originalEvent);
+            });
+        },
         // 容器更新相关
         getContainer() {
             return map.getCanvasContainer();
