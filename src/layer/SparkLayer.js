@@ -11,8 +11,8 @@ export default class SparkLayer extends Layer {
         this.autoUpdate = true;
         this.bufferData = [];
 
-        this.startTime = Number(this.options.startTime) || 0;
-        this.endTime = Number(this.options.endTime) || 10;
+        this.startTime = +(this.options.startTime) || 0;
+        this.endTime = +(this.options.endTime) || 10;
         this.time = this.startTime;
     }
 
@@ -80,22 +80,31 @@ export default class SparkLayer extends Layer {
         const gl = this.gl;
         if (gl) {
             const arrayData = [],
-                getH = options.height,
-                segs = Number(options.segs) || 10;
+                segs = +(options.segs) || 10;
 
             for (let i = 0; i < data.length; i++) {
                 const coord = data[i].geometry.coordinates;
-                const point = this.normizedPoint([
+                // 点
+                const point = this.normizedPoint(coord);
+                // 高度
+                const height = this.normizedPoint([
                     coord[0],
                     coord[1],
-                    typeof getH === "function" ? getH(data[i]) : Number(getH),
-                ]);
+                    this.getValue("height", data[i]),
+                ])[2];
 
                 for (let h = 0, j = 0; j < segs; j++) {
-                    arrayData.push(point[0], point[1], h, j);
+                    arrayData.push(point[0], point[1], h);
+                    0 === point[2]
+                        ? arrayData.push(j)
+                        : arrayData.push(+(point[2]));
 
-                    h += point[2] / segs;
-                    arrayData.push(point[0], point[1], h, j + 1);
+                    h += height / segs;
+
+                    arrayData.push(point[0], point[1], h);
+                    0 === point[2]
+                        ? arrayData.push(j + 1)
+                        : arrayData.push(+(point[2]));
                 }
             }
 
@@ -131,7 +140,7 @@ export default class SparkLayer extends Layer {
         gl.blendEquation(gl.FUNC_ADD);
         gl.drawArrays(gl.LINES, 0, this.bufferData.length / 4);
 
-        this.time += Number(this.options.step);
+        this.time += +(this.options.step);
         this.time > 1.5 * this.endTime && (this.time = this.startTime);
     }
 }

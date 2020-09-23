@@ -118,31 +118,20 @@ export default class PointLayer extends Layer {
 
     onChanged(options, dataArray) {
         if (this.gl) {
-            const arrayData = [],
-                staticColor = options.color,
-                staticSize = options.size;
+            const arrayData = [];
 
             for (let i = 0; i < dataArray.length; i++) {
                 const data = dataArray[i];
                 const point = this.normizedPoint(data.geometry.coordinates);
 
-                let color = data.color || staticColor,
-                    size = data.size || staticSize;
-
-                if ("properties" in data) {
-                    if ("color" in data.properties) {
-                        color = data.properties.color;
-                    }
-                    if ("size" in data.properties) {
-                        size = Number(data.properties.size);
-                    }
-                }
+                let color = this.getValue("color", data);
                 color = this.normizedColor(color);
+                const size = +this.getValue("size", data);
 
                 const points = this.addMultipleCoords(point);
                 for (let j = 0; j < points.length; j++) {
                     const p = points[j];
-                    arrayData.push(p[0], p[1], Number(p[2] || 0));
+                    arrayData.push(p[0], p[1], +(p[2] || 0));
                     arrayData.push(color[0], color[1], color[2], color[3]);
                     arrayData.push(size * window.devicePixelRatio);
                 }

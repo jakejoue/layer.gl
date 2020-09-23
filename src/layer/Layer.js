@@ -108,6 +108,16 @@ export default class Layer extends CommonLayer {
     }
 
     /* ************** 通用方法接口 ************** */
+    // 获取对象的方法
+    getValue(key, data) {
+        const v = this.options[key];
+
+        if (typeof v === "function") {
+            return v(data);
+        }
+
+        return v;
+    }
 
     // 格式化color方法
     normizedColor(color) {
