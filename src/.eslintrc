@@ -11,5 +11,8 @@
     "no-var": "error",
     "prefer-const": "error",
     "no-undef": "error"
+  },
+  "globals": {
+    "Three": "readonly"
   }
 }

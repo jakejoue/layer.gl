@@ -10,11 +10,12 @@ export default {
         format: "umd",
         sourcemap: true,
     },
-    external: ["maptalks", "openlayers", "leaflet"],
+    external: ["maptalks", "openlayers", "leaflet", "three"],
     globals: {
         openlayers: "ol",
         leaflet: "L",
         maptalks: "maptalks",
+        Three: "Three",
     },
     plugins: [
         commonResolve(),
