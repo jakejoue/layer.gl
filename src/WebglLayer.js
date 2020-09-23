@@ -106,6 +106,7 @@ export default class WebglLayer {
                 "px;height:" +
                 size.height +
                 "px;z-index:2;";
+            const c = this.options
             style.pointerEvents = "none";
             this.gl.viewport(0, 0, canvas.width, canvas.height);
         }

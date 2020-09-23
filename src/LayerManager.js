@@ -203,6 +203,8 @@ export default class LayerManager {
 
                 this.webglLayer.canvas.style.cursor =
                     -1 === result.dataIndex ? "default" : "pointer";
+                this.webglLayer.canvas.style.pointerEvents =
+                    -1 === result.dataIndex ? "none" : "auto";
 
                 if (layer.options.onMousemove)
                     layer.options.onMousemove(result, result);
