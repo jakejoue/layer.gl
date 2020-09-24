@@ -9,14 +9,14 @@ export default {
         file: "build/layergl.js",
         format: "umd",
         sourcemap: true,
+        globals: {
+            openlayers: "ol",
+            leaflet: "L",
+            maptalks: "maptalks",
+            Three: "Three",
+        },
     },
     external: ["maptalks", "openlayers", "leaflet", "three"],
-    globals: {
-        openlayers: "ol",
-        leaflet: "L",
-        maptalks: "maptalks",
-        Three: "Three",
-    },
     plugins: [
         commonResolve(),
         nodeResolve(),
