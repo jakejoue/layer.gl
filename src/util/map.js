@@ -19,7 +19,7 @@ function getMapBoxGLMap(map) {
         },
         onClick(handler) {
             listen("click", function (evt) {
-                handler(evt.originalEvent);
+                handler(evt.point);
             });
         },
         onDblClick(handler) {
@@ -35,7 +35,7 @@ function getMapBoxGLMap(map) {
         onMousemove(handler) {
             listen("mousemove", function (evt) {
                 if (!map.isMoving()) {
-                    handler(evt.originalEvent);
+                    handler(evt.point);
                 }
             });
         },
