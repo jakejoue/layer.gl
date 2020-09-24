@@ -17,9 +17,9 @@ export default class LayerManager {
             layer.map = this.webglLayer.map;
             if ("threeLayer" === layer.layerType) {
                 layer.setWebglLayer(this.webglLayer);
-                layer = layer.getThreeLayer();
-                this.addLayer(layer);
-                layer.initialize && layer.initialize(flag);
+                const threeLayer = layer.getThreeLayer();
+                this.addLayer(threeLayer);
+                layer.initialize && layer.initialize(threeLayer);
             } else {
                 layer.setWebglLayer(this.webglLayer);
                 layer.commonInitialize &&

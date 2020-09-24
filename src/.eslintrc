@@ -13,6 +13,6 @@
     "no-undef": "error"
   },
   "globals": {
-    "Three": "readonly"
+    "THREE": "readonly"
   }
 }

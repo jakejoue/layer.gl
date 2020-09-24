@@ -13,7 +13,7 @@ export default {
             openlayers: "ol",
             leaflet: "L",
             maptalks: "maptalks",
-            Three: "Three",
+            three: "THREE",
         },
     },
     external: ["maptalks", "openlayers", "leaflet", "three"],

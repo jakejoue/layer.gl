@@ -97,7 +97,7 @@ export default class Program {
             definedStr = "#define LOG_DEPTH\n";
         }
         definedStr += `// 相关defined的后处理函数
-        // cesium支持（暂时保留）
+        // cesium 支持（暂时保留）
         #ifdef LOG_DEPTH
         varying float v_depthFromNearPlusOne;
         #endif
@@ -118,7 +118,7 @@ export default class Program {
         #endif
 
         void afterMain() {
-            // cesium后处理
+            // cesium 后处理
             #if defined(LOG_DEPTH)
             v_depthFromNearPlusOne = (gl_Position.w - 0.1) + 1.0;
             gl_Position.z = clamp(gl_Position.z / gl_Position.w, -1.0, 1.0) * gl_Position.w;
