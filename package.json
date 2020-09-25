@@ -4,7 +4,7 @@
   "description": "a library of geography visualization",
   "main": "build/layergl.js",
   "scripts": {
-    "mini": "npm run build && uglifyjs build/layergl.js -c -m -o build/layergl.min.js",
+    "mini": "npm run build && uglifyjs build/layergl.js --source-map -c -m -o build/layergl.min.js",
     "build": "rollup -c"
   },
   "repository": {
