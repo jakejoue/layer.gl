@@ -15,6 +15,9 @@ export default class ThreeLayer extends Layer {
         } else {
             this.camera = new THREE.Camera();
             this.scene = new THREE.Scene();
+
+            const axes = new THREE.AxisHelper(20);
+            this.scene.add(axes);
         }
 
         this.world = new THREE.Group();
@@ -83,8 +86,12 @@ export default class ThreeLayer extends Layer {
                 const matrix = transferOptions.matrix;
 
                 const m = new THREE.Matrix4().fromArray(matrix);
-                this.camera.projectionMatrix.elements = matrix;
-                this.camera.projectionMatrix = m.multiply(m);
+                const l = new THREE.Matrix4().scale(
+                    new THREE.Vector3(1.0, -1.0, 1.0)
+                );
+
+                this.camera.projectionMatrix = m.multiply(l);
+                this.world.matrix = l;
 
                 this.renderer.state.reset();
                 this.postProcessing
