@@ -166,7 +166,7 @@ export default class IconLayer extends Layer {
     }
 
     processCache(options, data) {
-        const b = this;
+        const self = this;
         this.cachedData = [];
         this.iconHash = new Map();
         for (
@@ -209,69 +209,64 @@ export default class IconLayer extends Layer {
         }
         data = Array.from(this.iconHash.keys()).map(function (a) {
             return new Promise((resolve, reject) => {
-                b.url2canvas(a, function (d) {
-                    b.iconHash.set(a, d);
+                self.url2canvas(a, function (d) {
+                    self.iconHash.set(a, d);
                     resolve();
                 });
             });
         });
         Promise.all(data).then(function (c) {
-            b.buildSprite(options);
-            b.webglLayer.render();
+            self.buildSprite(options);
+            self.webglLayer.render();
         });
     }
 
-    buildSprite(a) {
-        let b = a.padding,
-            c = this.canvas,
-            g = this.ctx,
-            k = [],
+    buildSprite(options) {
+        const padding = options.padding,
+            canvas = this.canvas,
+            ctx = this.ctx;
+
+        let k = [],
             h = new Map(),
             l = !0,
             n = !1,
             p = void 0;
-        try {
-            for (
-                var m = gd(this.iconHash), q;
-                !(l = (q = m.next()).done);
-                l = !0
-            ) {
-                const r = db(q.value, 2),
-                    u = r[1],
-                    w = u.width,
-                    t = u.height;
-                k.push({
-                    w: w + b[0],
-                    h: t + b[0],
-                    width: w,
-                    height: t,
-                    key: r[0],
-                    icon: u,
-                });
-            }
-        } catch (z) {
-            (n = !0), (p = z);
-        } finally {
-            try {
-                !l && m.return && m.return();
-            } finally {
-                if (n) throw p;
-            }
+
+        for (const q of this.iconHash) {
+            const r = db(q.value, 2),
+                u = r[1],
+                w = u.width,
+                t = u.height;
+            k.push({
+                w: w + padding[0],
+                h: t + padding[0],
+                width: w,
+                height: t,
+                key: r[0],
+                icon: u,
+            });
         }
+
         n = Ee(k);
         for (l = 0; l < k.length; l++)
             (p = k[l]), h.get(p.key) || h.set(p.key, p);
         l = Kb(n.w);
         n = Kb(n.h);
-        c.width = l;
-        c.height = n;
-        g.save();
-        for (c = 0; c < k.length; c++)
-            (p = k[c]),
-                g.drawImage(p.icon, p.x + b[0], p.y + b[1], p.width, p.height);
-        g.restore();
+        canvas.width = l;
+        canvas.height = n;
+        ctx.save();
+        for (let i = 0; i < k.length; i++)
+            (p = k[i]),
+                ctx.drawImage(
+                    p.icon,
+                    p.x + padding[0],
+                    p.y + padding[1],
+                    p.width,
+                    p.height
+                );
+        ctx.restore();
         this.loadTexture();
-        this.buildVertex(a, h, l, n);
+        this.buildVertex(options, h, l, n);
     }
 
     buildVertex(a, c, e, g) {
@@ -316,6 +311,7 @@ export default class IconLayer extends Layer {
         this.indexBuffer.updateData(new Uint32Array(l));
         a && this.pickBuffer.updateData(new Float32Array(n));
     }
+
     render(a) {
         if (
             this.cachedData &&

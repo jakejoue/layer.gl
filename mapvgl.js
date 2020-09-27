@@ -111,22 +111,22 @@ function(x) {
         for (var a = 0; a < c; a++)"number" !== typeof f[a] && (f[a] = 0);
         return f
     }
-    function la(f) {
+    function toRadian(f) {
         return f * Math.PI / 180
     }
-    function Uc(f) {
+    function toAngle(f) {
         return f / Math.PI * 180
     }
-    function Kb(f) {
+    function ceilPowerOfTwo(f) {
         return Math.pow(2, Math.ceil(Math.log(f) / Math.LN2))
     }
-    function Vc(f) {
+    function floorPowerOfTwo(f) {
         return Math.pow(2, Math.floor(Math.log(f) / Math.LN2))
     }
-    function Wc(f, c) {
+    function approximatelyEqual(f, c) {
         return 1E-8 > Math.abs(f - c)
     }
-    function ra() {}
+    function MercatorProjection() {}
     function Xc(f, c) {
         for (var a in c) f[a] = c[a]
     }
@@ -138,13 +138,13 @@ function(x) {
         this.x = f;
         this.y = c
     }
-    function Yc(f, c) {
+    function Canvas(f, c) {
         var a = document.createElement("canvas");
         f && (a.width = f);
         c && (a.height = c);
         return a
     }
-    function na(f) {
+    function Intensity(f) {
         f = f || {};
         this.gradient = f.gradient || {
             "0.25": "rgba(0, 0, 255, 1)",
@@ -158,7 +158,7 @@ function(x) {
         this.min = f.min || 0;
         this.initPalette()
     }
-    function Ra(f) {
+    function BezierCurve(f) {
         this.options = f || {};
         this._initialize()
     }
@@ -167,7 +167,7 @@ function(x) {
         g = 1 - f;
         return e * e * e * c + 3 * g * g * f * a + 3 * (1 - f) * f * f * b + f * f * f * d
     }
-    function Ya(f) {
+    function GeodesicCurve(f) {
         this.WORLD_SIZE_MC_HALF = 2.0037726372307256E7;
         this.WORLD_SIZE_MC = 2 * this.WORLD_SIZE_MC_HALF;
         this.options = f || {};
@@ -176,7 +176,7 @@ function(x) {
     function de(f, c) {
         return f && c ? Math.round(Math.sqrt(Math.pow(f.lng - c.lng, 2) + Math.pow(f.lat - c.lat, 2))) : 0
     }
-    function ee(f) {
+    function getContext(f) {
         for (var c = ["webgl2", "experimental-webgl2", "webgl", "experimental-webgl"], a, b = 0; b < c.length; b++) try {
             if (a = f.getContext(c[b], {
                 premultipliedAlpha: !1
@@ -184,7 +184,7 @@ function(x) {
         } catch(d) {}
         return a
     }
-    function rb(f, c, a) {
+    function createTexture(f, c, a) {
         a = T({
             TEXTURE_MAG_FILTER: "LINEAR",
             TEXTURE_MIN_FILTER: "LINEAR",
@@ -200,21 +200,21 @@ function(x) {
         f.bindTexture(f.TEXTURE_2D, null);
         return b
     }
-    function Ka(f, c, a, b) {
-        if ("object" === ("undefined" === typeof c ? "undefined": qb(c))) c = rb(f, c, b),
+    function loadTextureImage(f, c, a, b) {
+        if ("object" === ("undefined" === typeof c ? "undefined": qb(c))) c = createTexture(f, c, b),
         a(c, null);
         else {
             var d = new Image;
             d.crossOrigin = "anonymous";
             d.onload = function() {
-                var c = Vc(d.width),
-                g = Vc(d.height),
+                var c = floorPowerOfTwo(d.width),
+                g = floorPowerOfTwo(d.height),
                 k = document.createElement("canvas");
                 k.width = c;
                 k.height = g;
                 k.getContext("2d").drawImage(d, 0, 0, c, g);
                 d = k;
-                c = rb(f, d, b);
+                c = createTexture(f, d, b);
                 a(c, d)
             };
             d.src = c
@@ -1509,7 +1509,7 @@ function(x) {
     function Pg(f) {
         var c = f / 2,
         a = f + c,
-        b = new Yc(2 * a, 2 * a),
+        b = new Canvas(2 * a, 2 * a),
         d = b.getContext("2d");
         d.shadowBlur = c;
         d.shadowColor = "black";
@@ -3722,7 +3722,7 @@ function(x) {
             return "Point"
         }
     });
-    Xc(ra, {
+    Xc(MercatorProjection, {
         EARTHRADIUS: 6370996.81,
         MCBAND: [1.289059486E7, 8362377.87, 5591021, 3481989.83, 1678043.12, 0],
         LLBAND: [75, 60, 45, 30, 15, 0],
@@ -3810,20 +3810,20 @@ function(x) {
             return f
         }
     });
-    Xc(ra.prototype, {
+    Xc(MercatorProjection.prototype, {
         lngLatToMercator: function(f) {
-            return ra.convertLL2MC(f)
+            return MercatorProjection.convertLL2MC(f)
         },
         lngLatToPoint: function(f) {
-            f = ra.convertLL2MC(f);
+            f = MercatorProjection.convertLL2MC(f);
             return new ce(f.lng, f.lat)
         },
         mercatorToLngLat: function(f) {
-            return ra.convertMC2LL(f)
+            return MercatorProjection.convertMC2LL(f)
         },
         pointToLngLat: function(f) {
             f = new ya(f.x, f.y);
-            return ra.convertMC2LL(f)
+            return MercatorProjection.convertMC2LL(f)
         },
         pointToPixel: function(f, c, a, b, d) {
             if (f) return f = this.lngLatToMercator(f, d),
@@ -3839,21 +3839,21 @@ function(x) {
             return Math.pow(2, 18 - f)
         }
     });
-    na.prototype.setMax = function(f) {
+    Intensity.prototype.setMax = function(f) {
         this.max = f || 100
     };
-    na.prototype.setMin = function(f) {
+    Intensity.prototype.setMin = function(f) {
         this.min = f || 0
     };
-    na.prototype.setMaxSize = function(f) {
+    Intensity.prototype.setMaxSize = function(f) {
         this.maxSize = f || 35
     };
-    na.prototype.setMinSize = function(f) {
+    Intensity.prototype.setMinSize = function(f) {
         this.minSize = f || 0
     };
-    na.prototype.initPalette = function() {
+    Intensity.prototype.initPalette = function() {
         var f = this.gradient,
-        c = this.paletteCtx = (new Yc(256, 1)).getContext("2d"),
+        c = this.paletteCtx = (new Canvas(256, 1)).getContext("2d"),
         a = c.createLinearGradient(0, 0, 256, 1);
         Ea(f).forEach(function(b) {
             a.addColorStop(parseFloat(b), f[b])
@@ -3862,11 +3862,11 @@ function(x) {
         c.fillRect(0, 0, 256, 1);
         c.imageData = c.getImageData(0, 0, 256, 1).data
     };
-    na.prototype.getColor = function(f) {
+    Intensity.prototype.getColor = function(f) {
         f = this.getImageData(f);
         return "rgba(" + f[0] + ", " + f[1] + ", " + f[2] + ", " + f[3] / 256 + ")"
     };
-    na.prototype.getImageData = function(f) {
+    Intensity.prototype.getImageData = function(f) {
         var c = this.paletteCtx.imageData;
         if (void 0 === f) return c;
         var a = this.max,
@@ -3876,7 +3876,7 @@ function(x) {
         f = 4 * Math.floor((f - b) / (a - b) * 255);
         return [c[f], c[f + 1], c[f + 2], c[f + 3]]
     };
-    na.prototype.getSize = function(f) {
+    Intensity.prototype.getSize = function(f) {
         var c = this.max,
         a = this.min,
         b = this.maxSize,
@@ -3885,7 +3885,7 @@ function(x) {
         f < a && (f = a);
         return d + (f - a) / (c - a) * (b - d)
     };
-    Ra.prototype._initialize = function() {
+    BezierCurve.prototype._initialize = function() {
         this.v0 = this._normalizaCoord(this.options.start);
         this.v3 = this._normalizaCoord(this.options.end);
         this.v1 = this._getControlPoint(this.v0, this.v3, 4);
@@ -3893,34 +3893,34 @@ function(x) {
         this.v0[2] || (this.v0[2] = 0);
         this.v3[2] || (this.v3[2] = 0)
     };
-    Ra.prototype.setOptions = function(f) {
+    BezierCurve.prototype.setOptions = function(f) {
         this.options = f || {};
         this._initialize()
     };
-    Ra.prototype.getPoints = function(f) {
+    BezierCurve.prototype.getPoints = function(f) {
         void 0 === f && (f = 20);
         for (var c = [], a = 0; a <= f; a++) c.push(this._getPoint(a / f));
         return c
     };
-    Ra.prototype._normalizaCoord = function(f) {
+    BezierCurve.prototype._normalizaCoord = function(f) {
         if (!f) return [];
-        f = ra.convertLL2MC({
+        f = MercatorProjection.convertLL2MC({
             lng: Number(f[0]),
             lat: Number(f[1])
         });
         return [f.lng, f.lat]
     };
-    Ra.prototype._getControlPoint = function(f, c) {
+    BezierCurve.prototype._getControlPoint = function(f, c) {
         var a = 2 < arguments.length && void 0 !== arguments[2] ? arguments[2] : 1;
         return [].concat(W(this._getQuarter(f, c)), [this._getDistance(f, c) / a])
     };
-    Ra.prototype._getQuarter = function(f, c) {
+    BezierCurve.prototype._getQuarter = function(f, c) {
         return [(3 * f[0] + c[0]) / 4, (3 * f[1] + c[1]) / 4]
     };
-    Ra.prototype._getDistance = function(f, c) {
+    BezierCurve.prototype._getDistance = function(f, c) {
         return Math.sqrt(Math.pow(f[0] - c[0], 2) + Math.pow(f[1] - c[1], 2))
     };
-    Ra.prototype._getPoint = function(f) {
+    BezierCurve.prototype._getPoint = function(f) {
         var c = [],
         a = this.v0,
         b = this.v1,
@@ -3929,7 +3929,7 @@ function(x) {
         c.push(Zc(f, a[0], b[0], d[0], e[0]), Zc(f, a[1], b[1], d[1], e[1]), Zc(f, a[2], b[2], d[2], e[2]));
         return c
     };
-    Ya.prototype._initialize = function() {
+    GeodesicCurve.prototype._initialize = function() {
         this.points = this.options.points || this.options.point || [];
         this.greatCirclePoints = [];
         for (var f = [], c = 0; c < this.points.length; c++) {
@@ -3938,37 +3938,37 @@ function(x) {
         }
         this.points = f
     };
-    Ya.prototype.setOptions = function(f) {
+    GeodesicCurve.prototype.setOptions = function(f) {
         this.options = f || {};
         this._initialize()
     };
-    Ya.prototype.getPoints = function() {
+    GeodesicCurve.prototype.getPoints = function() {
         if (0 === this.greatCirclePoints.length) for (var f = 0; f < this.points.length - 1; f++) this._calcGreatCirclePoints(this.points[f], this.points[f + 1]);
         return this.greatCirclePoints
     };
-    Ya.prototype._normalizaCoord = function(f) {
+    GeodesicCurve.prototype._normalizaCoord = function(f) {
         if (!f) return null;
         f instanceof Array && (f = {
             lng: Number(f[0]),
             lat: Number(f[1])
         });
-        var c = ra.convertLL2MC(f);
-        f = ra.convertMC2LL(f);
+        var c = MercatorProjection.convertLL2MC(f);
+        f = MercatorProjection.convertMC2LL(f);
         c.latLng = f;
         return c
     };
-    Ya.prototype._calcGreatCirclePoints = function(f, c) {
+    GeodesicCurve.prototype._calcGreatCirclePoints = function(f, c) {
         var a = f.latLng,
         b = c.latLng;
-        if (!Wc(a.lng, b.lng) || !Wc(a.lat, b.lat)) {
-            var d = ra.getDistance(la(a.lng), la(a.lat), la(b.lng), la(b.lat));
+        if (!approximatelyEqual(a.lng, b.lng) || !approximatelyEqual(a.lat, b.lat)) {
+            var d = MercatorProjection.getDistance(toRadian(a.lng), toRadian(a.lat), toRadian(b.lng), toRadian(b.lat));
             if (! (25E4 > d)) {
                 d = Math.round(d / 15E4);
                 var e = this._calcAngularDistance(a, b);
                 this.greatCirclePoints.push([f.lng, f.lat]);
                 for (var g = 0; g < d; g++) {
                     var k = this._calcMiddlePoint(a, b, g / d, e);
-                    k = ra.convertLL2MC(k);
+                    k = MercatorProjection.convertLL2MC(k);
                     var h = de(k, f);
                     30037726 < h && (k.lng = k.lng < f.lng ? k.lng + this.WORLD_SIZE_MC: k.lng - this.WORLD_SIZE_MC);
                     this.greatCirclePoints.push([k.lng, k.lat]);
@@ -3980,29 +3980,29 @@ function(x) {
             }
         }
     };
-    Ya.prototype._calcAngularDistance = function(f, c) {
-        var a = la(f.lat),
-        b = la(c.lat);
-        f = la(f.lng);
-        c = la(c.lng);
+    GeodesicCurve.prototype._calcAngularDistance = function(f, c) {
+        var a = toRadian(f.lat),
+        b = toRadian(c.lat);
+        f = toRadian(f.lng);
+        c = toRadian(c.lng);
         return Math.acos(Math.sin(a) * Math.sin(b) + Math.cos(a) * Math.cos(b) * Math.cos(Math.abs(c - f)))
     };
-    Ya.prototype._calcMiddlePoint = function(f, c, a, b) {
+    GeodesicCurve.prototype._calcMiddlePoint = function(f, c, a, b) {
         var d = c.lat,
         e = f.lng;
         c = c.lng;
-        f = la(f.lat);
-        d = la(d);
-        e = la(e);
-        var g = la(c);
+        f = toRadian(f.lat);
+        d = toRadian(d);
+        e = toRadian(e);
+        var g = toRadian(c);
         c = Math.sin((1 - a) * b) / Math.sin(b);
         b = Math.sin(a * b) / Math.sin(b);
         a = c * Math.cos(f) * Math.cos(e) + b * Math.cos(d) * Math.cos(g);
         e = c * Math.cos(f) * Math.sin(e) + b * Math.cos(d) * Math.sin(g);
         f = Math.atan2(c * Math.sin(f) + b * Math.sin(d), Math.sqrt(Math.pow(a, 2) + Math.pow(e, 2)));
-        return new ya(Uc(Math.atan2(e, a)), Uc(f))
+        return new ya(toAngle(Math.atan2(e, a)), toAngle(f))
     };
-    var ai = function() {
+    var OdCurve = function() {
         function f() {
             var c = 0 < arguments.length && void 0 !== arguments[0] ? arguments[0] : {};
             G(this, f);
@@ -4023,7 +4023,7 @@ function(x) {
                     lng: Number(c[0]),
                     lat: Number(c[1])
                 });
-                return ra.convertLL2MC(c)
+                return MercatorProjection.convertLL2MC(c)
             }
         },
         {
@@ -4078,7 +4078,7 @@ function(x) {
         }]);
         return f
     } (),
-    Cd = function() {
+    CommonLayer = function() {
         function f(c) {
             G(this, f);
             this.options = this.getCommonDefaultOptions();
@@ -4186,7 +4186,7 @@ function(x) {
         }]);
         return f
     } (),
-    V = function() {
+    Program = function() {
         function f(c, a, b) {
             G(this, f);
             this.options = a;
@@ -4331,7 +4331,7 @@ function(x) {
         }]);
         return f
     } (),
-    rf = function() {
+    StateManager = function() {
         function f(c) {
             G(this, f);
             this.options = c;
@@ -4398,7 +4398,7 @@ function(x) {
         }]);
         return f
     } (),
-    H = function() {
+    Buffer = function() {
         function f(c) {
             G(this, f);
             this.options = c;
@@ -4444,7 +4444,7 @@ function(x) {
         UNSIGNED_SHORT: 2,
         FLOAT: 4
     },
-    va = function() {
+    VertexArray = function() {
         function f(c) {
             G(this, f);
             this.options = c;
@@ -4477,7 +4477,7 @@ function(x) {
         }]);
         return f
     } (),
-    wa = function d(c, a, b) {
+    FrameBufferObject = function d(c, a, b) {
         G(this, d);
         a = a || c.canvas.width;
         b = b || c.canvas.height;
@@ -4544,7 +4544,7 @@ function(x) {
         }]);
         return c
     } (),
-    ci = function(c) {
+    BlurEffect = function(c) {
         function a(b) {
             G(this, a);
             return R(this, (a.__proto__ || N(a)).call(this, b))
@@ -4553,18 +4553,18 @@ function(x) {
         M(a, [{
             key: "getProgram",
             value: function(a) {
-                this.programSample || (this.programSample = new V(a, {
+                this.programSample || (this.programSample = new Program(a, {
                     vertexShader: "attribute vec3 aPos;attribute vec2 aTextureCoord;varying vec2 vTextureCoord;void main(){vTextureCoord=aTextureCoord;gl_Position=vec4(aPos,1.0);}",
                     fragmentShader: "precision mediump float;uniform sampler2D uSampler;varying vec2 vTextureCoord;void main(){float fStep=1.0/512.0;vec4 sample11=texture2D(uSampler,vec2(vTextureCoord.s-1.0*fStep,vTextureCoord.t+1.0*fStep));vec4 sample12=texture2D(uSampler,vec2(vTextureCoord.s,vTextureCoord.t+1.0*fStep));vec4 sample13=texture2D(uSampler,vec2(vTextureCoord.s+1.0*fStep,vTextureCoord.t+1.0*fStep));vec4 sample21=texture2D(uSampler,vec2(vTextureCoord.s-1.0*fStep,vTextureCoord.t));vec4 sample22=texture2D(uSampler,vec2(vTextureCoord.s,vTextureCoord.t));vec4 sample23=texture2D(uSampler,vec2(vTextureCoord.s+1.0*fStep,vTextureCoord.t));vec4 sample31=texture2D(uSampler,vec2(vTextureCoord.s-1.0*fStep,vTextureCoord.t-1.0*fStep));vec4 sample32=texture2D(uSampler,vec2(vTextureCoord.s,vTextureCoord.t-1.0*fStep));vec4 sample33=texture2D(uSampler,vec2(vTextureCoord.s+1.0*fStep,vTextureCoord.t-1.0*fStep));vec4 blurSample=(sample11+sample12+sample13+sample21+2.0*sample22+sample23+sample31+sample32+sample33)/10.0;gl_FragColor=blurSample;}"
-                }), this.vertexBuffer = new H({
+                }), this.vertexBuffer = new Buffer({
                     gl: a,
                     target: "ARRAY_BUFFER",
                     usage: "STATIC_DRAW"
-                }), this.sampleBuffer = new H({
+                }), this.sampleBuffer = new Buffer({
                     gl: a,
                     target: "ARRAY_BUFFER",
                     usage: "STATIC_DRAW"
-                }), this.vertexBuffer.updateData(new Float32Array(this.vertex)), this.sampleBuffer.updateData(new Float32Array(this.sampleCoord)), this.vertexArray = new va({
+                }), this.vertexBuffer.updateData(new Float32Array(this.vertex)), this.sampleBuffer.updateData(new Float32Array(this.sampleCoord)), this.vertexArray = new VertexArray({
                     gl: a,
                     program: this.programSample,
                     attributes: [{
@@ -4605,7 +4605,7 @@ function(x) {
         }]);
         return a
     } (Jc),
-    di = function(c) {
+    BloomEffect = function(c) {
         function a(b) {
             G(this, a);
             return R(this, (a.__proto__ || N(a)).call(this, b))
@@ -4614,15 +4614,15 @@ function(x) {
         M(a, [{
             key: "getProgram",
             value: function(a) {
-                this.programBright || (this.programBright = new V(a, {
+                this.programBright || (this.programBright = new Program(a, {
                     vertexShader: "attribute vec3 aPos;attribute vec2 aTextureCoord;varying vec2 vTextureCoord;void main(){vTextureCoord=aTextureCoord;gl_Position=vec4(aPos,1.0);}",
                     fragmentShader: "precision mediump float;uniform sampler2D uSampler;uniform float threshold;varying vec2 vTextureCoord;void main(){vec4 color=texture2D(uSampler,vTextureCoord);vec4 lightColor=max(vec4(0.0),(color-(1.0-threshold)/5.0));float brightness=dot(color.rgb,vec3(0.2126,0.7152,0.0722));if(brightness>threshold){color=lightColor;}else{color=vec4(0.0);}gl_FragColor=color;}"
                 }));
-                this.programBloom || (this.programBloom = new V(a, {
+                this.programBloom || (this.programBloom = new Program(a, {
                     vertexShader: "attribute vec3 aPos;attribute vec2 aTextureCoord;varying vec2 vTextureCoord;void main(){vTextureCoord=aTextureCoord;gl_Position=vec4(aPos,1.0);}",
                     fragmentShader: "precision mediump float;uniform sampler2D uSampler;uniform bool isVertical;uniform vec2 canvasSize;uniform float blurSize;uniform float devicePixelRatio;varying vec2 vTextureCoord;void main(){float weight[10];weight[0]=0.2270270270;weight[1]=0.1945945946;weight[2]=0.1216216216;weight[3]=0.1135135135;weight[4]=0.0972972973;weight[5]=0.0608108108;weight[6]=0.0540540541;weight[7]=0.0270270270;weight[8]=0.0162162162;weight[9]=0.0081081081;vec2 offset=vec2(blurSize/canvasSize.x,blurSize/canvasSize.y)*devicePixelRatio;vec4 result=texture2D(uSampler,vTextureCoord)*weight[0];if(isVertical){for(int i=1;i<10;++i){result+=texture2D(uSampler,vTextureCoord+vec2(0.0,offset.y*float(i)))*weight[i];result+=texture2D(uSampler,vTextureCoord-vec2(0.0,offset.y*float(i)))*weight[i];}}else{for(int i=1;i<10;++i){result+=texture2D(uSampler,vTextureCoord+vec2(offset.x*float(i),0.0))*weight[i];result+=texture2D(uSampler,vTextureCoord-vec2(offset.x*float(i),0.0))*weight[i];}}gl_FragColor=result;}"
                 }));
-                this.programResult || (this.programResult = new V(a, {
+                this.programResult || (this.programResult = new Program(a, {
                     vertexShader: "attribute vec3 aPos;attribute vec2 aTextureCoord;varying vec2 vTextureCoord;void main(){vTextureCoord=aTextureCoord;gl_Position=vec4(aPos,1.0);}",
                     fragmentShader: "precision mediump float;uniform sampler2D originalTexture;uniform sampler2D bloomTexture;varying vec2 vTextureCoord;void main(){vec4 color=texture2D(originalTexture,vTextureCoord);vec4 bloomColor=texture2D(bloomTexture,vTextureCoord);color+=bloomColor;gl_FragColor=color;}"
                 }));
@@ -4636,15 +4636,15 @@ function(x) {
         {
             key: "onResize",
             value: function(a) {
-                this.collectBrightBuffer = new wa(a);
-                this.bloomBuffer = new wa(a)
+                this.collectBrightBuffer = new FrameBufferObject(a);
+                this.bloomBuffer = new FrameBufferObject(a)
             }
         },
         {
             key: "getExtraFbo",
             value: function(a) {
-                this.collectBrightBuffer || (this.collectBrightBuffer = new wa(a));
-                this.bloomBuffer || (this.bloomBuffer = new wa(a));
+                this.collectBrightBuffer || (this.collectBrightBuffer = new FrameBufferObject(a));
+                this.bloomBuffer || (this.bloomBuffer = new FrameBufferObject(a));
                 return {
                     collectBrightBuffer: this.collectBrightBuffer.framebuffer,
                     bloomBuffer: this.bloomBuffer.framebuffer
@@ -4735,7 +4735,7 @@ function(x) {
         }]);
         return a
     } (Jc),
-    ei = function(c) {
+    BrightEffect = function(c) {
         function a(b) {
             G(this, a);
             return R(this, (a.__proto__ || N(a)).call(this, b))
@@ -4744,15 +4744,15 @@ function(x) {
         M(a, [{
             key: "getProgram",
             value: function(a) {
-                this.programBright || (this.programBright = new V(a, {
+                this.programBright || (this.programBright = new Program(a, {
                     vertexShader: "attribute vec3 aPos;attribute vec2 aTextureCoord;varying vec2 vTextureCoord;void main(){vTextureCoord=aTextureCoord;gl_Position=vec4(aPos,1.0);}",
                     fragmentShader: "precision mediump float;uniform sampler2D uSampler;uniform float threshold;varying vec2 vTextureCoord;void main(){vec4 color=texture2D(uSampler,vTextureCoord);vec4 lightColor=max(vec4(0.0),(color-threshold));gl_FragColor=lightColor;}"
                 }));
-                this.programBloom || (this.programBloom = new V(a, {
+                this.programBloom || (this.programBloom = new Program(a, {
                     vertexShader: "attribute vec3 aPos;attribute vec2 aTextureCoord;varying vec2 vTextureCoord;void main(){vTextureCoord=aTextureCoord;gl_Position=vec4(aPos,1.0);}",
                     fragmentShader: "precision mediump float;uniform sampler2D uSampler;uniform bool isVertical;uniform vec2 canvasSize;uniform float blurSize;uniform float devicePixelRatio;varying vec2 vTextureCoord;void main(){float weight[10];weight[0]=0.2270270270;weight[1]=0.1945945946;weight[2]=0.1216216216;weight[3]=0.1135135135;weight[4]=0.0972972973;weight[5]=0.0608108108;weight[6]=0.0540540541;weight[7]=0.0270270270;weight[8]=0.0162162162;weight[9]=0.0081081081;vec2 offset=vec2(blurSize/canvasSize.x,blurSize/canvasSize.y)*devicePixelRatio;vec4 result=texture2D(uSampler,vTextureCoord)*weight[0];if(isVertical){for(int i=1;i<10;++i){result+=texture2D(uSampler,vTextureCoord+vec2(0.0,offset.y*float(i)))*weight[i];result+=texture2D(uSampler,vTextureCoord-vec2(0.0,offset.y*float(i)))*weight[i];}}else{for(int i=1;i<10;++i){result+=texture2D(uSampler,vTextureCoord+vec2(offset.x*float(i),0.0))*weight[i];result+=texture2D(uSampler,vTextureCoord-vec2(offset.x*float(i),0.0))*weight[i];}}gl_FragColor=result;}"
                 }));
-                this.programResult || (this.programResult = new V(a, {
+                this.programResult || (this.programResult = new Program(a, {
                     vertexShader: "attribute vec3 aPos;attribute vec2 aTextureCoord;varying vec2 vTextureCoord;void main(){vTextureCoord=aTextureCoord;gl_Position=vec4(aPos,1.0);}",
                     fragmentShader: "precision mediump float;uniform sampler2D originalTexture;uniform sampler2D bloomTexture;uniform float toneScale;varying vec2 vTextureCoord;void main(){vec4 color=texture2D(originalTexture,vTextureCoord)*toneScale;vec4 bloomColor=texture2D(bloomTexture,vTextureCoord);color+=bloomColor;gl_FragColor=color;}"
                 }));
@@ -4766,15 +4766,15 @@ function(x) {
         {
             key: "onResize",
             value: function(a) {
-                this.collectBrightBuffer = new wa(a);
-                this.bloomBuffer = new wa(a)
+                this.collectBrightBuffer = new FrameBufferObject(a);
+                this.bloomBuffer = new FrameBufferObject(a)
             }
         },
         {
             key: "getExtraFbo",
             value: function(a) {
-                this.collectBrightBuffer || (this.collectBrightBuffer = new wa(a));
-                this.bloomBuffer || (this.bloomBuffer = new wa(a));
+                this.collectBrightBuffer || (this.collectBrightBuffer = new FrameBufferObject(a));
+                this.bloomBuffer || (this.bloomBuffer = new FrameBufferObject(a));
                 return {
                     collectBrightBuffer: this.collectBrightBuffer.framebuffer,
                     bloomBuffer: this.bloomBuffer.framebuffer
@@ -4869,7 +4869,7 @@ function(x) {
         }]);
         return a
     } (Jc),
-    fi = function(c) {
+    DepthEffect = function(c) {
         function a(b) {
             G(this, a);
             return R(this, (a.__proto__ || N(a)).call(this, b))
@@ -4878,7 +4878,7 @@ function(x) {
         M(a, [{
             key: "getProgram",
             value: function(a) {
-                this.programSample || (this.programSample = new V(a, {
+                this.programSample || (this.programSample = new Program(a, {
                     vertexShader: "attribute vec3 aPos;attribute vec2 aTextureCoord;varying vec2 vTextureCoord;void main(){vTextureCoord=aTextureCoord;gl_Position=vec4(aPos,1.0);}",
                     fragmentShader: "precision mediump float;uniform sampler2D uSampler;uniform vec2 canvasSize;varying vec2 vTextureCoord;void main(){float fStep=1.0/312.0;vec4 sample11=texture2D(uSampler,vec2(vTextureCoord.s-1.0*fStep,vTextureCoord.t+1.0*fStep));vec4 sample12=texture2D(uSampler,vec2(vTextureCoord.s,vTextureCoord.t+1.0*fStep));vec4 sample13=texture2D(uSampler,vec2(vTextureCoord.s+1.0*fStep,vTextureCoord.t+1.0*fStep));vec4 sample21=texture2D(uSampler,vec2(vTextureCoord.s-1.0*fStep,vTextureCoord.t));vec4 sample22=texture2D(uSampler,vec2(vTextureCoord.s,vTextureCoord.t));vec4 sample23=texture2D(uSampler,vec2(vTextureCoord.s+1.0*fStep,vTextureCoord.t));vec4 sample31=texture2D(uSampler,vec2(vTextureCoord.s-1.0*fStep,vTextureCoord.t-1.0*fStep));vec4 sample32=texture2D(uSampler,vec2(vTextureCoord.s,vTextureCoord.t-1.0*fStep));vec4 sample33=texture2D(uSampler,vec2(vTextureCoord.s+1.0*fStep,vTextureCoord.t-1.0*fStep));vec4 blurSample=(sample11+sample12+sample13+sample21+2.0*sample22+sample23+sample31+sample32+sample33)/10.0;float desX=abs((gl_FragCoord.x-canvasSize.x/2.0)/(canvasSize.x/2.0));float desY=abs((gl_FragCoord.y-canvasSize.y/2.0)/(canvasSize.y/2.0));float factor=max(desX,desY);gl_FragColor=(sample22*(1.0-factor)+blurSample*factor);}"
                 }));
@@ -4911,7 +4911,7 @@ function(x) {
         }]);
         return a
     } (Jc),
-    sf = function() {
+    EffectManager = function() {
         function c(a) {
             G(this, c);
             this.gl = a;
@@ -4950,7 +4950,7 @@ function(x) {
             key: "initFbo",
             value: function() {
                 var a = this.gl;
-                this.fbo = [new wa(a), new wa(a)]
+                this.fbo = [new FrameBufferObject(a), new FrameBufferObject(a)]
             }
         },
         {
@@ -4978,7 +4978,7 @@ function(x) {
         }]);
         return c
     } (),
-    ba = function(c) {
+    Layer = function(c) {
         function a(b) {
             G(this, a);
             b = R(this, (a.__proto__ || N(a)).call(this, b));
@@ -5003,7 +5003,7 @@ function(x) {
             value: function(a) {
                 var b = this.getOptions();
                 this.gl = a;
-                b.enablePicked && (this.pickBuffer = new H({
+                b.enablePicked && (this.pickBuffer = new Buffer({
                     gl: a,
                     target: "ARRAY_BUFFER",
                     usage: "STATIC_DRAW"
@@ -5158,7 +5158,7 @@ function(x) {
             }
         }]);
         return a
-    } (Cd),
+    } (CommonLayer),
     Ia = O(function(c, a) {
         Object.defineProperty(a, "__esModule", {
             value: !0
@@ -6418,25 +6418,25 @@ function(x) {
             M = v * I - B * E,
             N = v * b - A * E,
             O = B * b - A * I,
-            H = L * O - J * N + w * M + U * K - x * G + C * F;
-            if (!H) return null;
-            H = 1 / H;
-            a[0] = (k * O - l * N + t * M) * H;
-            a[1] = (h * N - d * O - e * M) * H;
-            a[2] = (E * C - I * x + b * U) * H;
-            a[3] = (B * x - v * C - A * U) * H;
-            a[4] = (l * K - g * O - t * G) * H;
-            a[5] = (c * O - h * K + e * G) * H;
-            a[6] = (I * w - D * C - b * J) * H;
-            a[7] = (z * C - B * w + A * J) * H;
-            a[8] = (g * N - k * K + t * F) * H;
-            a[9] = (d * K - c * N - e * F) * H;
-            a[10] = (D * x - E * w + b * L) * H;
-            a[11] = (v * w - z * x - A * L) * H;
-            a[12] = (k * G - g * M - l * F) * H;
-            a[13] = (c * M - d * G + h * F) * H;
-            a[14] = (E * J - D * U - I * L) * H;
-            a[15] = (z * U - v * J + B * L) * H;
+            Buffer = L * O - J * N + w * M + U * K - x * G + C * F;
+            if (!Buffer) return null;
+            Buffer = 1 / Buffer;
+            a[0] = (k * O - l * N + t * M) * Buffer;
+            a[1] = (h * N - d * O - e * M) * Buffer;
+            a[2] = (E * C - I * x + b * U) * Buffer;
+            a[3] = (B * x - v * C - A * U) * Buffer;
+            a[4] = (l * K - g * O - t * G) * Buffer;
+            a[5] = (c * O - h * K + e * G) * Buffer;
+            a[6] = (I * w - D * C - b * J) * Buffer;
+            a[7] = (z * C - B * w + A * J) * Buffer;
+            a[8] = (g * N - k * K + t * F) * Buffer;
+            a[9] = (d * K - c * N - e * F) * Buffer;
+            a[10] = (D * x - E * w + b * L) * Buffer;
+            a[11] = (v * w - z * x - A * L) * Buffer;
+            a[12] = (k * G - g * M - l * F) * Buffer;
+            a[13] = (c * M - d * G + h * F) * Buffer;
+            a[14] = (E * J - D * U - I * L) * Buffer;
+            a[15] = (z * U - v * J + B * L) * Buffer;
             return a
         };
         a.adjoint = function(a, b) {
@@ -6585,7 +6585,7 @@ function(x) {
             var C = h * e * n + d * u;
             var F = d * e * n - h * u;
             var G = e * h * n - d * u;
-            var H = h * h * n + l;
+            var Buffer = h * h * n + l;
             var K = d * h * n + e * u;
             var M = e * d * n + h * u;
             e = h * d * n - e * u;
@@ -6594,10 +6594,10 @@ function(x) {
             a[1] = g * x + A * C + L * F;
             a[2] = z * x + D * C + J * F;
             a[3] = v * x + E * C + w * F;
-            a[4] = c * G + p * H + I * K;
-            a[5] = g * G + A * H + L * K;
-            a[6] = z * G + D * H + J * K;
-            a[7] = v * G + E * H + w * K;
+            a[4] = c * G + p * Buffer + I * K;
+            a[5] = g * G + A * Buffer + L * K;
+            a[6] = z * G + D * Buffer + J * K;
+            a[7] = v * G + E * Buffer + w * K;
             a[8] = c * M + p * e + I * h;
             a[9] = g * M + A * e + L * h;
             a[10] = z * M + D * e + J * h;
@@ -7224,7 +7224,7 @@ function(x) {
             C = b[4],
             F = b[5],
             G = b[6],
-            H = b[7],
+            Buffer = b[7],
             K = b[8],
             M = b[9],
             N = b[10],
@@ -7233,7 +7233,7 @@ function(x) {
             Q = b[13],
             R = b[14];
             b = b[15];
-            return Math.abs(c - L) <= k.EPSILON * Math.max(1, Math.abs(c), Math.abs(L)) && Math.abs(d - J) <= k.EPSILON * Math.max(1, Math.abs(d), Math.abs(J)) && Math.abs(e - w) <= k.EPSILON * Math.max(1, Math.abs(e), Math.abs(w)) && Math.abs(g - x) <= k.EPSILON * Math.max(1, Math.abs(g), Math.abs(x)) && Math.abs(h - C) <= k.EPSILON * Math.max(1, Math.abs(h), Math.abs(C)) && Math.abs(u - F) <= k.EPSILON * Math.max(1, Math.abs(u), Math.abs(F)) && Math.abs(y - G) <= k.EPSILON * Math.max(1, Math.abs(y), Math.abs(G)) && Math.abs(t - H) <= k.EPSILON * Math.max(1, Math.abs(t), Math.abs(H)) && Math.abs(l - K) <= k.EPSILON * Math.max(1, Math.abs(l), Math.abs(K)) && Math.abs(v - M) <= k.EPSILON * Math.max(1, Math.abs(v), Math.abs(M)) && Math.abs(B - N) <= k.EPSILON * Math.max(1, Math.abs(B), Math.abs(N)) && Math.abs(A - O) <= k.EPSILON * Math.max(1, Math.abs(A), Math.abs(O)) && Math.abs(D - P) <= k.EPSILON * Math.max(1, Math.abs(D), Math.abs(P)) && Math.abs(E - Q) <= k.EPSILON * Math.max(1, Math.abs(E), Math.abs(Q)) && Math.abs(I - R) <= k.EPSILON * Math.max(1, Math.abs(I), Math.abs(R)) && Math.abs(a - b) <= k.EPSILON * Math.max(1, Math.abs(a), Math.abs(b))
+            return Math.abs(c - L) <= k.EPSILON * Math.max(1, Math.abs(c), Math.abs(L)) && Math.abs(d - J) <= k.EPSILON * Math.max(1, Math.abs(d), Math.abs(J)) && Math.abs(e - w) <= k.EPSILON * Math.max(1, Math.abs(e), Math.abs(w)) && Math.abs(g - x) <= k.EPSILON * Math.max(1, Math.abs(g), Math.abs(x)) && Math.abs(h - C) <= k.EPSILON * Math.max(1, Math.abs(h), Math.abs(C)) && Math.abs(u - F) <= k.EPSILON * Math.max(1, Math.abs(u), Math.abs(F)) && Math.abs(y - G) <= k.EPSILON * Math.max(1, Math.abs(y), Math.abs(G)) && Math.abs(t - Buffer) <= k.EPSILON * Math.max(1, Math.abs(t), Math.abs(Buffer)) && Math.abs(l - K) <= k.EPSILON * Math.max(1, Math.abs(l), Math.abs(K)) && Math.abs(v - M) <= k.EPSILON * Math.max(1, Math.abs(v), Math.abs(M)) && Math.abs(B - N) <= k.EPSILON * Math.max(1, Math.abs(B), Math.abs(N)) && Math.abs(A - O) <= k.EPSILON * Math.max(1, Math.abs(A), Math.abs(O)) && Math.abs(D - P) <= k.EPSILON * Math.max(1, Math.abs(D), Math.abs(P)) && Math.abs(E - Q) <= k.EPSILON * Math.max(1, Math.abs(E), Math.abs(Q)) && Math.abs(I - R) <= k.EPSILON * Math.max(1, Math.abs(I), Math.abs(R)) && Math.abs(a - b) <= k.EPSILON * Math.max(1, Math.abs(a), Math.abs(b))
         };
         a.sub = a.mul = void 0;
         var k = function(a) {
@@ -9108,7 +9108,7 @@ default = Lb;
         ripple: 4,
         water: 6
     },
-    Kc = function(c) {
+    ShapeLayer = function(c) {
         function a(b, c) {
             G(this, a);
             b = R(this, (a.__proto__ || N(a)).call(this, b, c));
@@ -9145,33 +9145,33 @@ default = Lb;
                 var c = [];
                 b.enablePicked && c.push("PICK");
                 b.texture && c.push("USE_TEXTURE");
-                this.program = new V(this.gl, {
+                this.program = new Program(this.gl, {
                     vertexShader: "precision highp float;uniform vec4 uSelectedColor;attribute vec4 a_pos;attribute vec3 a_normal;attribute vec4 a_color;attribute vec4 a_pre_color;attribute float a_height;attribute float a_pre_height;\n#if defined(USE_TEXTURE)\nattribute vec2 a_texture_coord;\n#endif\nuniform mat4 u_proj_matrix;uniform mat4 u_mv_matrix;uniform mat4 u_normal_matrix;uniform vec3 u_side_light_dir;uniform bool u_use_lighting;uniform bool u_use_texture;uniform vec3 u_ripple_center;uniform float u_radius;uniform float style;uniform float alpha;uniform float time;uniform float dataTime;uniform float riseTime;uniform vec2 uMapCenter;uniform float uMapZoom;varying float v_height;varying vec4 v_color;varying vec3 v_position;varying vec2 v_texture_coord;const vec3 point_color=vec3(0.06,0.06,0.06);const vec3 light_color=vec3(0.53,0.53,0.53);const vec3 light_color_2=vec3(0.4,0.4,0.4);const vec3 uAmbientColor=vec3(0.8,0.8,0.8);const vec3 uLightingDirection=vec3(0.0,1.0,1.0);const vec3 uDirectionalColor=vec3(1.0,1.0,1.0);float getTransitionValue(float pre_value,float to_value,float dataTime,float riseTime){float result=0.0;if(pre_value==to_value){result=to_value;}else{if(riseTime>0.0&&dataTime<riseTime){result=(pre_value+(to_value-pre_value)*(dataTime/riseTime));}else{result=to_value;}}return result;}void main(){vec4 pos=a_pos;pos.z=pos.z+pos.w*getTransitionValue(a_pre_height,a_height,dataTime,riseTime);v_position=pos.xyz;v_height=a_height;\n#if defined(USE_TEXTURE)\nif(u_use_texture){v_texture_coord=a_texture_coord;}\n#endif\nvec4 position=u_proj_matrix*u_mv_matrix*vec4(pos.xyz,1.0);gl_Position=position;vec4 icolor=a_color;\n#if defined(PICK)\nif(mapvIsPicked()){icolor=uSelectedColor;}\n#endif\nif(u_use_lighting){vec3 N=normalize(vec3(u_normal_matrix*vec4(a_normal,1.0)));vec4 point_dir=u_mv_matrix*vec4(0,1,0,0);vec3 L_point=normalize(point_dir.xyz);float lambert_point=max(0.0,dot(N,-L_point));vec4 light_dir=u_mv_matrix*vec4(u_side_light_dir,0);vec3 L=normalize(light_dir.xyz);float lambert=max(0.0,dot(N,-L));if(pos.z<5.0){float deepGradientColor=(5.0-pos.z)/8.0;lambert=lambert-deepGradientColor;}vec4 light_dir_2=u_mv_matrix*vec4(0,0,-1,0);vec3 L2=normalize(light_dir_2.xyz);float lambert_2=max(0.0,dot(N,-L2));if(a_pre_color.r==a_color.r&&a_pre_color.g==a_color.g&&a_pre_color.b==a_color.b){}else{if(riseTime>0.0&&dataTime<riseTime){icolor.r=a_pre_color.r+(a_color.r-a_pre_color.r)*(dataTime/riseTime);icolor.g=a_pre_color.g+(a_color.g-a_pre_color.g)*(dataTime/riseTime);icolor.b=a_pre_color.b+(a_color.b-a_pre_color.b)*(dataTime/riseTime);}}v_color.rgb=icolor.rgb+icolor.rgb*light_color*lambert+icolor.rgb*light_color_2*lambert_2+icolor.rgb*point_color*lambert_point;v_color.a=icolor.a;if(u_use_texture){mat3 normalMatrix=mat3(u_normal_matrix);vec3 transformedNormal=normalMatrix*a_normal;vec3 dir=uLightingDirection;dir=vec3(normalMatrix*vec3(0.0,-1.0,2.0));float directionalLightWeighting=max(dot(normalize(transformedNormal),normalize(dir)),0.0);vec4 vLightWeighting;vLightWeighting=vec4(uAmbientColor+uDirectionalColor*directionalLightWeighting,1.0);v_color=vLightWeighting;}}else{v_color=icolor;}}",
                     fragmentShader: "precision highp float;varying vec4 v_color;varying vec3 v_position;varying float v_height;varying vec2 v_texture_coord;uniform vec3 u_ripple_center;uniform vec4 top_color;uniform float u_radius;uniform float style;uniform float alpha;uniform float time;uniform sampler2D u_sampler;uniform bool u_use_lighting;uniform bool u_use_texture;void main(){vec4 color=vec4(v_color);vec4 textureColor=vec4(1.0,1.0,1.0,1.0);if(u_use_texture){if(style==6.0){float x=v_texture_coord.s;float y=v_texture_coord.t;vec2 cPos=-1.0+2.0*gl_FragCoord.xy/MAPV_resolution;float cLength=length(cPos);vec2 uv=gl_FragCoord.xy/MAPV_resolution+(cPos/cLength)*cos(cLength*12.0-time/1000.0*4.0)*0.03;textureColor=texture2D(u_sampler,uv/2.0+vec2(x,y));}else{textureColor=texture2D(u_sampler,vec2(v_texture_coord.s,v_texture_coord.t));}if(u_use_lighting){color=vec4(textureColor*v_color*1.1);}else{color=textureColor;}}if(style==1.0||style==2.0){float t=time/1000.0;float diffDistance=5.0;float modX=mod(v_position.x,diffDistance*2.0);float modZ=mod(v_position.z,diffDistance*2.0);if(modX<diffDistance&&modZ<diffDistance&&v_position.z<v_height){color*=1.05;if(time>0.0&&style==2.0){float iX=ceil(v_position.x/diffDistance);float iZ=ceil(v_position.z/diffDistance);float timeDistance=8.0;t+=tan(sin(iZ));color*=(1.0+mod(t,timeDistance)/timeDistance);}}color.a=alpha;}else if(style==5.0){float t=time/1000.0;float diffDistance=10.0;float modZ=mod(v_position.z-t*40.0,diffDistance*2.0);color.a=1.0-pow(v_position.z/v_height,0.5);if(v_position.z/v_height<0.3){color.r+=0.2;color.g+=0.2;color.b+=0.2;}if(modZ<diffDistance*2.0-4.0){discard;}}else if(style==3.0){float diffDistance=10.0;float modX=mod(v_position.x,diffDistance*2.0);color.a=1.0-pow(v_position.z/v_height,0.3);}else if(style==4.0){float dis=distance(u_ripple_center,v_position);float rSize=400.0;if(v_position.z>=v_height){color=top_color;}if(dis>u_radius-rSize&&dis<u_radius+rSize){color*=(1.0-abs(dis-u_radius)/rSize)*2.0+1.0;}}else if(style==6.0){}gl_FragColor=color;}",
                     defines: c
                 },
                 this);
-                this.vertexBuffer = new H({
+                this.vertexBuffer = new Buffer({
                     gl: a,
                     target: "ARRAY_BUFFER",
                     usage: "STATIC_DRAW"
                 });
-                this.colorBuffer = new H({
+                this.colorBuffer = new Buffer({
                     gl: a,
                     target: "ARRAY_BUFFER",
                     usage: "STATIC_DRAW"
                 });
-                this.heightBuffer = new H({
+                this.heightBuffer = new Buffer({
                     gl: a,
                     target: "ARRAY_BUFFER",
                     usage: "STATIC_DRAW"
                 });
-                this.textureBuffer = new H({
+                this.textureBuffer = new Buffer({
                     gl: a,
                     target: "ARRAY_BUFFER",
                     usage: "STATIC_DRAW"
                 });
-                this.indexBuffer = new H({
+                this.indexBuffer = new Buffer({
                     gl: a,
                     target: "ELEMENT_ARRAY_BUFFER",
                     usage: "STATIC_DRAW"
@@ -9233,7 +9233,7 @@ default = Lb;
                     offset: 0
                 });
                 c = c.concat(this.getCommonAttributes());
-                this.vertexArray = new va({
+                this.vertexArray = new VertexArray({
                     gl: a,
                     program: this.program,
                     attributes: c
@@ -9315,7 +9315,7 @@ default = Lb;
             value: function(a) {
                 var b = this,
                 c = this.getOptions();
-                c.texture ? (this.isUseTexture = !0, Ka(this.gl, c.texture,
+                c.texture ? (this.isUseTexture = !0, loadTextureImage(this.gl, c.texture,
                 function(c, d) {
                     b.image = d;
                     b.texture = c;
@@ -9325,7 +9325,7 @@ default = Lb;
             }
         }]);
         return a
-    } (ba);
+    } (Layer);
     gb.prototype.initData = function() {
         this.outBuilding3d = {
             pickColorVertex: [],
@@ -9484,7 +9484,7 @@ default = Lb;
             h.push(B, B + 2, B + 3, B, B + 3, B + 1)
         }
     };
-    var Bf = function(c) {
+    var GridLayer = function(c) {
         function a(b, c) {
             G(this, a);
             b = R(this, (a.__proto__ || N(a)).call(this, b, c));
@@ -9612,7 +9612,7 @@ default = Lb;
             }
         }]);
         return a
-    } (Kc),
+    } (ShapeLayer),
     nb = function(c) {
         function a(b) {
             G(this, a);
@@ -9655,12 +9655,12 @@ default = Lb;
             }
         }]);
         return a
-    } (Cd),
-    ni = function(c) {
+    } (CommonLayer),
+    HeatGridLayer = function(c) {
         function a(b, c) {
             G(this, a);
             b = R(this, (a.__proto__ || N(a)).call(this, b, c));
-            b.gridLayer = new Bf(b.getGridOptions());
+            b.gridLayer = new GridLayer(b.getGridOptions());
             b.children = [b.gridLayer];
             b.options.riseTime && (b.autoUpdate = !0);
             return b
@@ -9679,7 +9679,7 @@ default = Lb;
                 c = a.max,
                 e = a.min;
                 void 0 === c && (e = this.gridLayer.getGridDataRange(), c = e.max, e = e.min);
-                var g = new na({
+                var g = new Intensity({
                     max: c,
                     min: e,
                     gradient: a.gradient,
@@ -9724,7 +9724,7 @@ default = Lb;
         }]);
         return a
     } (nb),
-    Cf = function(c) {
+    SimpleLineLayer = function(c) {
         function a(b, c) {
             G(this, a);
             b = R(this, (a.__proto__ || N(a)).call(this, b, c));
@@ -9737,18 +9737,18 @@ default = Lb;
             value: function(a) {
                 this.gl = a;
                 var b = this.getOptions();
-                this.program = new V(this.gl, {
+                this.program = new Program(this.gl, {
                     vertexShader: "uniform mat4 u_matrix;attribute vec3 aPos;attribute vec4 aColor;varying vec4 vColor;\n#if defined(DASH)\nvarying vec3 vPos;\n#endif\nvoid main(){if(aColor.w>=0.0&&aColor.w<=1.0){vColor=aColor;}else{vColor=vec4(aColor.xyz,1.0);}gl_Position=u_matrix*vec4(aPos,1.0);\n#if defined(DASH)\nvPos=aPos;\n#endif\n}",
                     fragmentShader: "precision highp float;varying vec4 vColor;varying vec3 vPos;void main(){\n#if defined(DASH)\nif(mod(vPos.x,3.0)<1.5){discard;}\n#endif\ngl_FragColor=vColor;}",
                     defines: b.useDash ? ["DASH"] : ""
                 },
                 this);
-                this.buffer = new H({
+                this.buffer = new Buffer({
                     gl: a,
                     target: "ARRAY_BUFFER",
                     usage: "STATIC_DRAW"
                 });
-                this.vertexArray = new va({
+                this.vertexArray = new VertexArray({
                     gl: a,
                     program: this.program,
                     attributes: [{
@@ -9832,7 +9832,7 @@ default = Lb;
             }
         }]);
         return a
-    } (ba),
+    } (Layer),
     oi = Cc.f("species"),
     pi = O(function(c) {
         c.exports = {
@@ -10362,7 +10362,7 @@ default = Lb;
             return c
         } ()
     },
-    Ef = function(c) {
+    LineLayer = function(c) {
         function a(b, c) {
             G(this, a);
             b = R(this, (a.__proto__ || N(a)).call(this, b, c));
@@ -10410,48 +10410,48 @@ default = Lb;
                 c = [];
                 b.enablePicked && c.push("PICK");
                 Jd[b.style] && (this.isUseTexture = !0, c.push("USE_TEXTURE"));
-                this.program = new V(this.gl, {
+                this.program = new Program(this.gl, {
                     vertexShader: "precision highp float;uniform vec4 uSelectedColor;uniform mat4 uMatrix;uniform bool uFlat;uniform vec2 uDashArray;uniform float thickness;uniform float zoomUnits;uniform float devicePixelRatio;uniform int miter;attribute vec3 position;attribute vec3 next;attribute vec3 previous;attribute float direction;attribute vec4 aColor;attribute float aDistance;attribute float aTotalDistance;\n#if defined(USE_TEXTURE)\nattribute vec2 uv;\n#endif\nvarying vec4 vColor;varying vec2 vNormal;varying vec2 vUV;varying vec2 vDashArray;varying float vTotalDistance;varying float vCounter;vec2 project(vec4 coord){vec3 screen=coord.xyz/coord.w;vec2 clip=(screen.xy+1.0)/2.0;return clip*MAPV_resolution;}vec4 unproject(vec2 projected,float z,float w){vec2 clip=projected/MAPV_resolution;vec2 screen=clip*2.0-1.0;return vec4(screen*w,z,w);}vec3 getNormalAndWidth(vec2 currentScreen,vec2 previousScreen,vec2 nextScreen,float thickness){vec2 dir=vec2(0.0);if(currentScreen==previousScreen){dir=normalize(nextScreen-currentScreen);}else if(currentScreen==nextScreen){dir=normalize(currentScreen-previousScreen);}else{vec2 dirA=normalize((currentScreen-previousScreen));if(miter==1){vec2 dirB=normalize((nextScreen-currentScreen));vec2 tangent=normalize(dirA+dirB);vec2 perp=vec2(-dirA.y,dirA.x);vec2 miter=vec2(-tangent.y,tangent.x);dir=tangent;float angle=40.0;if(dot(dirA,dirB)>cos(radians(angle))){thickness=thickness/dot(miter,perp);}}else{dir=dirA;}}vec2 normal=vec2(-dir.y,dir.x);return vec3(normal,thickness);}void main(){vColor=aColor;vCounter=aDistance/aTotalDistance;vDashArray=zoomUnits*uDashArray/aTotalDistance;vTotalDistance=aTotalDistance;\n#if defined(USE_TEXTURE)\nvUV=uv;\n#endif\n#if defined(PICK)\nif(mapvIsPicked()){vColor=uSelectedColor;}\n#endif\nif(uFlat){float width=thickness*zoomUnits;vec3 nw=getNormalAndWidth(position.xy,previous.xy,next.xy,width);width=nw.z;vec2 normal=nw.xy;vNormal=normal*direction;normal*=width/2.0;gl_Position=uMatrix*vec4(position.xy+normal*direction,position.z,1.0);}else{vec4 previousProjected=uMatrix*vec4(previous,1.0);vec4 currentProjected=uMatrix*vec4(position,1.0);vec4 nextProjected=uMatrix*vec4(next,1.0);vec2 currentScreen=project(currentProjected);vec2 previousScreen=project(previousProjected);vec2 nextScreen=project(nextProjected);float width=thickness*devicePixelRatio;vec3 nw=getNormalAndWidth(currentScreen,previousScreen,nextScreen,width);width=nw.z;vec2 normal=nw.xy;vNormal=normal*direction;normal*=width/2.0;vec2 pos=currentScreen+normal*direction;vec4 finalPos=unproject(pos,currentProjected.z,currentProjected.w);gl_Position=finalPos;}}",
                     fragmentShader: "precision highp float;varying vec4 vColor;varying vec2 vNormal;varying vec2 vUV;varying vec2 vDashArray;varying float vCounter;varying float vTotalDistance;uniform bool uAntialias;uniform float uDashOffset;uniform float zoomUnits;uniform float thickness;\n#if defined(USE_TEXTURE)\nuniform float uTextureMargin;uniform sampler2D textureImage;\n#endif\nvoid main(){vec4 color=vColor;if(uAntialias){float blur=1.0;blur=1.0-smoothstep(0.8,1.0,length(vNormal));color.a*=blur;}\n#if defined(USE_TEXTURE)\nfloat segLen=uTextureMargin*zoomUnits;float textureLen=thickness*zoomUnits;float deltaX=mod(vUV.x,segLen);float middle=segLen/2.0;if(deltaX>=middle&&deltaX<=middle+textureLen){float uvx=(deltaX-middle)/textureLen;vec4 texture=texture2D(textureImage,vec2(uvx,vUV.y));color=texture.a>=0.5 ? texture : color;}\n#endif\nif(vDashArray.y>0.0){float offset=uDashOffset*zoomUnits/vTotalDistance;color.a*=(1.0-step(vDashArray.x,mod(vCounter+offset,vDashArray.x+vDashArray.y)));}gl_FragColor=color;}",
                     defines: c
                 },
                 this);
-                this.prevBuffer = new H({
+                this.prevBuffer = new Buffer({
                     gl: a,
                     target: "ARRAY_BUFFER",
                     usage: "STATIC_DRAW"
                 });
-                this.currentBuffer = new H({
+                this.currentBuffer = new Buffer({
                     gl: a,
                     target: "ARRAY_BUFFER",
                     usage: "STATIC_DRAW"
                 });
-                this.nextBuffer = new H({
+                this.nextBuffer = new Buffer({
                     gl: a,
                     target: "ARRAY_BUFFER",
                     usage: "STATIC_DRAW"
                 });
-                this.directionBuffer = new H({
+                this.directionBuffer = new Buffer({
                     gl: a,
                     target: "ARRAY_BUFFER",
                     usage: "STATIC_DRAW"
                 });
-                this.colorBuffer = new H({
+                this.colorBuffer = new Buffer({
                     gl: a,
                     target: "ARRAY_BUFFER",
                     usage: "STATIC_DRAW"
                 });
-                this.counterBuffer = new H({
+                this.counterBuffer = new Buffer({
                     gl: a,
                     target: "ARRAY_BUFFER",
                     usage: "STATIC_DRAW"
                 });
-                this.uvBuffer = new H({
+                this.uvBuffer = new Buffer({
                     gl: a,
                     target: "ARRAY_BUFFER",
                     usage: "STATIC_DRAW"
                 });
-                this.indexBuffer = new H({
+                this.indexBuffer = new Buffer({
                     gl: a,
                     target: "ELEMENT_ARRAY_BUFFER",
                     usage: "STATIC_DRAW"
@@ -10523,7 +10523,7 @@ default = Lb;
                 }), this.setOptions({
                     texture: Jd[b.style]
                 }), this.loadTexture());
-                this.vertexArray = new va({
+                this.vertexArray = new VertexArray({
                     gl: a,
                     program: this.program,
                     attributes: c
@@ -10635,7 +10635,7 @@ default = Lb;
             value: function(a) {
                 var b = this,
                 c = this.getOptions();
-                c.texture ? Ka(this.gl, c.texture,
+                c.texture ? loadTextureImage(this.gl, c.texture,
                 function(c, d) {
                     b.image = d;
                     b.texture = c;
@@ -10645,7 +10645,7 @@ default = Lb;
             }
         }]);
         return a
-    } (ba),
+    } (Layer),
     Kd = {
         normal: null,
         road: function() {
@@ -10665,7 +10665,7 @@ default = Lb;
             return c
         } ()
     },
-    ri = function(c) {
+    ELineLayer = function(c) {
         function a(b, c) {
             G(this, a);
             b = R(this, (a.__proto__ || N(a)).call(this, b, c));
@@ -10713,48 +10713,48 @@ default = Lb;
                 c = [];
                 b.enablePicked && c.push("PICK");
                 Kd[b.style] && (this.isUseTexture = !0, c.push("USE_TEXTURE"));
-                this.program = new V(this.gl, {
+                this.program = new Program(this.gl, {
                     vertexShader: "precision highp float;uniform vec4 uSelectedColor;uniform mat4 uMatrix;uniform bool uFlat;uniform vec2 uDashArray;uniform float thickness;uniform float zoomUnits;uniform float devicePixelRatio;uniform int miter;attribute vec3 position;attribute vec3 next;attribute vec3 previous;attribute float direction;attribute vec4 aColor;attribute float aDistance;attribute float aTotalDistance;\n#if defined(USE_TEXTURE)\nattribute vec2 uv;\n#endif\nvarying vec4 vColor;varying vec2 vNormal;varying vec2 vUV;varying vec2 vDashArray;varying float vTotalDistance;varying float vCounter;vec2 project(vec4 coord){vec3 screen=coord.xyz/coord.w;vec2 clip=(screen.xy+1.0)/2.0;return clip*MAPV_resolution;}vec4 unproject(vec2 projected,float z,float w){vec2 clip=projected/MAPV_resolution;vec2 screen=clip*2.0-1.0;return vec4(screen*w,z,w);}vec3 getNormalAndWidth(vec2 currentScreen,vec2 previousScreen,vec2 nextScreen,float thickness){vec2 dir=vec2(0.0);if(currentScreen==previousScreen){dir=normalize(nextScreen-currentScreen);}else if(currentScreen==nextScreen){dir=normalize(currentScreen-previousScreen);}else{vec2 dirA=normalize((currentScreen-previousScreen));if(miter==1){vec2 dirB=normalize((nextScreen-currentScreen));vec2 tangent=normalize(dirA+dirB);vec2 perp=vec2(-dirA.y,dirA.x);vec2 miter=vec2(-tangent.y,tangent.x);dir=tangent;float angle=40.0;if(dot(dirA,dirB)>cos(radians(angle))){thickness=thickness/dot(miter,perp);}}else{dir=dirA;}}vec2 normal=vec2(-dir.y,dir.x);return vec3(normal,thickness);}void main(){vColor=aColor;vCounter=aDistance/aTotalDistance;vDashArray=zoomUnits*uDashArray/aTotalDistance;vTotalDistance=aTotalDistance;\n#if defined(USE_TEXTURE)\nvUV=uv;\n#endif\n#if defined(PICK)\nif(mapvIsPicked()){vColor=uSelectedColor;}\n#endif\nif(uFlat){float width=thickness*zoomUnits;vec3 nw=getNormalAndWidth(position.xy,previous.xy,next.xy,width);width=nw.z;vec2 normal=nw.xy;vNormal=normal*direction;normal*=width/2.0;gl_Position=uMatrix*vec4(position.xy+normal*direction,position.z,1.0);}else{vec4 previousProjected=uMatrix*vec4(previous,1.0);vec4 currentProjected=uMatrix*vec4(position,1.0);vec4 nextProjected=uMatrix*vec4(next,1.0);vec2 currentScreen=project(currentProjected);vec2 previousScreen=project(previousProjected);vec2 nextScreen=project(nextProjected);float width=thickness*devicePixelRatio;vec3 nw=getNormalAndWidth(currentScreen,previousScreen,nextScreen,width);width=nw.z;vec2 normal=nw.xy;vNormal=normal*direction;normal*=width/2.0;vec2 pos=currentScreen+normal*direction;vec4 finalPos=unproject(pos,currentProjected.z,currentProjected.w);gl_Position=finalPos;}}",
                     fragmentShader: "precision highp float;varying vec4 vColor;varying vec2 vNormal;varying vec2 vUV;varying vec2 vDashArray;varying float vCounter;varying float vTotalDistance;uniform bool uAntialias;uniform float uDashOffset;uniform float zoomUnits;uniform float thickness;\n#if defined(USE_TEXTURE)\nuniform float uTextureMargin;uniform sampler2D textureImage;\n#endif\nvoid main(){vec4 color=vColor;if(uAntialias){float blur=1.0;blur=1.0-smoothstep(0.8,1.0,length(vNormal));color.a*=blur;}\n#if defined(USE_TEXTURE)\nfloat segLen=uTextureMargin*zoomUnits;float textureLen=thickness*zoomUnits;float deltaX=mod(vUV.x,segLen);float middle=segLen/2.0;if(deltaX>=middle&&deltaX<=middle+textureLen){float uvx=(deltaX-middle)/textureLen;vec4 texture=texture2D(textureImage,vec2(uvx,vUV.y));color=texture.a>=0.5 ? texture : color;}\n#endif\nif(vDashArray.y>0.0){float offset=uDashOffset*zoomUnits/vTotalDistance;color.a*=(1.0-step(vDashArray.x,mod(vCounter+offset,vDashArray.x+vDashArray.y)));}gl_FragColor=color;}",
                     defines: c
                 },
                 this);
-                this.prevBuffer = new H({
+                this.prevBuffer = new Buffer({
                     gl: a,
                     target: "ARRAY_BUFFER",
                     usage: "STATIC_DRAW"
                 });
-                this.currentBuffer = new H({
+                this.currentBuffer = new Buffer({
                     gl: a,
                     target: "ARRAY_BUFFER",
                     usage: "STATIC_DRAW"
                 });
-                this.nextBuffer = new H({
+                this.nextBuffer = new Buffer({
                     gl: a,
                     target: "ARRAY_BUFFER",
                     usage: "STATIC_DRAW"
                 });
-                this.directionBuffer = new H({
+                this.directionBuffer = new Buffer({
                     gl: a,
                     target: "ARRAY_BUFFER",
                     usage: "STATIC_DRAW"
                 });
-                this.colorBuffer = new H({
+                this.colorBuffer = new Buffer({
                     gl: a,
                     target: "ARRAY_BUFFER",
                     usage: "STATIC_DRAW"
                 });
-                this.counterBuffer = new H({
+                this.counterBuffer = new Buffer({
                     gl: a,
                     target: "ARRAY_BUFFER",
                     usage: "STATIC_DRAW"
                 });
-                this.uvBuffer = new H({
+                this.uvBuffer = new Buffer({
                     gl: a,
                     target: "ARRAY_BUFFER",
                     usage: "STATIC_DRAW"
                 });
-                this.indexBuffer = new H({
+                this.indexBuffer = new Buffer({
                     gl: a,
                     target: "ELEMENT_ARRAY_BUFFER",
                     usage: "STATIC_DRAW"
@@ -10826,7 +10826,7 @@ default = Lb;
                 }), this.setOptions({
                     texture: Kd[b.style]
                 }), this.loadTexture());
-                this.vertexArray = new va({
+                this.vertexArray = new VertexArray({
                     gl: a,
                     program: this.program,
                     attributes: c
@@ -10938,7 +10938,7 @@ default = Lb;
             value: function(a) {
                 var b = this,
                 c = this.getOptions();
-                c.texture ? Ka(this.gl, c.texture,
+                c.texture ? loadTextureImage(this.gl, c.texture,
                 function(c, d) {
                     b.image = d;
                     b.texture = c;
@@ -10948,7 +10948,7 @@ default = Lb;
             }
         }]);
         return a
-    } (ba),
+    } (Layer),
     si = function() {
         function c(a, b) {
             G(this, c);
@@ -11062,7 +11062,7 @@ default = Lb;
         }]);
         return c
     } (),
-    Ff = function(c) {
+    WallSpriteLayer = function(c) {
         function a(b, c) {
             G(this, a);
             b = R(this, (a.__proto__ || N(a)).call(this, b, c));
@@ -11089,7 +11089,7 @@ default = Lb;
             value: function(a) {
                 this.gl = a;
                 this.dataMgr = new si(this, this.gl);
-                this.program = new V(this.gl, {
+                this.program = new Program(this.gl, {
                     vertexShader: "uniform mat4 u_matrix;uniform float currentTime;uniform float trailLength;attribute vec4 aPos;attribute float aDistance;attribute vec4 aColor;varying vec4 vColor;varying float vHeight;varying float vTime;varying float vDistance;void main(){vTime=1.0-((currentTime-aPos.w)/trailLength);vHeight=aPos.z;vColor=aColor;vDistance=aDistance;gl_Position=u_matrix*vec4(aPos.xyz,1.0);}",
                     fragmentShader: "precision highp float;varying vec4 vColor;varying float vTime;varying float vDistance;varying float vHeight;uniform float currentTime;void main(){if(vTime>1.0||vTime<0.0){}float radius=2.5;float distance=vDistance+currentTime*20.0;float modDistance=mod(distance,9.0);float alpha=1.0;if(modDistance>radius*2.0){discard;}else{float x=abs(modDistance-radius);float y=abs(vHeight-radius);float dis=sqrt(pow(x,2.0)+pow(y,2.0));if(dis>radius){discard;}alpha=dis/radius;}gl_FragColor=vec4(vColor.rgb,1.0-alpha);}"
                 })
@@ -11140,7 +11140,7 @@ default = Lb;
             }
         }]);
         return a
-    } (ba),
+    } (Layer),
     ti = O(function(c, a) {
         a.__esModule = !0;
         var b = Ua && Ua.__esModule ? Ua: {
@@ -11166,7 +11166,7 @@ default = Lb;
     Cb(cc, 1, 1), Cb(cc, 2, 1), Cb(cc, 3, 1), cc),
     vi = (dc = {},
     Cb(dc, 1, 1), Cb(dc, 2, 1), Cb(dc, 3, 1), dc),
-    ob = function(c) {
+    LinePointLayer = function(c) {
         function a(b, c) {
             G(this, a);
             b = R(this, (a.__proto__ || N(a)).call(this, b, c));
@@ -11198,7 +11198,7 @@ default = Lb;
                 this.gl = a;
                 var b = this.getOptions();
                 this.updateUniformsFromOptions(b);
-                this.program = new V(this.gl, {
+                this.program = new Program(this.gl, {
                     vertexShader: "precision highp float;attribute vec3 aPos;attribute vec3 aNextPos;attribute float aIndex;attribute float aNextIndex;attribute float aLength;uniform float uSize;uniform mat4 u_matrix;uniform float uElapsedSteps;uniform int uAnimationType;uniform int uPointFade;uniform float uPointFadeBuffer;varying float vAddOpacity;void main(){if(uAnimationType==1){if(abs(aIndex-mod(uElapsedSteps,aLength))>.1){gl_Position=vec4(-2.,-2.,0,1.0);return;}gl_Position=u_matrix*vec4(aPos.xyz,1.0);vAddOpacity=1.;}else if(uAnimationType==2){float lineLength=aLength-1.;float cIndex=mod(uElapsedSteps,lineLength);float rest=cIndex-aIndex;if(rest<1.&&rest>=0.){if(uPointFade==1){if(cIndex<uPointFadeBuffer){vAddOpacity=cIndex/uPointFadeBuffer;}else if(cIndex>lineLength-uPointFadeBuffer){vAddOpacity=(lineLength-cIndex)/uPointFadeBuffer;}else{vAddOpacity=1.;}}else{vAddOpacity=1.;}gl_Position=u_matrix*vec4(aPos.x+(aNextPos.x-aPos.x)*rest,aPos.y+(aNextPos.y-aPos.y)*rest,aPos.z+(aNextPos.z-aPos.z)*rest,1.0);}else{gl_Position=vec4(-2.,-2.,0,1.0);return;}}else if(uAnimationType==3){float percent=mod(uElapsedSteps,aLength)/aLength;if(percent<=aNextIndex&&percent>=aIndex){if(uPointFade==1){float fadePercent=uPointFadeBuffer*1000./aLength;if(percent<fadePercent){vAddOpacity=percent/fadePercent;}else if(percent>1.-fadePercent){vAddOpacity=(1.-percent)/fadePercent;}else{vAddOpacity=1.;}}else{vAddOpacity=1.;}float rest=(percent-aIndex)/(aNextIndex-aIndex);gl_Position=u_matrix*vec4(aPos.x+(aNextPos.x-aPos.x)*rest,aPos.y+(aNextPos.y-aPos.y)*rest,aPos.z+(aNextPos.z-aPos.z)*rest,1.0);}else{gl_Position=vec4(-2.,-2.,0,1.0);return;}}gl_PointSize=uSize;}",
                     fragmentShader: "precision highp float;uniform vec4 uColor;uniform int ushapeType;varying float vAddOpacity;void main(){if(ushapeType==2){float d=distance(gl_PointCoord,vec2(0.5,0.5));if(d>0.5){discard;}gl_FragColor=vec4(uColor.rgb,uColor.a*vAddOpacity);}else if(ushapeType==3){float d=distance(gl_PointCoord,vec2(0.5,0.5));if(d>0.5){discard;}gl_FragColor=vec4(uColor.rgb,uColor.a*smoothstep(1.0,0.0,d*2.)*vAddOpacity);}else{gl_FragColor=vec4(uColor.rgb,uColor.a*vAddOpacity);}}"
                 });
@@ -11337,13 +11337,13 @@ default = Lb;
             }
         }]);
         return a
-    } (ba);
-    ob.ANIMATION_TYPE_LEAP = 1;
-    ob.ANIMATION_TYPE_SMOOTH = 2;
-    ob.ANIMATION_TYPE_UNIFORM_SPEED = 3;
-    ob.SHAPE_TYPE_SQUARE = 1;
-    ob.SHAPE_TYPE_CIRCLE = 2;
-    ob.SHAPE_TYPE_CIRCLE_GRADIENT = 3;
+    } (Layer);
+    LinePointLayer.ANIMATION_TYPE_LEAP = 1;
+    LinePointLayer.ANIMATION_TYPE_SMOOTH = 2;
+    LinePointLayer.ANIMATION_TYPE_UNIFORM_SPEED = 3;
+    LinePointLayer.SHAPE_TYPE_SQUARE = 1;
+    LinePointLayer.SHAPE_TYPE_CIRCLE = 2;
+    LinePointLayer.SHAPE_TYPE_CIRCLE_GRADIENT = 3;
     var wi = function() {
         function c(a, b) {
             G(this, c);
@@ -11442,7 +11442,7 @@ default = Lb;
         }]);
         return c
     } (),
-    xi = function(c) {
+    WallLayer = function(c) {
         function a(b, c) {
             G(this, a);
             return R(this, (a.__proto__ || N(a)).call(this, b, c))
@@ -11467,7 +11467,7 @@ default = Lb;
                 this.texture = null;
                 this.isUseTexture = !1;
                 this.vertexLength = 10;
-                this.program = new V(this.gl, {
+                this.program = new Program(this.gl, {
                     vertexShader: "uniform mat4 u_matrix;uniform bool uUseTexture;attribute vec3 aPos;attribute vec4 aColor;attribute vec2 aTextureCoords;varying vec2 vTextureCoords;varying vec4 vColor;void main(){if(aColor.w>=0.0&&aColor.w<=1.0){vColor=aColor;}else{vColor=vec4(aColor.xyz,1.0);}if(uUseTexture){vTextureCoords=aTextureCoords;}gl_Position=u_matrix*vec4(aPos,1.0);}",
                     fragmentShader: "precision highp float;uniform bool uUseTexture;uniform sampler2D uSampler;varying vec2 vTextureCoords;varying vec4 vColor;void main(){if(uUseTexture){gl_FragColor=vec4(1.0,1.0,1.0,1.0)*texture2D(uSampler,vTextureCoords);}else{gl_FragColor=vColor;}}"
                 });
@@ -11535,7 +11535,7 @@ default = Lb;
             value: function(a) {
                 var b = this,
                 c = this.getOptions();
-                c.texture ? (this.isUseTexture = !0, Ka(this.gl, c.texture,
+                c.texture ? (this.isUseTexture = !0, loadTextureImage(this.gl, c.texture,
                 function(c, d) {
                     b.image = d;
                     b.texture = c;
@@ -11545,7 +11545,7 @@ default = Lb;
             }
         }]);
         return a
-    } (ba),
+    } (Layer),
     yi = function() {
         function c(a, b) {
             G(this, c);
@@ -11650,7 +11650,7 @@ default = Lb;
         }]);
         return c
     } (),
-    zi = function(c) {
+    WallTripLayer = function(c) {
         function a(b, c) {
             G(this, a);
             b = R(this, (a.__proto__ || N(a)).call(this, b, c));
@@ -11677,7 +11677,7 @@ default = Lb;
             value: function(a) {
                 this.gl = a;
                 this.dataMgr = new yi(this, this.gl);
-                this.program = new V(this.gl, {
+                this.program = new Program(this.gl, {
                     vertexShader: "uniform mat4 u_matrix;uniform float currentTime;uniform float trailLength;attribute vec4 aPos;attribute vec4 aColor;varying vec4 vColor;varying float vTime;void main(){vTime=1.0-((currentTime-aPos.w)/trailLength);vColor=aColor;gl_Position=u_matrix*vec4(aPos.xyz,1.0);}",
                     fragmentShader: "precision highp float;varying vec4 vColor;varying float vTime;void main(){if(vTime>1.0||vTime<0.0){discard;}gl_FragColor=vec4(vColor.rgb,1.0*vTime);}"
                 })
@@ -11726,12 +11726,12 @@ default = Lb;
             }
         }]);
         return a
-    } (ba),
-    Ai = function(c) {
+    } (Layer),
+    HeatLineLayer = function(c) {
         function a(b, c) {
             G(this, a);
             b = R(this, (a.__proto__ || N(a)).call(this, b, c));
-            b.simpleLineLayer = new Cf(b.getHeatOptions());
+            b.simpleLineLayer = new SimpleLineLayer(b.getHeatOptions());
             b.children = [b.simpleLineLayer];
             return b
         }
@@ -11769,7 +11769,7 @@ default = Lb;
                 c = a.max,
                 e = a.min;
                 void 0 === c && (e = this.getDataRange(), c = e.max, e = e.min);
-                var g = new na({
+                var g = new Intensity({
                     max: c,
                     min: e,
                     gradient: a.gradient
@@ -12120,7 +12120,7 @@ default = Lb;
     }),
     Db = window.devicePixelRatio,
     Eb = Math.max(2, Db),
-    Ld = function(c) {
+    TextLayer = function(c) {
         function a(b, c) {
             G(this, a);
             b = R(this, (a.__proto__ || N(a)).call(this, b, c));
@@ -12152,23 +12152,23 @@ default = Lb;
                 this.gl = a;
                 var b = this.getOptions();
                 this.texture = null;
-                this.program = new V(this.gl, {
+                this.program = new Program(this.gl, {
                     vertexShader: "precision highp float;uniform mat4 matrix;uniform bool uFlat;uniform float zoomUnits;uniform float devicePixelRatio;uniform vec2 offset;attribute vec3 position;attribute float corner;attribute vec2 size;attribute vec2 aTextCoord;varying vec2 vTextCoord;vec3 transformCoord(vec3 coord,vec2 size,float corner){float x=coord.x;float y=coord.y;if(corner==1.0){x-=size[0];y+=size[1];}else if(corner==2.0){x+=size[0];y+=size[1];}else if(corner==3.0){x+=size[0];y-=size[1];}else{x-=size[0];y-=size[1];}return vec3(x,y,coord.z);}void main(){vec2 pixelOffset=offset*zoomUnits;vTextCoord=aTextCoord;if(uFlat){vec2 halfSize=size/2.0*zoomUnits;vec3 current=transformCoord(position,halfSize,corner);gl_Position=matrix*vec4(current.x+pixelOffset[0],current.y+pixelOffset[1],current.z,1.0);}else{vec4 projection=matrix*vec4(position.x+pixelOffset[0],position.y+pixelOffset[1],position.z,1.0);vec3 screen=projection.xyz/projection.w;vec2 halfSize=size/MAPV_resolution*devicePixelRatio;vec3 current=transformCoord(screen,halfSize,corner);gl_Position=vec4(current,1.0);}}",
                     fragmentShader: "precision highp float;uniform sampler2D textureImage;uniform vec4 uSelectedColor;varying vec2 vTextCoord;void main(){gl_FragColor=texture2D(textureImage,vec2(vTextCoord.x,1.0-vTextCoord.y));\n#if defined(PICK)\nif(mapvIsPicked()){gl_FragColor=vec4(uSelectedColor.rgb,gl_FragColor.a);}\n#endif\n}",
                     defines: b.enablePicked ? ["PICK"] : []
                 },
                 this);
-                this.vertexBuffer = new H({
+                this.vertexBuffer = new Buffer({
                     gl: a,
                     target: "ARRAY_BUFFER",
                     usage: "STATIC_DRAW"
                 });
-                this.uvBuffer = new H({
+                this.uvBuffer = new Buffer({
                     gl: a,
                     target: "ARRAY_BUFFER",
                     usage: "STATIC_DRAW"
                 });
-                this.indexBuffer = new H({
+                this.indexBuffer = new Buffer({
                     gl: a,
                     target: "ELEMENT_ARRAY_BUFFER",
                     usage: "STATIC_DRAW"
@@ -12206,7 +12206,7 @@ default = Lb;
                     offset: 0
                 }];
                 b = b.concat(this.getCommonAttributes());
-                this.vertexArray = new va({
+                this.vertexArray = new VertexArray({
                     gl: a,
                     program: this.program,
                     attributes: b
@@ -12324,8 +12324,8 @@ default = Lb;
                 }
                 b.restore();
                 n = Ee(y);
-                c = Kb(n.w);
-                n = Kb(n.h);
+                c = ceilPowerOfTwo(n.w);
+                n = ceilPowerOfTwo(n.h);
                 r.width = c * Eb;
                 r.height = n * Eb;
                 b.save();
@@ -12370,14 +12370,14 @@ default = Lb;
             key: "loadTexture",
             value: function() {
                 var a = this;
-                this.canvas ? Ka(this.gl, this.canvas,
+                this.canvas ? loadTextureImage(this.gl, this.canvas,
                 function(b) {
                     a.texture = b
                 }) : this.texture = null
             }
         }]);
         return a
-    } (ba),
+    } (Layer),
     Gf = O(function(c, a) { (function(a, d) {
             c.exports = d()
         })(Fe,
@@ -12719,12 +12719,12 @@ default = Lb;
             return z
         })
     }),
-    Ci = function(c) {
+    HoneycombLayer = function(c) {
         function a(b) {
             G(this, a);
             b = R(this, (a.__proto__ || N(a)).call(this, b));
-            b.shapeLayer = new Kc(b.options);
-            b.textLayer = new Ld(b.options.textOptions);
+            b.shapeLayer = new ShapeLayer(b.options);
+            b.textLayer = new TextLayer(b.options.textOptions);
             b.children = [b.shapeLayer, b.textLayer];
             b.max = [];
             return b
@@ -12821,7 +12821,7 @@ default = Lb;
                         return a
                     });
                     this.max[g] = Math.max(this.max[g] || 0, c.max);
-                    var m = new na({
+                    var m = new Intensity({
                         max: this.max[g],
                         min: 0,
                         maxSize: n * Math.pow(2, 18 - g),
@@ -12987,7 +12987,7 @@ default = Lb;
                 if ("gcj02" === this.options.coordinateSystem) return b = b * Math.PI / 180,
                 b = 3189068.5 * Math.log((1 + Math.sin(b)) / (1 - Math.sin(b))),
                 [parseFloat((a * Math.PI / 180 * 6378137).toFixed(2)), parseFloat(b.toFixed(2))];
-                a = ra.convertLL2MC({
+                a = MercatorProjection.convertLL2MC({
                     lng: a,
                     lat: b
                 });
@@ -13458,7 +13458,7 @@ default = Lb;
         }]);
         return a
     } (ec),
-    Hf = function() {
+    WebglLayer = function() {
         function c(a, b) {
             G(this, c);
             b = b || {};
@@ -13467,7 +13467,7 @@ default = Lb;
             this.options = b || {};
             this.renderArr = []; (a = b.canvas) || (a = document.createElement("canvas"));
             this.canvas = a;
-            this.gl = b.gl ? b.gl: ee(a);
+            this.gl = b.gl ? b.gl: getContext(a);
             this.gl.getExtension("OES_element_index_uint");
             this.changeSize();
             this.projectionMatrix = C.create(Float64Array);
@@ -13481,10 +13481,10 @@ default = Lb;
             this._update = this.update.bind(this);
             this.onInitialize(this.options.onInitialize);
             this.options.onRender && this.renderArr.push(this.options.onRender);
-            this.stateManager = new rf({
+            this.stateManager = new StateManager({
                 gl: this.gl
             });
-            this.pickFBO = new wa(this.gl);
+            this.pickFBO = new FrameBufferObject(this.gl);
             this.transferOptions = {};
             this.bind()
         }
@@ -13623,7 +13623,7 @@ default = Lb;
                 var a = this.gl.canvas.width / this.gl.canvas.height,
                 b = this.options.cameraNear || 1,
                 c = this.options.cameraFar || 4E3;
-                C.perspective(this.projectionMatrix, la(this.fovy), a, b, c);
+                C.perspective(this.projectionMatrix, toRadian(this.fovy), a, b, c);
                 a = this.map.getSize();
                 C.ortho(this.orthoMatrix, -a.width / 2, a.width / 2, -a.height / 2, a.height / 2, b, c)
             }
@@ -13639,10 +13639,10 @@ default = Lb;
                 C.identity(c);
                 C.identity(e);
                 var g = a.getSize();
-                g = Math.round( - g.height / (2 * Math.tan(la(this.fovy) / 2)));
+                g = Math.round( - g.height / (2 * Math.tan(toRadian(this.fovy) / 2)));
                 C.translate(e, e, [0, 0, g]);
-                C.rotate(e, e, la(a.getTilt()), [ - 1, 0, 0]);
-                C.rotate(e, e, la(a.getHeading()), [0, 0, -1]);
+                C.rotate(e, e, toRadian(a.getTilt()), [ - 1, 0, 0]);
+                C.rotate(e, e, toRadian(a.getHeading()), [0, 0, -1]);
                 g = a.getCenter();
                 var k = this.options.pointOffset || [0, 0];
                 a = a.getZoomUnits();
@@ -13684,7 +13684,7 @@ default = Lb;
         circle: 1,
         square: 2
     },
-    Md = function(c) {
+    PointLayer = function(c) {
         function a(b) {
             G(this, a);
             b = R(this, (a.__proto__ || N(a)).call(this, b));
@@ -13708,13 +13708,13 @@ default = Lb;
             value: function(a) {
                 this.gl = a;
                 var b = this.getOptions();
-                this.program = new V(this.gl, {
+                this.program = new Program(this.gl, {
                     vertexShader: "attribute vec3 aPos;attribute vec4 aColor;attribute float aSize;uniform mat4 uMatrix;varying vec4 vColor;uniform vec4 uSelectedColor;void main(void){if(aColor.w>=0.0&&aColor.w<=1.0){vColor=aColor;}else{vColor=vec4(aColor.xyz,1.0);}gl_Position=uMatrix*vec4(aPos.xyz,1.0);gl_PointSize=aSize;\n#if defined(PICK)\nif(mapvIsPicked()){vColor=uSelectedColor;}\n#endif\n}",
                     fragmentShader: "varying vec4 vColor;uniform int uShape;void main(void){vec4 color=vColor;if(uShape==1){float d=distance(gl_PointCoord,vec2(0.5,0.5));if(d>0.5){discard;}float blur=1.0;blur=1.0-smoothstep(0.49,0.5,d);color.a*=blur;gl_FragColor=color;}else{gl_FragColor=color;}}",
                     defines: b.enablePicked ? ["PICK"] : []
                 },
                 this);
-                this.buffer = new H({
+                this.buffer = new Buffer({
                     gl: a,
                     target: "ARRAY_BUFFER",
                     usage: "STATIC_DRAW"
@@ -13744,7 +13744,7 @@ default = Lb;
                     offset: 28
                 }];
                 b = b.concat(this.getCommonAttributes());
-                this.vertexArray = new va({
+                this.vertexArray = new VertexArray({
                     gl: a,
                     program: this.program,
                     attributes: b
@@ -13823,8 +13823,8 @@ default = Lb;
             }
         }]);
         return a
-    } (ba),
-    Ii = function(c) {
+    } (Layer),
+    GroundRippleLayer = function(c) {
         function a(b, c) {
             G(this, a);
             b = R(this, (a.__proto__ || N(a)).call(this, b, c));
@@ -13856,7 +13856,7 @@ default = Lb;
             key: "initialize",
             value: function(a) {
                 this.gl = a;
-                this.program = new V(this.gl, {
+                this.program = new Program(this.gl, {
                     vertexShader: "uniform mat4 u_projectionMatrix;uniform mat4 u_modelViewMatrix;uniform mat4 u_modelMatrix;uniform float u_opacity;attribute vec4 aPos;attribute vec4 aColor;varying vec4 vColor;void main(){vColor=aColor;vColor.a=u_opacity;gl_Position=u_projectionMatrix*u_modelViewMatrix*u_modelMatrix*vec4(aPos.xyz,1.0);}",
                     fragmentShader: "precision highp float;varying vec4 vColor;void main(){if(vColor.a==0.0){discard;}gl_FragColor=vColor;}"
                 })
@@ -13952,8 +13952,8 @@ default = Lb;
             }
         }]);
         return a
-    } (ba),
-    Ji = function(c) {
+    } (Layer),
+    RippleLayer = function(c) {
         function a(b) {
             G(this, a);
             b = R(this, (a.__proto__ || N(a)).call(this, b));
@@ -13980,13 +13980,13 @@ default = Lb;
             value: function(a) {
                 this.gl = a;
                 var b = this.getOptions();
-                this.program = new V(this.gl, {
+                this.program = new Program(this.gl, {
                     vertexShader: "attribute vec3 aPos;attribute vec4 aColor;attribute float aSize;uniform mat4 uMatrix;uniform vec4 uSelectedColor;uniform float uTime;uniform float duration;uniform float zoomUnits;varying vec4 vColor;void main(void){if(aColor.w>=0.0&&aColor.w<=1.0){vColor=aColor;}else{vColor=vec4(aColor.xyz,1.0);}float percent=mod(uTime,duration)/duration;vColor.a=1.-percent;gl_Position=uMatrix*vec4(aPos.xyz,1.0);gl_PointSize=aSize/zoomUnits*percent;\n#if defined(PICK)\nif(mapvIsPicked()){vColor=uSelectedColor;}\n#endif\n}",
                     fragmentShader: "varying vec4 vColor;void main(void){vec4 color=vColor;float d=distance(gl_PointCoord,vec2(0.5,0.5));if(d>0.5){discard;}float blur=1.0;blur=1.0-smoothstep(0.49,0.5,d);color.a*=blur;gl_FragColor=color;}",
                     defines: b.enablePicked ? ["PICK"] : []
                 },
                 this);
-                this.buffer = new H({
+                this.buffer = new Buffer({
                     gl: a,
                     target: "ARRAY_BUFFER",
                     usage: "STATIC_DRAW"
@@ -14016,7 +14016,7 @@ default = Lb;
                     offset: 28
                 }];
                 b = b.concat(this.getCommonAttributes());
-                this.vertexArray = new va({
+                this.vertexArray = new VertexArray({
                     gl: a,
                     program: this.program,
                     attributes: b
@@ -14093,8 +14093,8 @@ default = Lb;
             }
         }]);
         return a
-    } (ba),
-    Ki = function(c) {
+    } (Layer),
+    SparkLayer = function(c) {
         function a(b, c) {
             G(this, a);
             b = R(this, (a.__proto__ || N(a)).call(this, b, c));
@@ -14129,7 +14129,7 @@ default = Lb;
             key: "initialize",
             value: function(a) {
                 this.gl = a;
-                this.program = new V(this.gl, {
+                this.program = new Program(this.gl, {
                     vertexShader: "precision mediump float;attribute vec4 aPos;uniform mat4 u_matrix;uniform float currentTime;uniform float trailLength;varying float vTime;void main(){gl_Position=u_matrix*vec4(aPos.xyz,1.0);vTime=1.0-((currentTime-aPos.w)/trailLength);}",
                     fragmentShader: "precision mediump float;uniform vec3 uFragColor;varying float vTime;void main(){if(vTime>1.0||vTime<0.0){discard;}gl_FragColor=vec4(uFragColor,1.0*vTime);}"
                 });
@@ -14192,13 +14192,13 @@ default = Lb;
             }
         }]);
         return a
-    } (ba),
-    Li = function(c) {
+    } (Layer),
+    ClusterLayer = function(c) {
         function a(b) {
             G(this, a);
             b = R(this, (a.__proto__ || N(a)).call(this, b));
-            b.pointLayer = new Md(b.options);
-            b.textLayer = new Ld(b.options.textOptions);
+            b.pointLayer = new PointLayer(b.options);
+            b.textLayer = new TextLayer(b.options.textOptions);
             b.children = [b.pointLayer, b.textLayer];
             return b
         }
@@ -14318,7 +14318,7 @@ default = Lb;
                 k = c.gradient,
                 h = c.minSize,
                 l = c.textOptions,
-                n = new na({
+                n = new Intensity({
                     max: this.max,
                     min: ~~this.min || 1,
                     minSize: h || 8,
@@ -14371,7 +14371,7 @@ default = Lb;
         }]);
         return a
     } (nb),
-    Mi = function(c) {
+    HeatPointLayer = function(c) {
         function a(b, c) {
             G(this, a);
             return R(this, (a.__proto__ || N(a)).call(this, b, c))
@@ -14443,7 +14443,7 @@ default = Lb;
                     d = Math.min(h[2], d);
                     a /= 2
                 }
-                c = new na({
+                c = new Intensity({
                     max: ~~a,
                     min: d,
                     gradient: c.gradient
@@ -14464,8 +14464,8 @@ default = Lb;
             }
         }]);
         return a
-    } (Md),
-    Ni = function(c) {
+    } (PointLayer),
+    ShapeLineLayer = function(c) {
         function a(b, c) {
             G(this, a);
             b = R(this, (a.__proto__ || N(a)).call(this, b, c));
@@ -14514,7 +14514,7 @@ default = Lb;
             key: "initialize",
             value: function(a) {
                 this.gl = a;
-                this.program = new V(a, {
+                this.program = new Program(a, {
                     vertexShader: "uniform mat4 uMatrix;attribute vec3 aPos;void main(){gl_PointSize=10.0;gl_Position=uMatrix*vec4(aPos,1.0);}",
                     fragmentShader: "precision mediump float;uniform vec4 uFragColor;void main(){gl_FragColor=uFragColor;}"
                 });
@@ -14543,12 +14543,12 @@ default = Lb;
             }
         }]);
         return a
-    } (ba),
+    } (Layer),
     Jf = {
         circle: 1,
         square: 2
     },
-    Oi = function(c) {
+    PointTripLayer = function(c) {
         function a(b, c) {
             G(this, a);
             b = R(this, (a.__proto__ || N(a)).call(this, b, c));
@@ -14564,7 +14564,7 @@ default = Lb;
             key: "initialize",
             value: function(a) {
                 this.gl = a;
-                this.program = new V(this.gl, {
+                this.program = new Program(this.gl, {
                     vertexShader: "attribute vec4 aPos;attribute vec4 aColor;attribute float aSize;uniform mat4 u_matrix;varying vec4 vColor;uniform float currentTime;uniform float trailLength;varying float vTime;void main(void){if(aColor.w>=0.0&&aColor.w<=1.0){vColor=aColor;}else{vColor=vec4(aColor.xyz,1.0);}gl_Position=u_matrix*vec4(aPos.xyz,1.0);gl_PointSize=aSize;vTime=1.0-((currentTime-aPos.w)/trailLength);}",
                     fragmentShader: "precision highp float;varying vec4 vColor;uniform int uShape;varying float vTime;void main(void){if(vTime>1.0||vTime<0.0){discard;}if(uShape==1){float d=distance(gl_PointCoord,vec2(0.5,0.5));if(d<0.5){gl_FragColor=vColor;}else{discard;}}else{gl_FragColor=vec4(vColor.rgb,vColor.a*vTime);}}"
                 });
@@ -14611,8 +14611,8 @@ default = Lb;
             }
         }]);
         return a
-    } (ba),
-    Pi = function(c) {
+    } (Layer),
+    LineTripLayer = function(c) {
         function a(b, c) {
             G(this, a);
             b = R(this, (a.__proto__ || N(a)).call(this, b, c));
@@ -14638,7 +14638,7 @@ default = Lb;
             key: "initialize",
             value: function(a) {
                 this.gl = a;
-                this.program = new V(this.gl, {
+                this.program = new Program(this.gl, {
                     vertexShader: "precision highp float;attribute vec4 aPos;attribute vec4 aColor;uniform mat4 u_matrix;uniform float currentTime;uniform float trailLength;varying float vTime;varying vec4 vColor;void main(){gl_Position=u_matrix*vec4(aPos.xyz,1.0);vColor=aColor;vTime=1.0-((currentTime-aPos.w)/trailLength);}",
                     fragmentShader: "precision highp float;uniform vec3 uFragColor;varying vec4 vColor;varying float vTime;void main(){if(vTime>1.0||vTime<0.0){discard;}gl_FragColor=vec4(vColor.rgb,1.0*vTime);}"
                 },
@@ -14725,8 +14725,8 @@ default = Lb;
             }
         }]);
         return a
-    } (ba),
-    Kf = function(c) {
+    } (Layer),
+    LineFlowLayer = function(c) {
         function a(b, c) {
             G(this, a);
             b = R(this, (a.__proto__ || N(a)).call(this, b, c));
@@ -14773,43 +14773,43 @@ default = Lb;
             value: function(a) {
                 this.gl = a;
                 var b = this.getOptions();
-                this.program = new V(this.gl, {
+                this.program = new Program(this.gl, {
                     vertexShader: "uniform mat4 u_matrix;uniform float thickness;uniform int miter;uniform vec4 uSelectedColor;attribute vec3 position;attribute vec3 next;attribute vec3 previous;attribute float direction;attribute vec4 aColor;attribute float aCounter;attribute vec2 uv;varying vec4 vColor;varying vec2 vNormal;varying float vCounter;vec2 project(vec4 coord){vec3 screen=coord.xyz/coord.w;vec2 clip=(screen.xy+1.0)/2.0;return clip*MAPV_resolution;}vec4 unproject(vec2 projected,float z,float w){vec2 clip=projected/MAPV_resolution;vec2 screen=clip*2.0-1.0;return vec4(screen*w,z,w);}void main(){vColor=aColor;vCounter=aCounter;\n#if defined(PICK)\nif(mapvIsPicked()){vColor=uSelectedColor;}\n#endif\nvec4 previousProjected=u_matrix*vec4(previous,1.0);vec4 currentProjected=u_matrix*vec4(position,1.0);vec4 nextProjected=u_matrix*vec4(next,1.0);vec2 currentScreen=project(currentProjected);vec2 previousScreen=project(previousProjected);vec2 nextScreen=project(nextProjected);float len=thickness;float orientation=direction;vec2 dir=vec2(0.0);if(currentScreen==previousScreen){dir=normalize(nextScreen-currentScreen);}else if(currentScreen==nextScreen){dir=normalize(currentScreen-previousScreen);}else{vec2 dirA=normalize((currentScreen-previousScreen));if(miter==1){vec2 dirB=normalize((nextScreen-currentScreen));vec2 tangent=normalize(dirA+dirB);vec2 perp=vec2(-dirA.y,dirA.x);vec2 miter=vec2(-tangent.y,tangent.x);dir=tangent;}else{dir=dirA;}}vec2 normal=vec2(-dir.y,dir.x);vNormal=normal*orientation;normal*=len/2.0;vec2 pos=currentScreen+normal*orientation;vec4 finalPos=unproject(pos,currentProjected.z,currentProjected.w);gl_Position=finalPos;}",
                     fragmentShader: "precision highp float;uniform bool uAntialias;uniform bool uAnimate;uniform float uTime;uniform float duration;uniform float interval;uniform float trailLength;varying vec4 vColor;varying vec2 vNormal;varying float vCounter;void main(){vec4 color=vColor;if(uAntialias){float blur=1.0;blur=1.0-smoothstep(0.98,1.0,length(vNormal));color.a*=blur;}if(uAnimate){float alpha=1.0-fract(mod(1.0-vCounter,interval)*(1.0/interval)+uTime/duration);alpha=(alpha+trailLength-1.0)/trailLength;color.a*=alpha;}gl_FragColor=color;}",
                     defines: b.enablePicked ? ["PICK"] : []
                 },
                 this);
-                this.prevBuffer = new H({
+                this.prevBuffer = new Buffer({
                     gl: a,
                     target: "ARRAY_BUFFER",
                     usage: "STATIC_DRAW"
                 });
-                this.currentBuffer = new H({
+                this.currentBuffer = new Buffer({
                     gl: a,
                     target: "ARRAY_BUFFER",
                     usage: "STATIC_DRAW"
                 });
-                this.nextBuffer = new H({
+                this.nextBuffer = new Buffer({
                     gl: a,
                     target: "ARRAY_BUFFER",
                     usage: "STATIC_DRAW"
                 });
-                this.directionBuffer = new H({
+                this.directionBuffer = new Buffer({
                     gl: a,
                     target: "ARRAY_BUFFER",
                     usage: "STATIC_DRAW"
                 });
-                this.colorBuffer = new H({
+                this.colorBuffer = new Buffer({
                     gl: a,
                     target: "ARRAY_BUFFER",
                     usage: "STATIC_DRAW"
                 });
-                this.counterBuffer = new H({
+                this.counterBuffer = new Buffer({
                     gl: a,
                     target: "ARRAY_BUFFER",
                     usage: "STATIC_DRAW"
                 });
-                this.indexBuffer = new H({
+                this.indexBuffer = new Buffer({
                     gl: a,
                     target: "ELEMENT_ARRAY_BUFFER",
                     usage: "STATIC_DRAW"
@@ -14863,7 +14863,7 @@ default = Lb;
                     offset: 0
                 }];
                 b = b.concat(this.getCommonAttributes());
-                this.vertexArray = new va({
+                this.vertexArray = new VertexArray({
                     gl: a,
                     program: this.program,
                     attributes: b
@@ -14975,8 +14975,8 @@ default = Lb;
             }
         }]);
         return a
-    } (ba),
-    Qi = function(c) {
+    } (Layer),
+    TileLayer = function(c) {
         function a(b, c) {
             G(this, a);
             return R(this, (a.__proto__ || N(a)).call(this, b, c))
@@ -14994,23 +14994,23 @@ default = Lb;
                 this.gl = a;
                 var b = this.getOptions();
                 this.texture = null;
-                this.program = new V(this.gl, {
+                this.program = new Program(this.gl, {
                     vertexShader: "precision highp float;attribute vec3 a_pos;attribute vec2 a_texture_coord;uniform sampler2D uTerrain;uniform mat4 u_proj_matrix;uniform mat4 u_mv_matrix;varying vec2 v_texture_coord;void main(){v_texture_coord=a_texture_coord;vec3 pos=a_pos.xyz;\n#if defined(TERRAIN)\nvec4 terrainColor=texture2D(uTerrain,vec2(v_texture_coord.s,v_texture_coord.t));vec3 rgb=terrainColor.rgb*256.0;pos.z=-10000.0+((rgb.r*256.0*256.0+rgb.g*256.0+rgb.b)*0.1);pos.z=pos.z-60.0;\n#endif\nvec4 position=u_proj_matrix*u_mv_matrix*vec4(pos,1.0);gl_Position=position;}",
                     fragmentShader: "precision highp float;varying vec2 v_texture_coord;uniform sampler2D uTile;uniform bool uUseFilter;uniform vec4 uFilterColor;void main(){vec4 textureColor=texture2D(uTile,vec2(v_texture_coord.s,v_texture_coord.t));if(uUseFilter){textureColor=textureColor*uFilterColor;}gl_FragColor=textureColor;}",
                     defines: b.terrain ? ["TERRAIN"] : ""
                 },
                 this);
-                this.vertexBuffer = new H({
+                this.vertexBuffer = new Buffer({
                     gl: a,
                     target: "ARRAY_BUFFER",
                     usage: "STATIC_DRAW"
                 });
-                this.indexBuffer = new H({
+                this.indexBuffer = new Buffer({
                     gl: a,
                     target: "ELEMENT_ARRAY_BUFFER",
                     usage: "STATIC_DRAW"
                 });
-                this.vertexArray = new va({
+                this.vertexArray = new VertexArray({
                     gl: a,
                     program: this.program,
                     attributes: [{
@@ -15069,10 +15069,10 @@ default = Lb;
             value: function(a) {
                 var b = this,
                 c = this.getOptions();
-                c.tile ? c.terrain ? Ka(this.gl, c.terrain,
+                c.tile ? c.terrain ? loadTextureImage(this.gl, c.terrain,
                 function(d, e) {
                     b.terrainSampler = d;
-                    Ka(b.gl, c.tile,
+                    loadTextureImage(b.gl, c.tile,
                     function(c, d) {
                         b.texture = c;
                         a && a();
@@ -15082,7 +15082,7 @@ default = Lb;
                 {
                     TEXTURE_WRAP_S: "MIRRORED_REPEAT",
                     TEXTURE_WRAP_T: "MIRRORED_REPEAT"
-                }) : Ka(this.gl, c.tile,
+                }) : loadTextureImage(this.gl, c.tile,
                 function(c, d) {
                     b.texture = c;
                     a && a();
@@ -15119,7 +15119,7 @@ default = Lb;
             }
         }]);
         return a
-    } (ba),
+    } (Layer),
     Lc = function(c, a, b, d) {
         if (! (c instanceof a) || void 0 !== d && d in c) throw TypeError(b + ": incorrect invocation!");
         return c
@@ -15780,7 +15780,7 @@ default = Lb;
         }
     }),
     eg = Q(fj),
-    gj = function(c) {
+    IconLayer = function(c) {
         function a(b, c) {
             G(this, a);
             b = R(this, (a.__proto__ || N(a)).call(this, b, c));
@@ -15806,23 +15806,23 @@ default = Lb;
                 this.gl = a;
                 var b = this.getOptions();
                 this.texture = null;
-                this.program = new V(this.gl, {
+                this.program = new Program(this.gl, {
                     vertexShader: "precision highp float;attribute vec3 a_pos;attribute float a_corner;attribute vec2 a_size;attribute vec2 a_offset;attribute vec2 a_texture_coord;uniform mat4 u_matrix;uniform vec2 u_size;uniform vec2 u_offset;uniform float devicePixelRatio;varying vec2 v_texture_coord;vec3 transformCoord(vec3 coord,vec2 size,float corner){float x=coord.x;float y=coord.y;if(corner==1.0){x-=size[0];y+=size[1];}else if(corner==2.0){x+=size[0];y+=size[1];}else if(corner==3.0){x+=size[0];y-=size[1];}else{x-=size[0];y-=size[1];}return vec3(x,y,coord.z);}void main(){v_texture_coord=a_texture_coord;vec4 position=u_matrix*vec4(a_pos,1.0);vec3 screen=position.xyz/position.w;vec2 halfSize=a_size/MAPV_resolution*devicePixelRatio;vec3 current=transformCoord(screen,halfSize,a_corner);current.xy=current.xy-a_offset*2./MAPV_resolution*devicePixelRatio;gl_Position=vec4(current,1.0);}",
                     fragmentShader: "precision highp float;varying vec2 v_texture_coord;uniform sampler2D u_icon;uniform vec4 uSelectedColor;void main(){vec4 textureColor=texture2D(u_icon,vec2(v_texture_coord.x,1.0-v_texture_coord.y));if(textureColor.a==0.0){discard;}gl_FragColor=textureColor;\n#if defined(PICK)\nif(mapvIsPicked()){gl_FragColor=vec4(uSelectedColor.rgb,gl_FragColor.a);}\n#endif\n}",
                     defines: b.enablePicked ? ["PICK"] : []
                 },
                 this);
-                this.vertexBuffer = new H({
+                this.vertexBuffer = new Buffer({
                     gl: a,
                     target: "ARRAY_BUFFER",
                     usage: "STATIC_DRAW"
                 });
-                this.uvBuffer = new H({
+                this.uvBuffer = new Buffer({
                     gl: a,
                     target: "ARRAY_BUFFER",
                     usage: "STATIC_DRAW"
                 });
-                this.indexBuffer = new H({
+                this.indexBuffer = new Buffer({
                     gl: a,
                     target: "ELEMENT_ARRAY_BUFFER",
                     usage: "STATIC_DRAW"
@@ -15868,7 +15868,7 @@ default = Lb;
                     offset: 0
                 }];
                 b = b.concat(this.getCommonAttributes());
-                this.vertexArray = new va({
+                this.vertexArray = new VertexArray({
                     gl: a,
                     program: this.program,
                     attributes: b
@@ -15968,8 +15968,8 @@ default = Lb;
                 n = Ee(k);
                 for (l = 0; l < k.length; l++) p = k[l],
                 h.get(p.key) || h.set(p.key, p);
-                l = Kb(n.w);
-                n = Kb(n.h);
+                l = ceilPowerOfTwo(n.w);
+                n = ceilPowerOfTwo(n.h);
                 c.width = l;
                 c.height = n;
                 g.save();
@@ -16062,23 +16062,23 @@ default = Lb;
             key: "loadTexture",
             value: function() {
                 var a = this;
-                this.canvas ? Ka(this.gl, this.canvas,
+                this.canvas ? loadTextureImage(this.gl, this.canvas,
                 function(b) {
                     a.texture = b
                 }) : this.texture = null
             }
         }]);
         return a
-    } (ba),
-    hj = function(c) {
+    } (Layer),
+    PolygonLayer = function(c) {
         function a(b) {
             G(this, a);
             var c = R(this, (a.__proto__ || N(a)).call(this, b));
             b = c.getOptions();
-            c.shapeLayer = new Kc({
+            c.shapeLayer = new ShapeLayer({
                 enablePicked: b.enablePicked
             });
-            c.lineLayer = new Ef;
+            c.lineLayer = new LineLayer;
             c.children = [c.shapeLayer, c.lineLayer];
             return c
         }
@@ -16644,7 +16644,7 @@ default = Lb;
         MAT3: 9,
         MAT4: 16
     },
-    og = function(c) {
+    GltfLayer = function(c) {
         function a(b, c) {
             G(this, a);
             return R(this, (a.__proto__ || N(a)).call(this, b, c))
@@ -16707,7 +16707,7 @@ default = Lb;
             }
         }]);
         return a
-    } (ba),
+    } (Layer),
     vb = vb || {}; (function() {
         function c(a, c, e) {
             e = a.createShader(e);
@@ -16746,12 +16746,12 @@ default = Lb;
             for (var g = [], k = b.length, h = 0; h < k; ++h) g.push(a(b[h], d))
         }
     })();
-    var vj = function(c) {
+    var CarLineLayer = function(c) {
         function a(b) {
             G(this, a);
             var c = R(this, (a.__proto__ || N(a)).call(this, b));
             b = c.getOptions();
-            c.gltfLayer = new og({
+            c.gltfLayer = new GltfLayer({
                 url: b.url,
                 scale: b.scale
             });
@@ -17074,20 +17074,20 @@ default = Lb;
     ca.prototype.getLineJoin = function(c) {
         return ["miter", "bevel", "round"][c]
     };
-    var wj = function(c) {
+    var TrafficLayer = function(c) {
         function a(b) {
             G(this, a);
             b = R(this, (a.__proto__ || N(a)).call(this, b));
             b.autoUpdate = !0;
             b.getOptions();
-            var c = new Kf({
+            var c = new LineFlowLayer({
                 color: "rgba(257, 254, 47, 0.9)",
                 zoom: 18,
                 duration: .8,
                 interval: .2,
                 trailLength: .4
             }),
-            e = new Ff({
+            e = new WallSpriteLayer({
                 height: 5,
                 color: "rgba(257, 254, 47, 0.9)",
                 trailLength: 2,
@@ -17140,7 +17140,7 @@ default = Lb;
         }]);
         return a
     } (nb),
-    xj = function(c) {
+    HeatmapLayer = function(c) {
         function a(b, c) {
             G(this, a);
             b = R(this, (a.__proto__ || N(a)).call(this, b, c));
@@ -17167,42 +17167,42 @@ default = Lb;
                 this.gl = a;
                 var c = this.getOptions();
                 this.inverseMatrix = C.create(Float64Array);
-                this.frameBuffer = new wa(a);
+                this.frameBuffer = new FrameBufferObject(a);
                 this.webglLayer.map.onResize(function() {
-                    b.frameBuffer = new wa(a)
+                    b.frameBuffer = new FrameBufferObject(a)
                 });
                 this.circle = Pg(64);
-                this.circleTexture = rb(a, this.circle, {
+                this.circleTexture = createTexture(a, this.circle, {
                     TEXTURE_MAG_FILTER: "LINEAR",
                     TEXTURE_MIN_FILTER: "LINEAR",
                     TEXTURE_WRAP_S: "CLAMP_TO_EDGE",
                     TEXTURE_WRAP_T: "CLAMP_TO_EDGE"
                 });
-                this.intensity = new na({
+                this.intensity = new Intensity({
                     gradient: c.gradient
                 });
-                this.paletteTexture = rb(a, this.intensity.paletteCtx.canvas, {
+                this.paletteTexture = createTexture(a, this.intensity.paletteCtx.canvas, {
                     TEXTURE_MAG_FILTER: "LINEAR",
                     TEXTURE_MIN_FILTER: "LINEAR",
                     TEXTURE_WRAP_S: "CLAMP_TO_EDGE",
                     TEXTURE_WRAP_T: "CLAMP_TO_EDGE"
                 });
-                this.offlineProgram = new V(this.gl, {
+                this.offlineProgram = new Program(this.gl, {
                     vertexShader: "uniform mat4 u_matrix;uniform mat4 pointToPixelMatrix;uniform mat4 pixelToViewMatrix;uniform mat4 projectionMatrix;uniform int unit;uniform float size;uniform float max;uniform float min;attribute vec3 aPos;attribute vec2 aOffset;attribute float aCount;varying vec2 vOffset;varying float vCount;varying vec3 vPosition;void main(){vOffset=aOffset;vCount=(aCount-min)/(max-min);if(unit==1){vec2 pos=(pointToPixelMatrix*vec4(aPos.xy,0.0,1.0)).xy+aOffset.xy*size/2.0;gl_Position=projectionMatrix*pixelToViewMatrix*vec4(pos,0.0,1.0);}else{vec2 pos=aPos.xy+aOffset.xy*size;gl_Position=u_matrix*vec4(pos,0.0,1.0);}vPosition=vec3(gl_Position.z/gl_Position.w);}",
                     fragmentShader: "varying vec2 vOffset;varying float vCount;varying vec3 vPosition;uniform sampler2D uCircle;void main(){vec4 circle=texture2D(uCircle,(vOffset+1.0)/2.0);float intensity=circle.a*vCount;if(intensity<=0.0){discard;}gl_FragColor=vec4(vPosition,intensity);}"
                 },
                 this);
-                this.offlineBuffer = new H({
+                this.offlineBuffer = new Buffer({
                     gl: a,
                     target: "ARRAY_BUFFER",
                     usage: "STATIC_DRAW"
                 });
-                this.offlineIndexBuffer = new H({
+                this.offlineIndexBuffer = new Buffer({
                     gl: a,
                     target: "ELEMENT_ARRAY_BUFFER",
                     usage: "STATIC_DRAW"
                 });
-                this.offlineVertexArray = new va({
+                this.offlineVertexArray = new VertexArray({
                     gl: a,
                     program: this.offlineProgram,
                     attributes: [{
@@ -17230,22 +17230,22 @@ default = Lb;
                         offset: 20
                     }]
                 });
-                this.indexBuffer = new H({
+                this.indexBuffer = new Buffer({
                     gl: a,
                     target: "ELEMENT_ARRAY_BUFFER",
                     usage: "STATIC_DRAW"
                 });
-                this.program = new V(this.gl, {
+                this.program = new Program(this.gl, {
                     vertexShader: "attribute vec2 aPos;varying vec2 vPos;uniform float uHeight;uniform mat4 pixelToViewMatrix;uniform mat4 projectionMatrix;uniform sampler2D u_sampler;uniform mat4 inverseMatrix;void main(){vPos=aPos;if(uHeight<=0.0){gl_Position=vec4(aPos,0.0,1.0);}else{vec4 gray=texture2D(u_sampler,(aPos+1.0)/2.0);vec4 m0=inverseMatrix*vec4(aPos.xy,0.0,1.0);vec4 m1=inverseMatrix*vec4(aPos.xy,1.0,1.0);m0/=m0.w;m1/=m1.w;vec4 pixel=m0+(-m0.z/(m1.z-m0.z))*(m1-m0);pixel.z=uHeight*gray.a;gl_Position=projectionMatrix*pixelToViewMatrix*vec4(pixel.xyz,1.0);}}",
                     fragmentShader: "uniform sampler2D u_sampler;uniform sampler2D u_samplerPalette;uniform float uHeight;varying vec2 vPos;void main(){vec4 gray=texture2D(u_sampler,(vPos+1.0)/2.0);float grayAlpha=gray.a;if(grayAlpha<=0.0){discard;}vec4 color=texture2D(u_samplerPalette,vec2(grayAlpha,1.0));gl_FragColor=vec4(color.rgb,grayAlpha);}"
                 },
                 this);
-                this.buffer = new H({
+                this.buffer = new Buffer({
                     gl: a,
                     target: "ARRAY_BUFFER",
                     usage: "STATIC_DRAW"
                 });
-                this.vertexArray = new va({
+                this.vertexArray = new VertexArray({
                     gl: a,
                     program: this.program,
                     attributes: [{
@@ -17274,9 +17274,9 @@ default = Lb;
             key: "onOptionsChanged",
             value: function(a, c) {
                 var b = this.gl;
-                b && a.gradient !== c.gradient && (this.intensity = new na({
+                b && a.gradient !== c.gradient && (this.intensity = new Intensity({
                     gradient: a.gradient
-                }), this.paletteTexture = rb(b, this.intensity.paletteCtx.canvas, {
+                }), this.paletteTexture = createTexture(b, this.intensity.paletteCtx.canvas, {
                     TEXTURE_MAG_FILTER: "LINEAR",
                     TEXTURE_MIN_FILTER: "LINEAR",
                     TEXTURE_WRAP_S: "CLAMP_TO_EDGE",
@@ -17373,7 +17373,7 @@ default = Lb;
             }
         }]);
         return a
-    } (ba),
+    } (Layer),
     yj = function() {
         function c(a) {
             G(this, c);
@@ -17536,7 +17536,7 @@ default = Lb;
         }]);
         return c
     } (),
-    zj = function() {
+    View = function() {
         function c(a) {
             var b = this;
             G(this, c);
@@ -17545,12 +17545,12 @@ default = Lb;
             };
             T(this.options, a);
             var d = a.pointOffset;
-            this.webglLayer = a.webglLayer || new Hf(a.map, this.options);
+            this.webglLayer = a.webglLayer || new WebglLayer(a.map, this.options);
             this.layerManager = new yj({
                 autoUpdate: this.options.autoUpdate,
                 webglLayer: this.webglLayer
             });
-            this.effectManager = new sf(this.webglLayer.gl);
+            this.effectManager = new EffectManager(this.webglLayer.gl);
             this.webglRender = {
                 render: function() {}
             };
@@ -17670,64 +17670,64 @@ default = Lb;
         var a = document.getElementsByTagName("script")[0];
         a.parentNode.insertBefore(c, a)
     })();
-    x.View = zj;
-    x.GridLayer = Bf;
-    x.HeatGridLayer = ni;
-    x.ShapeLayer = Kc;
-    x.SimpleLineLayer = Cf;
-    x.LineLayer = Ef;
-    x.ELineLayer = ri;
-    x.WallSpriteLayer = Ff;
-    x.LinePointLayer = ob;
-    x.WallLayer = xi;
-    x.WallTripLayer = zi;
-    x.HeatLineLayer = Ai;
-    x.HoneycombLayer = Ci;
-    x.WebglLayer = Hf;
-    x.PointLayer = Md;
-    x.GroundRippleLayer = Ii;
-    x.RippleLayer = Ji;
-    x.SparkLayer = Ki;
-    x.ClusterLayer = Li;
-    x.HeatPointLayer = Mi;
-    x.ShapeLineLayer = Ni;
-    x.PointTripLayer = Oi;
-    x.LineTripLayer = Pi;
-    x.LineFlowLayer = Kf;
-    x.TileLayer = Qi;
-    x.IconLayer = gj;
-    x.PolygonLayer = hj;
-    x.CarLineLayer = vj;
-    x.Layer = ba;
-    x.TextLayer = Ld;
-    x.TrafficLayer = wj;
-    x.GltfLayer = og;
-    x.HeatmapLayer = xj;
-    x.BlurEffect = ci;
-    x.BloomEffect = di;
-    x.BrightEffect = ei;
-    x.DepthEffect = fi;
-    x.EffectManager = sf;
-    x.getContext = ee;
-    x.createTexture = rb;
-    x.loadTextureImage = Ka;
-    x.FrameBufferObject = wa;
-    x.Program = V;
-    x.StateManager = rf;
-    x.Buffer = H;
-    x.VertexArray = va;
-    x.CommonLayer = Cd;
-    x.MercatorProjection = ra;
-    x.Canvas = Yc;
-    x.Intensity = na;
-    x.BezierCurve = Ra;
-    x.GeodesicCurve = Ya;
-    x.OdCurve = ai;
-    x.toRadian = la;
-    x.toAngle = Uc;
-    x.ceilPowerOfTwo = Kb;
-    x.floorPowerOfTwo = Vc;
-    x.approximatelyEqual = Wc;
+    x.View = View;
+    x.GridLayer = GridLayer;
+    x.HeatGridLayer = HeatGridLayer;
+    x.ShapeLayer = ShapeLayer;
+    x.SimpleLineLayer = SimpleLineLayer;
+    x.LineLayer = LineLayer;
+    x.ELineLayer = ELineLayer;
+    x.WallSpriteLayer = WallSpriteLayer;
+    x.LinePointLayer = LinePointLayer;
+    x.WallLayer = WallLayer;
+    x.WallTripLayer = WallTripLayer;
+    x.HeatLineLayer = HeatLineLayer;
+    x.HoneycombLayer = HoneycombLayer;
+    x.WebglLayer = WebglLayer;
+    x.PointLayer = PointLayer;
+    x.GroundRippleLayer = GroundRippleLayer;
+    x.RippleLayer = RippleLayer;
+    x.SparkLayer = SparkLayer;
+    x.ClusterLayer = ClusterLayer;
+    x.HeatPointLayer = HeatPointLayer;
+    x.ShapeLineLayer = ShapeLineLayer;
+    x.PointTripLayer = PointTripLayer;
+    x.LineTripLayer = LineTripLayer;
+    x.LineFlowLayer = LineFlowLayer;
+    x.TileLayer = TileLayer;
+    x.IconLayer = IconLayer;
+    x.PolygonLayer = PolygonLayer;
+    x.CarLineLayer = CarLineLayer;
+    x.Layer = Layer;
+    x.TextLayer = TextLayer;
+    x.TrafficLayer = TrafficLayer;
+    x.GltfLayer = GltfLayer;
+    x.HeatmapLayer = HeatmapLayer;
+    x.BlurEffect = BlurEffect;
+    x.BloomEffect = BloomEffect;
+    x.BrightEffect = BrightEffect;
+    x.DepthEffect = DepthEffect;
+    x.EffectManager = EffectManager;
+    x.getContext = getContext;
+    x.createTexture = createTexture;
+    x.loadTextureImage = loadTextureImage;
+    x.FrameBufferObject = FrameBufferObject;
+    x.Program = Program;
+    x.StateManager = StateManager;
+    x.Buffer = Buffer;
+    x.VertexArray = VertexArray;
+    x.CommonLayer = CommonLayer;
+    x.MercatorProjection = MercatorProjection;
+    x.Canvas = Canvas;
+    x.Intensity = Intensity;
+    x.BezierCurve = BezierCurve;
+    x.GeodesicCurve = GeodesicCurve;
+    x.OdCurve = OdCurve;
+    x.toRadian = toRadian;
+    x.toAngle = toAngle;
+    x.ceilPowerOfTwo = ceilPowerOfTwo;
+    x.floorPowerOfTwo = floorPowerOfTwo;
+    x.approximatelyEqual = approximatelyEqual;
     x.__moduleExports = Da;
     x.vec4 = Fa;
     x.vec3 = K;
