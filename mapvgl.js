@@ -179,7 +179,7 @@ function(x) {
     function getContext(f) {
         for (var c = ["webgl2", "experimental-webgl2", "webgl", "experimental-webgl"], a, b = 0; b < c.length; b++) try {
             if (a = f.getContext(c[b], {
-                premultipliedAlpha: !1
+                premultipliedAlpha: false
             })) break
         } catch(d) {}
         return a
@@ -194,7 +194,7 @@ function(x) {
         a);
         var b = f.createTexture();
         f.bindTexture(f.TEXTURE_2D, b);
-        f.pixelStorei(f.UNPACK_FLIP_Y_WEBGL, !0);
+        f.pixelStorei(f.UNPACK_FLIP_Y_WEBGL, true);
         f.texImage2D(f.TEXTURE_2D, 0, f.RGBA, f.RGBA, f.UNSIGNED_BYTE, c);
         for (var d in a) f.texParameteri(f.TEXTURE_2D, f[d], f[a[d]]);
         f.bindTexture(f.TEXTURE_2D, null);
@@ -224,7 +224,7 @@ function(x) {
         a = a || 2;
         var b = c && c.length,
         d = b ? c[0] * a: f.length,
-        e = fe(f, 0, d, a, !0),
+        e = fe(f, 0, d, a, true),
         g = [];
         if (!e || e.next === e.prev) return g;
         var k;
@@ -236,8 +236,8 @@ function(x) {
             for (l = c.length; n < l; n++) {
                 var p = c[n] * h;
                 var m = n < l - 1 ? c[n + 1] * h: f.length;
-                p = fe(f, p, m, h, !1);
-                p === p.next && (p.steiner = !0);
+                p = fe(f, p, m, h, false);
+                p === p.next && (p.steiner = true);
                 b.push(ug(p))
             }
             b.sort(vg);
@@ -274,13 +274,13 @@ function(x) {
         if (!f) return f;
         c || (c = f);
         do {
-            var a = !1;
+            var a = false;
             if (f.steiner || !fb(f, f.next) && 0 !== ma(f.prev, f, f.next)) f = f.next;
             else {
                 Ob(f);
                 f = c = f.prev;
                 if (f === f.next) break;
-                a = !0
+                a = true
             }
         } while ( a || f !== c );
         return c
@@ -319,16 +319,16 @@ function(x) {
                 h = f.prev;
                 u = f.next;
                 if (e) r = xg(f, b, d, e);
-                else a: if (r = f, n = r.prev, p = r, q = r.next, 0 <= ma(n, p, q)) r = !1;
+                else a: if (r = f, n = r.prev, p = r, q = r.next, 0 <= ma(n, p, q)) r = false;
                 else {
                     for (l = r.next.next; l !== r.prev;) {
                         if (sb(n.x, n.y, p.x, p.y, q.x, q.y, l.x, l.y) && 0 <= ma(l.prev, l, l.next)) {
-                            r = !1;
+                            r = false;
                             break a
                         }
                         l = l.next
                     }
-                    r = !0
+                    r = true
                 }
                 if (r) c.push(h.i / a),
                 c.push(f.i / a),
@@ -360,18 +360,18 @@ function(x) {
                                             r = h;
                                             do {
                                                 if (r.i !== h.i && r.next.i !== h.i && r.i !== u.i && r.next.i !== u.i && ie(r, r.next, h, u)) {
-                                                    r = !0;
+                                                    r = true;
                                                     break b
                                                 }
                                                 r = r.next
                                             } while ( r !== h );
-                                            r = !1
+                                            r = false
                                         }
                                         r = !r
                                     }
                                     if (r = r && Pb(h, u) && Pb(u, h)) {
                                         r = h;
-                                        n = !1;
+                                        n = false;
                                         p = (h.x + u.x) / 2;
                                         u = (h.y + u.y) / 2;
                                         do r.y > u !== r.next.y > u && r.next.y !== r.y && p < (r.next.x - r.x) * (u - r.y) / (r.next.y - r.y) + r.x && (n = !n),
@@ -490,7 +490,7 @@ function(x) {
         return f.x === c.x && f.y === c.y
     }
     function ie(f, c, a, b) {
-        return fb(f, c) && fb(a, b) || fb(f, b) && fb(a, c) ? !0 : 0 < ma(f, c, a) !== 0 < ma(f, c, b) && 0 < ma(a, b, f) !== 0 < ma(a, b, c)
+        return fb(f, c) && fb(a, b) || fb(f, b) && fb(a, c) ? true : 0 < ma(f, c, a) !== 0 < ma(f, c, b) && 0 < ma(a, b, f) !== 0 < ma(a, b, c)
     }
     function Pb(f, c) {
         return 0 > ma(f.prev, f, f.next) ? 0 <= ma(f, c, f.next) && 0 <= ma(f, f.prev, c) : 0 > ma(f, c, f.prev) || 0 > ma(f, f.next, c)
@@ -526,7 +526,7 @@ function(x) {
         this.x = c;
         this.y = a;
         this.nextZ = this.prevZ = this.z = this.next = this.prev = null;
-        this.steiner = !1
+        this.steiner = false
     }
     function $c(f, c, a, b) {
         for (var d = 0,
@@ -551,7 +551,7 @@ function(x) {
         this.initData()
     }
     function ke() {
-        cd = !0;
+        cd = true;
         for (var f = 0; 64 > f; ++f) La[f] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/" [f],
         Aa["ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".charCodeAt(f)] = f;
         Aa[45] = 62;
@@ -690,7 +690,7 @@ function(x) {
         "string" !== typeof f && (f = "" + f);
         var a = f.length;
         if (0 === a) return 0;
-        for (var b = !1;;) switch (c) {
+        for (var b = false;;) switch (c) {
         case "ascii":
         case "latin1":
         case "binary":
@@ -711,11 +711,11 @@ function(x) {
         default:
             if (b) return oc(f).length;
             c = ("" + c).toLowerCase();
-            b = !0
+            b = true
         }
     }
     function Bg(f, c, a) {
-        var b = !1;
+        var b = false;
         if (void 0 === c || 0 > c) c = 0;
         if (c > this.length) return "";
         if (void 0 === a || a > this.length) a = this.length;
@@ -762,7 +762,7 @@ function(x) {
         default:
             if (b) throw new TypeError("Unknown encoding: " + f);
             f = (f + "").toLowerCase();
-            b = !0
+            b = true
         }
     }
     function hb(f, c, a) {
@@ -806,9 +806,9 @@ function(x) {
         } else - 1 !== b && (a -= a - b),
         b = -1;
         else for (a + h > k && (a = k - h); 0 <= a; a--) {
-            k = !0;
+            k = true;
             for (b = 0; b < h; b++) if (e(f, a + b) !== e(c, b)) {
-                k = !1;
+                k = false;
                 break
             }
             if (k) return a
@@ -1041,17 +1041,17 @@ function(x) {
     function Ee(f) {
         var c = 0,
         a = 0,
-        b = !0,
-        d = !1,
+        b = true,
+        d = false,
         e = void 0;
         try {
-            for (var g = gd(f), k; ! (b = (k = g.next()).done); b = !0) {
+            for (var g = gd(f), k; ! (b = (k = g.next()).done); b = true) {
                 var h = k.value;
                 c += h.w * h.h;
                 a = Math.max(a, h.w)
             }
         } catch(u) {
-            d = !0,
+            d = true,
             e = u
         } finally {
             try { ! b && g.
@@ -1071,11 +1071,11 @@ function(x) {
             h: Infinity
         }];
         d = b = 0;
-        e = !0;
-        g = !1;
+        e = true;
+        g = false;
         k = void 0;
         try {
-            for (var l = gd(f), n; ! (e = (n = l.next()).done); e = !0) for (var p = n.value,
+            for (var l = gd(f), n; ! (e = (n = l.next()).done); e = true) for (var p = n.value,
             m = a.length - 1; 0 <= m; m--) {
                 var q = a[m];
                 if (! (p.w > q.w || p.h > q.h)) {
@@ -1096,7 +1096,7 @@ function(x) {
                 }
             }
         } catch(u) {
-            g = !0,
+            g = true,
             k = u
         } finally {
             try { ! e && l.
@@ -1186,7 +1186,7 @@ function(x) {
     function Lg(f, c) {
         var a = new XMLHttpRequest;
         a.overrideMimeType("application/json");
-        a.open("GET", f, !0);
+        a.open("GET", f, true);
         a.onreadystatechange = function() {
             4 == a.readyState && "200" == a.status && c(a.responseText, this)
         };
@@ -1195,7 +1195,7 @@ function(x) {
     function Mg(f, c) {
         var a = new XMLHttpRequest;
         a.responseType = "arraybuffer";
-        a.open("GET", f, !0);
+        a.open("GET", f, true);
         a.onreadystatechange = function() {
             if (4 == a.readyState && "200" == a.status) {
                 var b = a.response;
@@ -1318,7 +1318,7 @@ function(x) {
         a.enable(a.CULL_FACE);
         a.cullFace(a.BACK);
         a.frontFace(a.CCW);
-        var r = !0;
+        var r = true;
         a.enable(a.DEPTH_TEST);
         a.depthFunc(a.LEQUAL);
         var u = u || {},
@@ -1351,9 +1351,9 @@ function(x) {
                 a.activeTexture(a.TEXTURE0 + 29);
                 a.bindTexture(a.TEXTURE_2D, null);
                 a.uniform4fv(y.uniformLocations.baseColorFactor, d);
-                a.uniformMatrix4fv(y.uniformLocations.MV, !1, z);
-                a.uniformMatrix4fv(y.uniformLocations.MVP, !1, v);
-                a.uniformMatrix4fv(y.uniformLocations.MVNormal, !1, B);
+                a.uniformMatrix4fv(y.uniformLocations.MV, false, z);
+                a.uniformMatrix4fv(y.uniformLocations.MVP, false, v);
+                a.uniformMatrix4fv(y.uniformLocations.MVNormal, false, B);
                 a.bindVertexArray(b.vertexArray);
                 null !== b.indices ? a.drawElements(b.mode, b.indicesLength, b.indicesComponentType, b.indicesOffset) : a.drawArrays(b.mode, b.drawArraysOffset, b.drawArraysCount);
                 a.bindVertexArray(null)
@@ -1498,7 +1498,7 @@ function(x) {
         this.options = f = f || {};
         f.colors = f.colors || ["rgba(0,192,73,0.99609375)", "rgba(242,48,48,0.99609375)", "rgba(255,159,25,0.99609375)"];
         var c = f.colors;
-        this.drawTogether = !0;
+        this.drawTogether = true;
         this.parseColors(c);
         this.tileSize = 256;
         this.ratio = window.devicePixelRatio;
@@ -1515,7 +1515,7 @@ function(x) {
         d.shadowColor = "black";
         d.shadowOffsetX = d.shadowOffsetY = 1E4;
         d.beginPath();
-        d.arc(a - 1E4, a - 1E4, f, 0, 2 * Math.PI, !0);
+        d.arc(a - 1E4, a - 1E4, f, 0, 2 * Math.PI, true);
         d.closePath();
         d.fill();
         return b
@@ -1589,7 +1589,7 @@ function(x) {
             } else for (; d > b; b++) if ((f || b in c) && c[b] === a) return f || b || 0;
             return ! f && -1
         }
-    } (!1),
+    } (false),
     $g = kd("IE_PROTO"),
     He = function(f, c) {
         f = Oa(f);
@@ -1672,7 +1672,7 @@ function(x) {
     za = {
         f: Ca ? Object.defineProperty: function(f, c, a) {
             qa(f);
-            c = Sb(c, !0);
+            c = Sb(c, true);
             qa(a);
             if (Ie) try {
                 return ah(f, c, a)
@@ -1760,7 +1760,7 @@ function(x) {
     ch = O(function(f) {
         f.exports = {
             "default": bh,
-            __esModule: !0
+            __esModule: true
         }
     }),
     Ea = Q(ch),
@@ -1790,7 +1790,7 @@ function(x) {
     fh = O(function(f) {
         f.exports = {
             "default": eh,
-            __esModule: !0
+            __esModule: true
         }
     }),
     T = Q(fh),
@@ -1811,12 +1811,12 @@ function(x) {
     Tb = O(function(f) {
         f.exports = {
             "default": hh,
-            __esModule: !0
+            __esModule: true
         }
     }),
     N = Q(Tb),
     ih = O(function(f, c) {
-        c.__esModule = !0;
+        c.__esModule = true;
         c.
     default = function(a, b) {
             if (! (a instanceof b)) throw new TypeError("Cannot call a class as a function");
@@ -1833,12 +1833,12 @@ function(x) {
     Ua = O(function(f) {
         f.exports = {
             "default": kh,
-            __esModule: !0
+            __esModule: true
         }
     }),
     ea = Q(Ua),
     lh = O(function(f, c) {
-        c.__esModule = !0;
+        c.__esModule = true;
         var a = Ua && Ua.__esModule ? Ua: {
         default:
             Ua
@@ -1848,9 +1848,9 @@ function(x) {
             function b(b, c) {
                 for (var d = 0; d < c.length; d++) {
                     var e = c[d];
-                    e.enumerable = e.enumerable || !1;
-                    e.configurable = !0;
-                    "value" in e && (e.writable = !0); (0, a.
+                    e.enumerable = e.enumerable || false;
+                    e.configurable = true;
+                    "value" in e && (e.writable = true); (0, a.
                 default)(b, e.key, e)
                 }
             }
@@ -1906,7 +1906,7 @@ function(x) {
     Me = ia("toStringTag"),
     kb = function(f, c, a) {
         f && !Y(f = a ? f: f.prototype, Me) && oh(f, Me, {
-            configurable: !0,
+            configurable: true,
             value: c
         })
     },
@@ -1935,15 +1935,15 @@ function(x) {
         };
         var k = c + " Iterator",
         h = "values" == d,
-        l = !1,
+        l = false,
         n = f.prototype,
         p = n[od] || n["@@iterator"] || d && n[d],
         m = p || b(d),
         q = d ? h ? b("entries") : m: void 0,
         r = "Array" == c ? n.entries || p: p,
         u;
-        r && (f = Ke(r.call(new f)), f !== Object.prototype && f.next && kb(f, k, !0));
-        h && p && "values" !== p.name && (l = !0, m = function() {
+        r && (f = Ke(r.call(new f)), f !== Object.prototype && f.next && kb(f, k, true));
+        h && p && "values" !== p.name && (l = true, m = function() {
             return p.call(this)
         });
         g && (pd || l || !n[od]) && Ta(n, od, m);
@@ -1970,7 +1970,7 @@ function(x) {
             var e = c.charCodeAt(a);
             return 55296 > e || 56319 < e || a + 1 === b || 56320 > (d = c.charCodeAt(a + 1)) || 57343 < d ? f ? c.charAt(a) : e: f ? c.slice(a, a + 2) : (e - 55296 << 10) + (d - 56320) + 65536
         }
-    } (!0);
+    } (true);
     qd(String, "String",
     function(f) {
         this._t = String(f);
@@ -1981,13 +1981,13 @@ function(x) {
         c = this._i;
         if (c >= f.length) return {
             value: void 0,
-            done: !0
+            done: true
         };
         f = rh(f, c);
         this._i += f.length;
         return {
             value: f,
-            done: !1
+            done: false
         }
     });
     var cb = function(f, c) {
@@ -2024,7 +2024,7 @@ function(x) {
     Ub = O(function(f) {
         f.exports = {
             "default": sh,
-            __esModule: !0
+            __esModule: true
         }
     });
     Q(Ub);
@@ -2049,7 +2049,7 @@ function(x) {
         },
         k = f.exports = {
             KEY: c,
-            NEED: !1,
+            NEED: false,
             fastKey: function(a, b) {
                 if (!oa(a)) return "symbol" == typeof a ? a: ("string" == typeof a ? "S": "P") + a;
                 if (!Y(a, c)) {
@@ -2104,7 +2104,7 @@ function(x) {
     Ec = {
         f: Ca ? Ve: function(f, c) {
             f = Oa(f);
-            c = Sb(c, !0);
+            c = Sb(c, true);
             if (Ie) try {
                 return Ve(f, c)
             } catch(a) {}
@@ -2158,11 +2158,11 @@ function(x) {
     Hc = function(f, c, a) {
         f === Ga && Hc(Wb, c, a);
         qa(f);
-        c = Sb(c, !0);
+        c = Sb(c, true);
         qa(a);
-        return Y(Va, c) ? (a.enumerable ? (Y(f, ua) && f[ua][c] && (f[ua][c] = !1), a = bb(a, {
-            enumerable: ab(0, !1)
-        })) : (Y(f, ua) || lb(f, ua, ab(1, {})), f[ua][c] = !0), yd(f, c, a)) : lb(f, c, a)
+        return Y(Va, c) ? (a.enumerable ? (Y(f, ua) && f[ua][c] && (f[ua][c] = false), a = bb(a, {
+            enumerable: ab(0, false)
+        })) : (Y(f, ua) || lb(f, ua, ab(1, {})), f[ua][c] = true), yd(f, c, a)) : lb(f, c, a)
     },
     $e = function(f, c) {
         qa(f);
@@ -2181,14 +2181,14 @@ function(x) {
         return f
     },
     yh = function(f) {
-        var c = xh.call(this, f = Sb(f, !0));
-        return this === Ga && Y(Va, f) && !Y(Wb, f) ? !1 : c || !Y(this, f) || !Y(Va, f) || Y(this, ua) && this[ua][f] ? c: !0
+        var c = xh.call(this, f = Sb(f, true));
+        return this === Ga && Y(Va, f) && !Y(Wb, f) ? false : c || !Y(this, f) || !Y(Va, f) || Y(this, ua) && this[ua][f] ? c: true
     },
     af = function(f, c) {
         f = Oa(f);
-        c = Sb(c, !0);
+        c = Sb(c, true);
         if (f !== Ga || !Y(Va, c) || Y(Wb, c)) {
-            var a = We(f, c); ! a || !Y(Va, c) || Y(f, ua) && f[ua][c] || (a.enumerable = !0);
+            var a = We(f, c); ! a || !Y(Va, c) || Y(f, ua) && f[ua][c] || (a.enumerable = true);
             return a
         }
     },
@@ -2208,11 +2208,11 @@ function(x) {
         var f = vc(0 < arguments.length ? arguments[0] : void 0),
         c = function(a) {
             this === Ga && c.call(Wb, a);
-            Y(this, ua) && Y(this[ua], f) && (this[ua][f] = !1);
+            Y(this, ua) && Y(this[ua], f) && (this[ua][f] = false);
             yd(this, f, ab(1, a))
         };
         Ca && xd && yd(Ga, f, {
-            configurable: !0,
+            configurable: true,
             set: c
         });
         return Ze(f)
@@ -2237,10 +2237,10 @@ function(x) {
             for (var c in Vb) if (Vb[c] === f) return c
         },
         useSetter: function() {
-            xd = !0
+            xd = true
         },
         useSimple: function() {
-            xd = !1
+            xd = false
         }
     });
     F(F.S + F.F * !yb, "Object", {
@@ -2272,20 +2272,20 @@ function(x) {
     });
     ta.prototype[Ye] || Ta(ta.prototype, Ye, ta.prototype.valueOf);
     kb(ta, "Symbol");
-    kb(Math, "Math", !0);
-    kb(P.JSON, "JSON", !0);
+    kb(Math, "Math", true);
+    kb(P.JSON, "JSON", true);
     ud("asyncIterator");
     ud("observable");
     var zh = X.Symbol,
     Xb = O(function(f) {
         f.exports = {
             "default": zh,
-            __esModule: !0
+            __esModule: true
         }
     }),
     hf = Q(Xb),
     zb = O(function(f, c) {
-        c.__esModule = !0;
+        c.__esModule = true;
         f = Ub && Ub.__esModule ? Ub: {
         default:
             Ub
@@ -2320,7 +2320,7 @@ function(x) {
     }),
     qb = Q(zb),
     Ah = O(function(f, c) {
-        c.__esModule = !0;
+        c.__esModule = true;
         var a = zb && zb.__esModule ? zb: {
         default:
             zb
@@ -2347,12 +2347,12 @@ function(x) {
     Yb = O(function(f) {
         f.exports = {
             "default": Dh,
-            __esModule: !0
+            __esModule: true
         }
     }),
     da = Q(Yb),
     Eh = O(function(f, c) {
-        c.__esModule = !0;
+        c.__esModule = true;
         var a = Tb && Tb.__esModule ? Tb: {
         default:
             Tb
@@ -2384,7 +2384,7 @@ function(x) {
             a(f, []),
             c = !(f instanceof Array)
         } catch(b) {
-            c = !0
+            c = true
         }
         return function(b, d) {
             qa(b);
@@ -2393,7 +2393,7 @@ function(x) {
             return b
         }
     } ({},
-    !1) : void 0);
+    false) : void 0);
     F(F.S, "Object", {
         setPrototypeOf: Fh
     });
@@ -2401,7 +2401,7 @@ function(x) {
     jf = O(function(f) {
         f.exports = {
             "default": Gh,
-            __esModule: !0
+            __esModule: true
         }
     });
     Q(jf);
@@ -2415,7 +2415,7 @@ function(x) {
     kf = O(function(f) {
         f.exports = {
             "default": Ih,
-            __esModule: !0
+            __esModule: true
         }
     }),
     Jh = Q(kf),
@@ -2426,7 +2426,7 @@ function(x) {
                 a
             }
         }
-        c.__esModule = !0;
+        c.__esModule = true;
         var b = a(jf),
         d = a(kf),
         e = a(zb);
@@ -2438,9 +2438,9 @@ function(x) {
         default)(c && c.prototype, {
                 constructor: {
                     value: a,
-                    enumerable: !1,
-                    writable: !0,
-                    configurable: !0
+                    enumerable: false,
+                    writable: true,
+                    configurable: true
                 }
             });
             c && (b.
@@ -2481,7 +2481,7 @@ function(x) {
     Zb = O(function(f) {
         f.exports = {
             "default": Oh,
-            __esModule: !0
+            __esModule: true
         }
     });
     Q(Zb);
@@ -2497,12 +2497,12 @@ function(x) {
     $b = O(function(f) {
         f.exports = {
             "default": Qh,
-            __esModule: !0
+            __esModule: true
         }
     }),
     gd = Q($b),
     Rh = O(function(f, c) {
-        c.__esModule = !0;
+        c.__esModule = true;
         var a = Zb && Zb.__esModule ? Zb: {
         default:
             Zb
@@ -2518,14 +2518,14 @@ function(x) {
                 if ((0, a.
             default)(Object(d))) {
                     var g = [],
-                    e = !0,
-                    h = !1,
+                    e = true,
+                    h = false,
                     f = void 0;
                     try {
                         for (var n = (0, b.
-                    default)(d), p; ! (e = (p = n.next()).done) && (g.push(p.value), !c || g.length !== c); e = !0);
+                    default)(d), p; ! (e = (p = n.next()).done) && (g.push(p.value), !c || g.length !== c); e = true);
                     } catch(m) {
-                        h = !0,
+                        h = true,
                         f = m
                     } finally {
                         try {
@@ -2553,20 +2553,20 @@ function(x) {
     mf = ia("iterator"),
     nf = Array.prototype,
     Bd = ia("iterator"),
-    of = !1;
+    of = false;
     try { [7][Bd]()["return"] = function() {
-            of = !0
+            of = true
         }
     } catch(f) {}
     var pf = function(f, c) {
         if (!c && !of) return ! 1;
-        var a = !1;
+        var a = false;
         try {
             c = [7];
             var b = c[Bd]();
             b.next = function() {
                 return {
-                    done: a = !0
+                    done: a = true
                 }
             };
             c[Bd] = function() {
@@ -2589,7 +2589,7 @@ function(x) {
             e && (d = ka(d, 2 < b ? arguments[2] : void 0, 2));
             if (void 0 != k && (a != Array || void 0 === k || Pa.Array !== k && nf[mf] !== k)) for (c = k.call(c), a = new a; ! (h = c.next()).done; g++) b = a,
             k = g,
-            h = e ? lf(c, d, [h.value, g], !0) : h.value,
+            h = e ? lf(c, d, [h.value, g], true) : h.value,
             k in b ? za.f(b, k, ab(0, h)) : b[k] = h;
             else for (b = uc(c.length), a = new a(b); b > g; g++) {
                 k = a;
@@ -2605,12 +2605,12 @@ function(x) {
     ac = O(function(f) {
         f.exports = {
             "default": Sh,
-            __esModule: !0
+            __esModule: true
         }
     }),
     Th = Q(ac),
     Uh = O(function(f, c) {
-        c.__esModule = !0;
+        c.__esModule = true;
         var a = ac && ac.__esModule ? ac: {
         default:
             ac
@@ -2638,7 +2638,7 @@ function(x) {
     Xh = O(function(f) {
         f.exports = {
             "default": Wh,
-            __esModule: !0
+            __esModule: true
         }
     }),
     be = Q(Xh),
@@ -2651,7 +2651,7 @@ function(x) {
     Zh = O(function(f) {
         f.exports = {
             "default": Yh,
-            __esModule: !0
+            __esModule: true
         }
     }),
     sg = Q(Zh),
@@ -2811,7 +2811,7 @@ function(x) {
         b = f.exports = function(b) {
             for (var d = [], g = 0, k = b.length; g < k; g++) {
                 var h = b[g];
-                var f = (f = h) && "string" !== typeof f ? f instanceof Array || Array.isArray(f) || 0 <= f.length && (f.splice instanceof Function || da(f, f.length - 1) && "String" !== f.constructor.name) : !1;
+                var f = (f = h) && "string" !== typeof f ? f instanceof Array || Array.isArray(f) || 0 <= f.length && (f.splice instanceof Function || da(f, f.length - 1) && "String" !== f.constructor.name) : false;
                 f ? d = c.call(d, a.call(h)) : d.push(h)
             }
             return d
@@ -4083,7 +4083,7 @@ function(x) {
             G(this, f);
             this.options = this.getCommonDefaultOptions();
             this.options = T(this.options, this.getDefaultOptions());
-            this.autoUpdate = !1;
+            this.autoUpdate = false;
             this.options = T(this.options, c);
             this.options.data && (this.data = this.options.data, delete this.options.data)
         }
@@ -4309,13 +4309,13 @@ function(x) {
                     b.uniform4i(d, a[0], a[1], a[2], a[3]);
                     break;
                 case b.FLOAT_MAT2:
-                    b.uniformMatrix2fv(d, !1, a);
+                    b.uniformMatrix2fv(d, false, a);
                     break;
                 case b.FLOAT_MAT3:
-                    b.uniformMatrix3fv(d, !1, a);
+                    b.uniformMatrix3fv(d, false, a);
                     break;
                 case b.FLOAT_MAT4:
-                    b.uniformMatrix4fv(d, !1, a);
+                    b.uniformMatrix4fv(d, false, a);
                     break;
                 default:
                     console.error("Unrecognized uniform type: " + c)
@@ -4349,11 +4349,11 @@ function(x) {
             key: "getDefaultState",
             value: function() {
                 return {
-                    blend: !1,
-                    depthTest: !1,
-                    cullFace: !1,
-                    depthMask: !0,
-                    stencilTest: !1
+                    blend: false,
+                    depthTest: false,
+                    cullFace: false,
+                    depthMask: true,
+                    stencilTest: false
                 }
             }
         },
@@ -4392,7 +4392,7 @@ function(x) {
                 c.blend !== b.blend && (c.blend ? a.enable(a.BLEND) : a.disable(a.BLEND));
                 c.depthTest !== b.depthTest && (c.depthTest ? a.enable(a.DEPTH_TEST) : a.disable(a.DEPTH_TEST));
                 c.cullFace !== b.cullFace && (c.cullFace ? a.enable(a.CULL_FACE) : a.disable(a.CULL_FACE));
-                c.depthMask !== b.depthMask && (c.depthMask ? a.depthMask(!0) : a.depthMask(!1));
+                c.depthMask !== b.depthMask && (c.depthMask ? a.depthMask(true) : a.depthMask(false));
                 this.currentState = c
             }
         }]);
@@ -4461,7 +4461,7 @@ function(x) {
                 b = 0; b < this.attributes.length; b++) {
                     var d = this.attributes[b],
                     f = a.attributes[d.name];
-                    void 0 !== f && (d.buffer.bind(c), c.vertexAttribPointer(f, d.size, c[d.type], d.normalize || !1, void 0 !== d.stride ? d.stride: this.stride, d.offset), c.enableVertexAttribArray(f))
+                    void 0 !== f && (d.buffer.bind(c), c.vertexAttribPointer(f, d.size, c[d.type], d.normalize || false, void 0 !== d.stride ? d.stride: this.stride, d.offset), c.enableVertexAttribArray(f))
                 }
             }
         },
@@ -4530,12 +4530,12 @@ function(x) {
                 var g = [ - 1, -1, 0, -1, 1, 0, 1, 1, 0, 1, 1, 0, -1, -1, 0, 1, -1, 0];
                 b.bufferData(b.ARRAY_BUFFER, new Float32Array(g), b.STATIC_DRAW);
                 b.enableVertexAttribArray(d.attributes.aPos);
-                b.vertexAttribPointer(d.attributes.aPos, 3, b.FLOAT, !1, 0, 0);
+                b.vertexAttribPointer(d.attributes.aPos, 3, b.FLOAT, false, 0, 0);
                 c = b.createBuffer();
                 b.bindBuffer(b.ARRAY_BUFFER, c);
                 b.bufferData(b.ARRAY_BUFFER, new Float32Array([0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 1, 0]), b.STATIC_DRAW);
                 b.enableVertexAttribArray(d.attributes.aTextureCoord);
-                b.vertexAttribPointer(d.attributes.aTextureCoord, 2, b.FLOAT, !1, 0, 0);
+                b.vertexAttribPointer(d.attributes.aTextureCoord, 2, b.FLOAT, false, 0, 0);
                 b.activeTexture(b.TEXTURE0);
                 b.bindTexture(b.TEXTURE_2D, a);
                 b.uniform1i(d.uniforms.uSampler, 0);
@@ -4671,20 +4671,20 @@ function(x) {
                 b.bindBuffer(b.ARRAY_BUFFER, m);
                 b.bufferData(b.ARRAY_BUFFER, new Float32Array(this.vertex), b.STATIC_DRAW);
                 b.enableVertexAttribArray(h.attributes.aPos);
-                b.vertexAttribPointer(h.attributes.aPos, 3, b.FLOAT, !1, 0, 0);
+                b.vertexAttribPointer(h.attributes.aPos, 3, b.FLOAT, false, 0, 0);
                 b.enableVertexAttribArray(l.attributes.aPos);
-                b.vertexAttribPointer(l.attributes.aPos, 3, b.FLOAT, !1, 0, 0);
+                b.vertexAttribPointer(l.attributes.aPos, 3, b.FLOAT, false, 0, 0);
                 b.enableVertexAttribArray(k.attributes.aPos);
-                b.vertexAttribPointer(k.attributes.aPos, 3, b.FLOAT, !1, 0, 0);
+                b.vertexAttribPointer(k.attributes.aPos, 3, b.FLOAT, false, 0, 0);
                 m = b.createBuffer();
                 b.bindBuffer(b.ARRAY_BUFFER, m);
                 b.bufferData(b.ARRAY_BUFFER, new Float32Array(this.sampleCoord), b.STATIC_DRAW);
                 b.enableVertexAttribArray(h.attributes.aTextureCoord);
-                b.vertexAttribPointer(h.attributes.aTextureCoord, 2, b.FLOAT, !1, 0, 0);
+                b.vertexAttribPointer(h.attributes.aTextureCoord, 2, b.FLOAT, false, 0, 0);
                 b.enableVertexAttribArray(l.attributes.aTextureCoord);
-                b.vertexAttribPointer(l.attributes.aTextureCoord, 2, b.FLOAT, !1, 0, 0);
+                b.vertexAttribPointer(l.attributes.aTextureCoord, 2, b.FLOAT, false, 0, 0);
                 b.enableVertexAttribArray(k.attributes.aTextureCoord);
-                b.vertexAttribPointer(k.attributes.aTextureCoord, 2, b.FLOAT, !1, 0, 0);
+                b.vertexAttribPointer(k.attributes.aTextureCoord, 2, b.FLOAT, false, 0, 0);
                 b.useProgram(h.program);
                 b.bindFramebuffer(b.FRAMEBUFFER, p);
                 b.clearColor(0, 0, 0, 0);
@@ -4701,7 +4701,7 @@ function(x) {
                 b.activeTexture(b.TEXTURE1);
                 b.bindTexture(b.TEXTURE_2D, p.texture);
                 b.uniform1i(l.uniforms.uSampler, 1);
-                b.uniform1i(l.uniforms.isVertical, !0);
+                b.uniform1i(l.uniforms.isVertical, true);
                 b.uniform1f(l.uniforms.blurSize, g.blurSize || 2);
                 b.uniform1f(l.uniforms.devicePixelRatio, window.devicePixelRatio);
                 b.uniform2fv(l.uniforms.canvasSize, [b.canvas.width, b.canvas.height]);
@@ -4713,7 +4713,7 @@ function(x) {
                 b.activeTexture(b.TEXTURE1);
                 b.bindTexture(b.TEXTURE_2D, n.texture);
                 b.uniform1i(l.uniforms.uSampler, 1);
-                b.uniform1i(l.uniforms.isVertical, !1);
+                b.uniform1i(l.uniforms.isVertical, false);
                 b.uniform1f(l.uniforms.blurSize, g.blurSize || 2);
                 b.uniform1f(l.uniforms.devicePixelRatio, window.devicePixelRatio);
                 b.uniform2fv(l.uniforms.canvasSize, [b.canvas.width, b.canvas.height]);
@@ -4804,20 +4804,20 @@ function(x) {
                 b.bindBuffer(b.ARRAY_BUFFER, q);
                 b.bufferData(b.ARRAY_BUFFER, new Float32Array(this.vertex), b.STATIC_DRAW);
                 b.enableVertexAttribArray(l.attributes.aPos);
-                b.vertexAttribPointer(l.attributes.aPos, 3, b.FLOAT, !1, 0, 0);
+                b.vertexAttribPointer(l.attributes.aPos, 3, b.FLOAT, false, 0, 0);
                 b.enableVertexAttribArray(n.attributes.aPos);
-                b.vertexAttribPointer(n.attributes.aPos, 3, b.FLOAT, !1, 0, 0);
+                b.vertexAttribPointer(n.attributes.aPos, 3, b.FLOAT, false, 0, 0);
                 b.enableVertexAttribArray(h.attributes.aPos);
-                b.vertexAttribPointer(h.attributes.aPos, 3, b.FLOAT, !1, 0, 0);
+                b.vertexAttribPointer(h.attributes.aPos, 3, b.FLOAT, false, 0, 0);
                 q = b.createBuffer();
                 b.bindBuffer(b.ARRAY_BUFFER, q);
                 b.bufferData(b.ARRAY_BUFFER, new Float32Array(this.sampleCoord), b.STATIC_DRAW);
                 b.enableVertexAttribArray(l.attributes.aTextureCoord);
-                b.vertexAttribPointer(l.attributes.aTextureCoord, 2, b.FLOAT, !1, 0, 0);
+                b.vertexAttribPointer(l.attributes.aTextureCoord, 2, b.FLOAT, false, 0, 0);
                 b.enableVertexAttribArray(n.attributes.aTextureCoord);
-                b.vertexAttribPointer(n.attributes.aTextureCoord, 2, b.FLOAT, !1, 0, 0);
+                b.vertexAttribPointer(n.attributes.aTextureCoord, 2, b.FLOAT, false, 0, 0);
                 b.enableVertexAttribArray(h.attributes.aTextureCoord);
-                b.vertexAttribPointer(h.attributes.aTextureCoord, 2, b.FLOAT, !1, 0, 0);
+                b.vertexAttribPointer(h.attributes.aTextureCoord, 2, b.FLOAT, false, 0, 0);
                 b.useProgram(l.program);
                 b.bindFramebuffer(b.FRAMEBUFFER, m);
                 b.clearColor(0, 0, 0, 0);
@@ -4834,7 +4834,7 @@ function(x) {
                 b.activeTexture(b.TEXTURE1);
                 b.bindTexture(b.TEXTURE_2D, m.texture);
                 b.uniform1i(n.uniforms.uSampler, 1);
-                b.uniform1i(n.uniforms.isVertical, !0);
+                b.uniform1i(n.uniforms.isVertical, true);
                 b.uniform1f(n.uniforms.blurSize, g.blurSize || 2);
                 b.uniform1f(n.uniforms.devicePixelRatio, window.devicePixelRatio);
                 b.uniform2fv(n.uniforms.canvasSize, [b.canvas.width, b.canvas.height]);
@@ -4846,7 +4846,7 @@ function(x) {
                 b.activeTexture(b.TEXTURE1);
                 b.bindTexture(b.TEXTURE_2D, p.texture);
                 b.uniform1i(n.uniforms.uSampler, 1);
-                b.uniform1i(n.uniforms.isVertical, !1);
+                b.uniform1i(n.uniforms.isVertical, false);
                 b.uniform1f(n.uniforms.blurSize, g.blurSize || 2);
                 b.uniform1f(n.uniforms.devicePixelRatio, window.devicePixelRatio);
                 b.uniform2fv(n.uniforms.canvasSize, [b.canvas.width, b.canvas.height]);
@@ -4896,12 +4896,12 @@ function(x) {
                 b.bindBuffer(b.ARRAY_BUFFER, g);
                 b.bufferData(b.ARRAY_BUFFER, new Float32Array(this.vertex), b.STATIC_DRAW);
                 b.enableVertexAttribArray(c.attributes.aPos);
-                b.vertexAttribPointer(c.attributes.aPos, 3, b.FLOAT, !1, 0, 0);
+                b.vertexAttribPointer(c.attributes.aPos, 3, b.FLOAT, false, 0, 0);
                 g = b.createBuffer();
                 b.bindBuffer(b.ARRAY_BUFFER, g);
                 b.bufferData(b.ARRAY_BUFFER, new Float32Array(this.sampleCoord), b.STATIC_DRAW);
                 b.enableVertexAttribArray(c.attributes.aTextureCoord);
-                b.vertexAttribPointer(c.attributes.aTextureCoord, 2, b.FLOAT, !1, 0, 0);
+                b.vertexAttribPointer(c.attributes.aTextureCoord, 2, b.FLOAT, false, 0, 0);
                 b.activeTexture(b.TEXTURE1);
                 b.bindTexture(b.TEXTURE_2D, a);
                 b.uniform1i(c.uniforms.uSampler, 1);
@@ -4967,7 +4967,7 @@ function(x) {
                     a.clearColor(k[0], k[1], k[2], k[3]);
                     a.clear(a.COLOR_BUFFER_BIT | a.DEPTH_BUFFER_BIT);
                     b[e].render({
-                        isPickRender: !1,
+                        isPickRender: false,
                         gl: a,
                         texture: c.texture,
                         fbo: g
@@ -4990,9 +4990,9 @@ function(x) {
             key: "getCommonDefaultOptions",
             value: function() {
                 return {
-                    repeat: !1,
-                    enablePicked: !1,
-                    autoSelect: !1,
+                    repeat: false,
+                    enablePicked: false,
+                    autoSelect: false,
                     selectedIndex: -1,
                     selectedColor: "rgba(20, 20, 200, 1.0)"
                 }
@@ -5109,7 +5109,7 @@ function(x) {
                 this.webglLayer.clear();
                 this.render({
                     gl: b,
-                    isPickRender: !0,
+                    isPickRender: true,
                     matrix: this.webglLayer.matrix,
                     projectionMatrix: this.webglLayer.projectionMatrix,
                     viewMatrix: this.webglLayer.viewMatrix,
@@ -5161,7 +5161,7 @@ function(x) {
     } (CommonLayer),
     Ia = O(function(c, a) {
         Object.defineProperty(a, "__esModule", {
-            value: !0
+            value: true
         });
         a.setMatrixArrayType = function(b) {
             a.ARRAY_TYPE = d = b
@@ -5205,7 +5205,7 @@ function(x) {
             return a
         }
         Object.defineProperty(a, "__esModule", {
-            value: !0
+            value: true
         });
         a.create = function() {
             var a = new e.ARRAY_TYPE(4);
@@ -5426,7 +5426,7 @@ function(x) {
             return a
         }
         Object.defineProperty(a, "__esModule", {
-            value: !0
+            value: true
         });
         a.create = function() {
             var a = new e.ARRAY_TYPE(6);
@@ -5695,7 +5695,7 @@ function(x) {
             return a
         }
         Object.defineProperty(a, "__esModule", {
-            value: !0
+            value: true
         });
         a.create = function() {
             var a = new e.ARRAY_TYPE(9);
@@ -6261,7 +6261,7 @@ function(x) {
             return a
         }
         Object.defineProperty(a, "__esModule", {
-            value: !0
+            value: true
         });
         a.create = function() {
             var a = new k.ARRAY_TYPE(16);
@@ -7321,7 +7321,7 @@ function(x) {
             return a[0] * b[0] + a[1] * b[1] + a[2] * b[2]
         }
         Object.defineProperty(a, "__esModule", {
-            value: !0
+            value: true
         });
         a.create = b;
         a.clone = function(a) {
@@ -7668,7 +7668,7 @@ function(x) {
             return b * b + c * c + d * d + a * a
         }
         Object.defineProperty(a, "__esModule", {
-            value: !0
+            value: true
         });
         a.create = b;
         a.clone = function(a) {
@@ -8022,7 +8022,7 @@ function(x) {
             return a
         }
         Object.defineProperty(a, "__esModule", {
-            value: !0
+            value: true
         });
         a.create = d;
         a.identity = function(a) {
@@ -8293,7 +8293,7 @@ function(x) {
             return a
         }
         Object.defineProperty(a, "__esModule", {
-            value: !0
+            value: true
         });
         a.create = function() {
             var a = new k.ARRAY_TYPE(8);
@@ -8756,7 +8756,7 @@ function(x) {
             return b * b + a * a
         }
         Object.defineProperty(a, "__esModule", {
-            value: !0
+            value: true
         });
         a.create = b;
         a.clone = function(a) {
@@ -8985,7 +8985,7 @@ function(x) {
             return b
         }
         Object.defineProperty(a, "__esModule", {
-            value: !0
+            value: true
         });
         a.vec4 = a.vec3 = a.vec2 = a.quat2 = a.quat = a.mat4 = a.mat3 = a.mat2d = a.mat2 = a.glMatrix = void 0;
         c = b(Ia);
@@ -9096,7 +9096,7 @@ default = Lb;
                         })
                     })
                 };
-                this.isThisThread = !0
+                this.isThisThread = true
             } else return new Bb(c)
         }
     } ("./worker.js",
@@ -9112,9 +9112,9 @@ default = Lb;
         function a(b, c) {
             G(this, a);
             b = R(this, (a.__proto__ || N(a)).call(this, b, c));
-            b._isShow = !0;
+            b._isShow = true;
             c = b.getOptions();
-            if ("windowAnimation" === c.style || "ripple" === c.style || 0 < c.riseTime) b.autoUpdate = !0;
+            if ("windowAnimation" === c.style || "ripple" === c.style || 0 < c.riseTime) b.autoUpdate = true;
             b.selectedColor = [ - 1, -1, -1];
             b.textureCache = {};
             return b
@@ -9126,10 +9126,10 @@ default = Lb;
                 return {
                     color: "rgba(50, 50, 230, 1.0)",
                     opacity: .8,
-                    isTextureFull: !1,
+                    isTextureFull: false,
                     topColor: "rgba(76, 76, 76, 76)",
                     textureScale: 1,
-                    useLight: !0,
+                    useLight: true,
                     riseTime: 0
                 }
             }
@@ -9141,7 +9141,7 @@ default = Lb;
                 var b = this.getOptions();
                 this.dataMgr = new gb(this, this.gl);
                 this.texture = null;
-                this.isUseTexture = !1;
+                this.isUseTexture = false;
                 var c = [];
                 b.enablePicked && c.push("PICK");
                 b.texture && c.push("USE_TEXTURE");
@@ -9274,7 +9274,7 @@ default = Lb;
                             0 === k.height && (b.enable(b.BLEND), b.blendFunc(b.SRC_ALPHA, b.ONE_MINUS_SRC_ALPHA));
                             var l = 0;
                             k.style && Af[k.style] && (l = Af[k.style]);
-                            "gradual" === k.style ? (b.depthMask(!1), b.enable(b.BLEND), b.blendFunc(b.SRC_ALPHA, b.ONE_MINUS_SRC_ALPHA)) : b.depthMask(!0);
+                            "gradual" === k.style ? (b.depthMask(false), b.enable(b.BLEND), b.blendFunc(b.SRC_ALPHA, b.ONE_MINUS_SRC_ALPHA)) : b.depthMask(true);
                             var n = this.normizedColor(k.topColor);
                             if ("ripple" === k.style && k.rippleLayer && k.rippleLayer.data && k.rippleLayer.data[0]) {
                                 var p = this.normizedPoint(k.rippleLayer.data[0].geometry.coordinates);
@@ -9315,13 +9315,13 @@ default = Lb;
             value: function(a) {
                 var b = this,
                 c = this.getOptions();
-                c.texture ? (this.isUseTexture = !0, loadTextureImage(this.gl, c.texture,
+                c.texture ? (this.isUseTexture = true, loadTextureImage(this.gl, c.texture,
                 function(c, d) {
                     b.image = d;
                     b.texture = c;
                     a && a();
                     b.webglLayer.render()
-                })) : (this.isUseTexture = !1, this.image = this.texture = null, a && a())
+                })) : (this.isUseTexture = false, this.image = this.texture = null, a && a())
             }
         }]);
         return a
@@ -9638,9 +9638,9 @@ default = Lb;
             key: "isRequestAnimation",
             value: function() {
                 if (void 0 !== this.autoUpdate) return Wa(a.prototype.__proto__ || N(a.prototype), "isRequestAnimation", this).call(this);
-                for (var b = !1,
+                for (var b = false,
                 c = 0; c < this.children.length; c++) if (this.children[c].isRequestAnimation()) {
-                    b = !0;
+                    b = true;
                     break
                 }
                 return b
@@ -9662,7 +9662,7 @@ default = Lb;
             b = R(this, (a.__proto__ || N(a)).call(this, b, c));
             b.gridLayer = new GridLayer(b.getGridOptions());
             b.children = [b.gridLayer];
-            b.options.riseTime && (b.autoUpdate = !0);
+            b.options.riseTime && (b.autoUpdate = true);
             return b
         }
         S(a, c);
@@ -9837,7 +9837,7 @@ default = Lb;
     pi = O(function(c) {
         c.exports = {
             "default": oi,
-            __esModule: !0
+            __esModule: true
         }
     });
     Q(pi);
@@ -9845,13 +9845,13 @@ default = Lb;
     La = [],
     Aa = [],
     Dg = "undefined" !== typeof Uint8Array ? Uint8Array: Array,
-    cd = !1,
+    cd = false,
     qi = {}.toString,
     qe = Array.isArray ||
     function(c) {
         return "[object Array]" == qi.call(c)
     };
-    w.TYPED_ARRAY_SUPPORT = void 0 !== Df.TYPED_ARRAY_SUPPORT ? Df.TYPED_ARRAY_SUPPORT: !0;
+    w.TYPED_ARRAY_SUPPORT = void 0 !== Df.TYPED_ARRAY_SUPPORT ? Df.TYPED_ARRAY_SUPPORT: true;
     w.poolSize = 8192;
     w._augment = function(c) {
         c.__proto__ = w.prototype;
@@ -9922,7 +9922,7 @@ default = Lb;
         return a
     };
     w.byteLength = oe;
-    w.prototype._isBuffer = !0;
+    w.prototype._isBuffer = true;
     w.prototype.swap16 = function() {
         var c = this.length;
         if (0 !== c % 2) throw new RangeError("Buffer size must be a multiple of 16-bits");
@@ -9951,7 +9951,7 @@ default = Lb;
     };
     w.prototype.equals = function(c) {
         if (!Ma(c)) throw new TypeError("Argument must be a Buffer");
-        return this === c ? !0 : 0 === w.compare(this, c)
+        return this === c ? true : 0 === w.compare(this, c)
     };
     w.prototype.inspect = function() {
         var c = "";
@@ -9989,10 +9989,10 @@ default = Lb;
         return - 1 !== this.indexOf(c, a, b)
     };
     w.prototype.indexOf = function(c, a, b) {
-        return te(this, c, a, b, !0)
+        return te(this, c, a, b, true)
     };
     w.prototype.lastIndexOf = function(c, a, b) {
-        return te(this, c, a, b, !1)
+        return te(this, c, a, b, false)
     };
     w.prototype.write = function(c, a, b, d) {
         if (void 0 === a) d = "utf8",
@@ -10008,7 +10008,7 @@ default = Lb;
         if (void 0 === b || b > e) b = e;
         if (0 < c.length && (0 > b || 0 > a) || a > this.length) throw new RangeError("Attempt to write outside buffer bounds");
         d || (d = "utf8");
-        for (e = !1;;) switch (d) {
+        for (e = false;;) switch (d) {
         case "hex":
             a:
             {
@@ -10056,7 +10056,7 @@ default = Lb;
         default:
             if (e) throw new TypeError("Unknown encoding: " + d);
             d = ("" + d).toLowerCase();
-            e = !0
+            e = true
         }
     };
     w.prototype.toJSON = function() {
@@ -10163,19 +10163,19 @@ default = Lb;
     };
     w.prototype.readFloatLE = function(c, a) {
         a || ja(c, 4, this.length);
-        return nc(this, c, !0, 23, 4)
+        return nc(this, c, true, 23, 4)
     };
     w.prototype.readFloatBE = function(c, a) {
         a || ja(c, 4, this.length);
-        return nc(this, c, !1, 23, 4)
+        return nc(this, c, false, 23, 4)
     };
     w.prototype.readDoubleLE = function(c, a) {
         a || ja(c, 8, this.length);
-        return nc(this, c, !0, 52, 8)
+        return nc(this, c, true, 52, 8)
     };
     w.prototype.readDoubleBE = function(c, a) {
         a || ja(c, 8, this.length);
-        return nc(this, c, !1, 52, 8)
+        return nc(this, c, false, 52, 8)
     };
     w.prototype.writeUIntLE = function(c, a, b, d) {
         c = +c;
@@ -10209,28 +10209,28 @@ default = Lb;
         c = +c;
         a |= 0;
         b || sa(this, c, a, 2, 65535, 0);
-        w.TYPED_ARRAY_SUPPORT ? (this[a] = c & 255, this[a + 1] = c >>> 8) : pc(this, c, a, !0);
+        w.TYPED_ARRAY_SUPPORT ? (this[a] = c & 255, this[a + 1] = c >>> 8) : pc(this, c, a, true);
         return a + 2
     };
     w.prototype.writeUInt16BE = function(c, a, b) {
         c = +c;
         a |= 0;
         b || sa(this, c, a, 2, 65535, 0);
-        w.TYPED_ARRAY_SUPPORT ? (this[a] = c >>> 8, this[a + 1] = c & 255) : pc(this, c, a, !1);
+        w.TYPED_ARRAY_SUPPORT ? (this[a] = c >>> 8, this[a + 1] = c & 255) : pc(this, c, a, false);
         return a + 2
     };
     w.prototype.writeUInt32LE = function(c, a, b) {
         c = +c;
         a |= 0;
         b || sa(this, c, a, 4, 4294967295, 0);
-        w.TYPED_ARRAY_SUPPORT ? (this[a + 3] = c >>> 24, this[a + 2] = c >>> 16, this[a + 1] = c >>> 8, this[a] = c & 255) : qc(this, c, a, !0);
+        w.TYPED_ARRAY_SUPPORT ? (this[a + 3] = c >>> 24, this[a + 2] = c >>> 16, this[a + 1] = c >>> 8, this[a] = c & 255) : qc(this, c, a, true);
         return a + 4
     };
     w.prototype.writeUInt32BE = function(c, a, b) {
         c = +c;
         a |= 0;
         b || sa(this, c, a, 4, 4294967295, 0);
-        w.TYPED_ARRAY_SUPPORT ? (this[a] = c >>> 24, this[a + 1] = c >>> 16, this[a + 2] = c >>> 8, this[a + 3] = c & 255) : qc(this, c, a, !1);
+        w.TYPED_ARRAY_SUPPORT ? (this[a] = c >>> 24, this[a + 1] = c >>> 16, this[a + 2] = c >>> 8, this[a + 3] = c & 255) : qc(this, c, a, false);
         return a + 4
     };
     w.prototype.writeIntLE = function(c, a, b, d) {
@@ -10268,21 +10268,21 @@ default = Lb;
         c = +c;
         a |= 0;
         b || sa(this, c, a, 2, 32767, -32768);
-        w.TYPED_ARRAY_SUPPORT ? (this[a] = c & 255, this[a + 1] = c >>> 8) : pc(this, c, a, !0);
+        w.TYPED_ARRAY_SUPPORT ? (this[a] = c & 255, this[a + 1] = c >>> 8) : pc(this, c, a, true);
         return a + 2
     };
     w.prototype.writeInt16BE = function(c, a, b) {
         c = +c;
         a |= 0;
         b || sa(this, c, a, 2, 32767, -32768);
-        w.TYPED_ARRAY_SUPPORT ? (this[a] = c >>> 8, this[a + 1] = c & 255) : pc(this, c, a, !1);
+        w.TYPED_ARRAY_SUPPORT ? (this[a] = c >>> 8, this[a + 1] = c & 255) : pc(this, c, a, false);
         return a + 2
     };
     w.prototype.writeInt32LE = function(c, a, b) {
         c = +c;
         a |= 0;
         b || sa(this, c, a, 4, 2147483647, -2147483648);
-        w.TYPED_ARRAY_SUPPORT ? (this[a] = c & 255, this[a + 1] = c >>> 8, this[a + 2] = c >>> 16, this[a + 3] = c >>> 24) : qc(this, c, a, !0);
+        w.TYPED_ARRAY_SUPPORT ? (this[a] = c & 255, this[a + 1] = c >>> 8, this[a + 2] = c >>> 16, this[a + 3] = c >>> 24) : qc(this, c, a, true);
         return a + 4
     };
     w.prototype.writeInt32BE = function(c, a, b) {
@@ -10290,20 +10290,20 @@ default = Lb;
         a |= 0;
         b || sa(this, c, a, 4, 2147483647, -2147483648);
         0 > c && (c = 4294967295 + c + 1);
-        w.TYPED_ARRAY_SUPPORT ? (this[a] = c >>> 24, this[a + 1] = c >>> 16, this[a + 2] = c >>> 8, this[a + 3] = c & 255) : qc(this, c, a, !1);
+        w.TYPED_ARRAY_SUPPORT ? (this[a] = c >>> 24, this[a + 1] = c >>> 16, this[a + 2] = c >>> 8, this[a + 3] = c & 255) : qc(this, c, a, false);
         return a + 4
     };
     w.prototype.writeFloatLE = function(c, a, b) {
-        return xe(this, c, a, !0, b)
+        return xe(this, c, a, true, b)
     };
     w.prototype.writeFloatBE = function(c, a, b) {
-        return xe(this, c, a, !1, b)
+        return xe(this, c, a, false, b)
     };
     w.prototype.writeDoubleLE = function(c, a, b) {
-        return ye(this, c, a, !0, b)
+        return ye(this, c, a, true, b)
     };
     w.prototype.writeDoubleBE = function(c, a, b) {
-        return ye(this, c, a, !1, b)
+        return ye(this, c, a, false, b)
     };
     w.prototype.copy = function(c, a, b, d) {
         b || (b = 0);
@@ -10377,8 +10377,8 @@ default = Lb;
                     color: "rgba(25, 25, 250, 1)",
                     blend: "normal",
                     width: 4,
-                    isFlat: !0,
-                    antialias: !1,
+                    isFlat: true,
+                    antialias: false,
                     lineJoin: "miter",
                     lineCap: "butt",
                     style: "normal",
@@ -10409,7 +10409,7 @@ default = Lb;
                 var b = this.getOptions(),
                 c = [];
                 b.enablePicked && c.push("PICK");
-                Jd[b.style] && (this.isUseTexture = !0, c.push("USE_TEXTURE"));
+                Jd[b.style] && (this.isUseTexture = true, c.push("USE_TEXTURE"));
                 this.program = new Program(this.gl, {
                     vertexShader: "precision highp float;uniform vec4 uSelectedColor;uniform mat4 uMatrix;uniform bool uFlat;uniform vec2 uDashArray;uniform float thickness;uniform float zoomUnits;uniform float devicePixelRatio;uniform int miter;attribute vec3 position;attribute vec3 next;attribute vec3 previous;attribute float direction;attribute vec4 aColor;attribute float aDistance;attribute float aTotalDistance;\n#if defined(USE_TEXTURE)\nattribute vec2 uv;\n#endif\nvarying vec4 vColor;varying vec2 vNormal;varying vec2 vUV;varying vec2 vDashArray;varying float vTotalDistance;varying float vCounter;vec2 project(vec4 coord){vec3 screen=coord.xyz/coord.w;vec2 clip=(screen.xy+1.0)/2.0;return clip*MAPV_resolution;}vec4 unproject(vec2 projected,float z,float w){vec2 clip=projected/MAPV_resolution;vec2 screen=clip*2.0-1.0;return vec4(screen*w,z,w);}vec3 getNormalAndWidth(vec2 currentScreen,vec2 previousScreen,vec2 nextScreen,float thickness){vec2 dir=vec2(0.0);if(currentScreen==previousScreen){dir=normalize(nextScreen-currentScreen);}else if(currentScreen==nextScreen){dir=normalize(currentScreen-previousScreen);}else{vec2 dirA=normalize((currentScreen-previousScreen));if(miter==1){vec2 dirB=normalize((nextScreen-currentScreen));vec2 tangent=normalize(dirA+dirB);vec2 perp=vec2(-dirA.y,dirA.x);vec2 miter=vec2(-tangent.y,tangent.x);dir=tangent;float angle=40.0;if(dot(dirA,dirB)>cos(radians(angle))){thickness=thickness/dot(miter,perp);}}else{dir=dirA;}}vec2 normal=vec2(-dir.y,dir.x);return vec3(normal,thickness);}void main(){vColor=aColor;vCounter=aDistance/aTotalDistance;vDashArray=zoomUnits*uDashArray/aTotalDistance;vTotalDistance=aTotalDistance;\n#if defined(USE_TEXTURE)\nvUV=uv;\n#endif\n#if defined(PICK)\nif(mapvIsPicked()){vColor=uSelectedColor;}\n#endif\nif(uFlat){float width=thickness*zoomUnits;vec3 nw=getNormalAndWidth(position.xy,previous.xy,next.xy,width);width=nw.z;vec2 normal=nw.xy;vNormal=normal*direction;normal*=width/2.0;gl_Position=uMatrix*vec4(position.xy+normal*direction,position.z,1.0);}else{vec4 previousProjected=uMatrix*vec4(previous,1.0);vec4 currentProjected=uMatrix*vec4(position,1.0);vec4 nextProjected=uMatrix*vec4(next,1.0);vec2 currentScreen=project(currentProjected);vec2 previousScreen=project(previousProjected);vec2 nextScreen=project(nextProjected);float width=thickness*devicePixelRatio;vec3 nw=getNormalAndWidth(currentScreen,previousScreen,nextScreen,width);width=nw.z;vec2 normal=nw.xy;vNormal=normal*direction;normal*=width/2.0;vec2 pos=currentScreen+normal*direction;vec4 finalPos=unproject(pos,currentProjected.z,currentProjected.w);gl_Position=finalPos;}}",
                     fragmentShader: "precision highp float;varying vec4 vColor;varying vec2 vNormal;varying vec2 vUV;varying vec2 vDashArray;varying float vCounter;varying float vTotalDistance;uniform bool uAntialias;uniform float uDashOffset;uniform float zoomUnits;uniform float thickness;\n#if defined(USE_TEXTURE)\nuniform float uTextureMargin;uniform sampler2D textureImage;\n#endif\nvoid main(){vec4 color=vColor;if(uAntialias){float blur=1.0;blur=1.0-smoothstep(0.8,1.0,length(vNormal));color.a*=blur;}\n#if defined(USE_TEXTURE)\nfloat segLen=uTextureMargin*zoomUnits;float textureLen=thickness*zoomUnits;float deltaX=mod(vUV.x,segLen);float middle=segLen/2.0;if(deltaX>=middle&&deltaX<=middle+textureLen){float uvx=(deltaX-middle)/textureLen;vec4 texture=texture2D(textureImage,vec2(uvx,vUV.y));color=texture.a>=0.5 ? texture : color;}\n#endif\nif(vDashArray.y>0.0){float offset=uDashOffset*zoomUnits/vTotalDistance;color.a*=(1.0-step(vDashArray.x,mod(vCounter+offset,vDashArray.x+vDashArray.y)));}gl_FragColor=color;}",
@@ -10582,7 +10582,7 @@ default = Lb;
                 });
                 var v = Ba(c.map(function(a) {
                     return - 1
-                }), !0),
+                }), true),
                 B = Ba(c),
                 A = Ba(c.map(rc( - 1))),
                 D = Ba(c.map(rc(1)));
@@ -10680,8 +10680,8 @@ default = Lb;
                     color: "rgba(25, 25, 250, 1)",
                     blend: "normal",
                     width: 10,
-                    isFlat: !0,
-                    antialias: !1,
+                    isFlat: true,
+                    antialias: false,
                     lineJoin: "miter",
                     lineCap: "butt",
                     style: "normal",
@@ -10712,7 +10712,7 @@ default = Lb;
                 var b = this.getOptions(),
                 c = [];
                 b.enablePicked && c.push("PICK");
-                Kd[b.style] && (this.isUseTexture = !0, c.push("USE_TEXTURE"));
+                Kd[b.style] && (this.isUseTexture = true, c.push("USE_TEXTURE"));
                 this.program = new Program(this.gl, {
                     vertexShader: "precision highp float;uniform vec4 uSelectedColor;uniform mat4 uMatrix;uniform bool uFlat;uniform vec2 uDashArray;uniform float thickness;uniform float zoomUnits;uniform float devicePixelRatio;uniform int miter;attribute vec3 position;attribute vec3 next;attribute vec3 previous;attribute float direction;attribute vec4 aColor;attribute float aDistance;attribute float aTotalDistance;\n#if defined(USE_TEXTURE)\nattribute vec2 uv;\n#endif\nvarying vec4 vColor;varying vec2 vNormal;varying vec2 vUV;varying vec2 vDashArray;varying float vTotalDistance;varying float vCounter;vec2 project(vec4 coord){vec3 screen=coord.xyz/coord.w;vec2 clip=(screen.xy+1.0)/2.0;return clip*MAPV_resolution;}vec4 unproject(vec2 projected,float z,float w){vec2 clip=projected/MAPV_resolution;vec2 screen=clip*2.0-1.0;return vec4(screen*w,z,w);}vec3 getNormalAndWidth(vec2 currentScreen,vec2 previousScreen,vec2 nextScreen,float thickness){vec2 dir=vec2(0.0);if(currentScreen==previousScreen){dir=normalize(nextScreen-currentScreen);}else if(currentScreen==nextScreen){dir=normalize(currentScreen-previousScreen);}else{vec2 dirA=normalize((currentScreen-previousScreen));if(miter==1){vec2 dirB=normalize((nextScreen-currentScreen));vec2 tangent=normalize(dirA+dirB);vec2 perp=vec2(-dirA.y,dirA.x);vec2 miter=vec2(-tangent.y,tangent.x);dir=tangent;float angle=40.0;if(dot(dirA,dirB)>cos(radians(angle))){thickness=thickness/dot(miter,perp);}}else{dir=dirA;}}vec2 normal=vec2(-dir.y,dir.x);return vec3(normal,thickness);}void main(){vColor=aColor;vCounter=aDistance/aTotalDistance;vDashArray=zoomUnits*uDashArray/aTotalDistance;vTotalDistance=aTotalDistance;\n#if defined(USE_TEXTURE)\nvUV=uv;\n#endif\n#if defined(PICK)\nif(mapvIsPicked()){vColor=uSelectedColor;}\n#endif\nif(uFlat){float width=thickness*zoomUnits;vec3 nw=getNormalAndWidth(position.xy,previous.xy,next.xy,width);width=nw.z;vec2 normal=nw.xy;vNormal=normal*direction;normal*=width/2.0;gl_Position=uMatrix*vec4(position.xy+normal*direction,position.z,1.0);}else{vec4 previousProjected=uMatrix*vec4(previous,1.0);vec4 currentProjected=uMatrix*vec4(position,1.0);vec4 nextProjected=uMatrix*vec4(next,1.0);vec2 currentScreen=project(currentProjected);vec2 previousScreen=project(previousProjected);vec2 nextScreen=project(nextProjected);float width=thickness*devicePixelRatio;vec3 nw=getNormalAndWidth(currentScreen,previousScreen,nextScreen,width);width=nw.z;vec2 normal=nw.xy;vNormal=normal*direction;normal*=width/2.0;vec2 pos=currentScreen+normal*direction;vec4 finalPos=unproject(pos,currentProjected.z,currentProjected.w);gl_Position=finalPos;}}",
                     fragmentShader: "precision highp float;varying vec4 vColor;varying vec2 vNormal;varying vec2 vUV;varying vec2 vDashArray;varying float vCounter;varying float vTotalDistance;uniform bool uAntialias;uniform float uDashOffset;uniform float zoomUnits;uniform float thickness;\n#if defined(USE_TEXTURE)\nuniform float uTextureMargin;uniform sampler2D textureImage;\n#endif\nvoid main(){vec4 color=vColor;if(uAntialias){float blur=1.0;blur=1.0-smoothstep(0.8,1.0,length(vNormal));color.a*=blur;}\n#if defined(USE_TEXTURE)\nfloat segLen=uTextureMargin*zoomUnits;float textureLen=thickness*zoomUnits;float deltaX=mod(vUV.x,segLen);float middle=segLen/2.0;if(deltaX>=middle&&deltaX<=middle+textureLen){float uvx=(deltaX-middle)/textureLen;vec4 texture=texture2D(textureImage,vec2(uvx,vUV.y));color=texture.a>=0.5 ? texture : color;}\n#endif\nif(vDashArray.y>0.0){float offset=uDashOffset*zoomUnits/vTotalDistance;color.a*=(1.0-step(vDashArray.x,mod(vCounter+offset,vDashArray.x+vDashArray.y)));}gl_FragColor=color;}",
@@ -10885,7 +10885,7 @@ default = Lb;
                 });
                 var v = tb(c.map(function(a) {
                     return - 1
-                }), !0),
+                }), true),
                 B = tb(c),
                 A = tb(c.map(De( - 1))),
                 D = tb(c.map(De(1)));
@@ -11069,7 +11069,7 @@ default = Lb;
             b.startTime = b.options.startTime || 0;
             b.endTime = b.options.endTime;
             b.time = b.startTime;
-            b.autoUpdate = !0;
+            b.autoUpdate = true;
             return b
         }
         S(a, c);
@@ -11116,7 +11116,7 @@ default = Lb;
                     b.enableVertexAttribArray(k.attributes.aPos);
                     b.enableVertexAttribArray(k.attributes.aDistance);
                     b.enableVertexAttribArray(k.attributes.aColor);
-                    b.uniformMatrix4fv(k.uniforms.u_matrix, !1, c);
+                    b.uniformMatrix4fv(k.uniforms.u_matrix, false, c);
                     b.uniform1f(k.uniforms.currentTime, this.time);
                     b.uniform1f(k.uniforms.trailLength, g.trailLength);
                     for (c = 0; c < a.vertex.length; c++) if (! (0 >= a.vertex[c].length)) {
@@ -11124,9 +11124,9 @@ default = Lb;
                         l = (new Float32Array(h[0])).BYTES_PER_ELEMENT;
                         h = l * h[0].length;
                         b.bindBuffer(b.ARRAY_BUFFER, a.vertexBuffer[c]);
-                        b.vertexAttribPointer(k.attributes.aPos, 4, b.FLOAT, !1, h, 0);
-                        b.vertexAttribPointer(k.attributes.aDistance, 1, b.FLOAT, !1, h, 4 * l);
-                        b.vertexAttribPointer(k.attributes.aColor, 4, b.FLOAT, !1, h, 5 * l);
+                        b.vertexAttribPointer(k.attributes.aPos, 4, b.FLOAT, false, h, 0);
+                        b.vertexAttribPointer(k.attributes.aDistance, 1, b.FLOAT, false, h, 4 * l);
+                        b.vertexAttribPointer(k.attributes.aColor, 4, b.FLOAT, false, h, 5 * l);
                         b.bindBuffer(b.ELEMENT_ARRAY_BUFFER, a.indexBuffer[c]);
                         b.drawElements(b.TRIANGLE_STRIP, a.index[c].length, b.UNSIGNED_SHORT, 0);
                         b.bindBuffer(b.ARRAY_BUFFER, null);
@@ -11142,7 +11142,7 @@ default = Lb;
         return a
     } (Layer),
     ti = O(function(c, a) {
-        a.__esModule = !0;
+        a.__esModule = true;
         var b = Ua && Ua.__esModule ? Ua: {
         default:
             Ua
@@ -11152,9 +11152,9 @@ default = Lb;
             c in a ? (0, b.
         default)(a, c, {
                 value: g,
-                enumerable: !0,
-                configurable: !0,
-                writable: !0
+                enumerable: true,
+                configurable: true,
+                writable: true
             }) : a[c] = g;
             return a
         }
@@ -11172,7 +11172,7 @@ default = Lb;
             b = R(this, (a.__proto__ || N(a)).call(this, b, c));
             b.bufferMap = {};
             b.bufferData = [];
-            b.autoUpdate = !0;
+            b.autoUpdate = true;
             return b
         }
         S(a, c);
@@ -11183,12 +11183,12 @@ default = Lb;
                     color: [1, 1, 1, .8],
                     speed: 1,
                     size: 5,
-                    pointFade: !0,
+                    pointFade: true,
                     pointFadeBuffer: 1,
                     minLineLength: 2,
                     animationType: 2,
                     shapeType: 2,
-                    depthTest: !1
+                    depthTest: false
                 }
             }
         },
@@ -11296,7 +11296,7 @@ default = Lb;
             value: function(a, c, e) {
                 if (void 0 !== c.attributes[e]) {
                     var b = this.bufferMap[e];
-                    b && (a.bindBuffer(a.ARRAY_BUFFER, b.buffer), a.enableVertexAttribArray(c.attributes[e]), a.vertexAttribPointer(c.attributes[e], b.elementSize, a.FLOAT, !1, b.data.BYTES_PER_ELEMENT * b.elementSize, 0))
+                    b && (a.bindBuffer(a.ARRAY_BUFFER, b.buffer), a.enableVertexAttribArray(c.attributes[e]), a.vertexAttribPointer(c.attributes[e], b.elementSize, a.FLOAT, false, b.data.BYTES_PER_ELEMENT * b.elementSize, 0))
                 }
             }
         },
@@ -11314,7 +11314,7 @@ default = Lb;
                     1 !== this.animationType && (this.renderAttributeArr(b, c, "aNextPos"), 3 === this.animationType && this.renderAttributeArr(b, c, "aNextIndex"));
                     var g = (new Date).getTime() - this.startTime;
                     g = 1 === this.animationType ? Math.round(g / 1E3 * this.options.speed * 20) : 3 === this.animationType ? g / 1E3 * this.options.speed * 1E3: g / 1E3 * this.options.speed;
-                    b.uniformMatrix4fv(c.uniforms.u_matrix, !1, a);
+                    b.uniformMatrix4fv(c.uniforms.u_matrix, false, a);
                     b.uniform4f(c.uniforms.uColor, this.color[0], this.color[1], this.color[2], this.color[3]);
                     b.uniform1f(c.uniforms.uSize, this.options.size);
                     b.uniform1f(c.uniforms.uElapsedSteps, g);
@@ -11453,7 +11453,7 @@ default = Lb;
             value: function() {
                 return {
                     texture: null,
-                    enablePreciseMap: !1,
+                    enablePreciseMap: false,
                     height: 100,
                     color: [1, 1, 1, 1]
                 }
@@ -11465,7 +11465,7 @@ default = Lb;
                 this.gl = a;
                 this.dataMgr = new wi(this, this.gl);
                 this.texture = null;
-                this.isUseTexture = !1;
+                this.isUseTexture = false;
                 this.vertexLength = 10;
                 this.program = new Program(this.gl, {
                     vertexShader: "uniform mat4 u_matrix;uniform bool uUseTexture;attribute vec3 aPos;attribute vec4 aColor;attribute vec2 aTextureCoords;varying vec2 vTextureCoords;varying vec4 vColor;void main(){if(aColor.w>=0.0&&aColor.w<=1.0){vColor=aColor;}else{vColor=vec4(aColor.xyz,1.0);}if(uUseTexture){vTextureCoords=aTextureCoords;}gl_Position=u_matrix*vec4(aPos,1.0);}",
@@ -11504,22 +11504,22 @@ default = Lb;
                         b.activeTexture(b.TEXTURE0);
                         b.bindTexture(b.TEXTURE_2D, this.texture);
                         b.uniform1i(k.uniforms.uSampler, 0);
-                        b.depthMask(!0);
+                        b.depthMask(true);
                         b.depthFunc(b.LESS)
-                    } else b.depthMask(!1);
+                    } else b.depthMask(false);
                     g.texture ? b.enableVertexAttribArray(k.attributes.aTextureCoords) : b.disableVertexAttribArray(k.attributes.aTextureCoords);
                     b.enableVertexAttribArray(k.attributes.aPos);
                     b.enableVertexAttribArray(k.attributes.aColor);
-                    b.uniformMatrix4fv(k.uniforms.u_matrix, !1, c);
+                    b.uniformMatrix4fv(k.uniforms.u_matrix, false, c);
                     b.uniform1i(k.uniforms.uUseTexture, this.isUseTexture);
                     for (c = 0; c < a.vertex.length; c++) if (! (0 >= a.vertex[c].length)) {
                         var h = a.vertex[c],
                         l = (new Float32Array(h[0])).BYTES_PER_ELEMENT;
                         h = l * h[0].length;
                         b.bindBuffer(b.ARRAY_BUFFER, a.vertexBuffer[c]);
-                        b.vertexAttribPointer(k.attributes.aPos, 3, b.FLOAT, !1, h, 0);
-                        b.vertexAttribPointer(k.attributes.aColor, 4, b.FLOAT, !1, h, 3 * l);
-                        g.texture && b.vertexAttribPointer(k.attributes.aTextureCoords, 2, b.FLOAT, !1, h, 7 * l);
+                        b.vertexAttribPointer(k.attributes.aPos, 3, b.FLOAT, false, h, 0);
+                        b.vertexAttribPointer(k.attributes.aColor, 4, b.FLOAT, false, h, 3 * l);
+                        g.texture && b.vertexAttribPointer(k.attributes.aTextureCoords, 2, b.FLOAT, false, h, 7 * l);
                         b.bindBuffer(b.ELEMENT_ARRAY_BUFFER, a.indexBuffer[c]);
                         b.drawElements(b.TRIANGLE_STRIP, a.index[c].length, b.UNSIGNED_SHORT, 0);
                         b.bindBuffer(b.ARRAY_BUFFER, null);
@@ -11535,13 +11535,13 @@ default = Lb;
             value: function(a) {
                 var b = this,
                 c = this.getOptions();
-                c.texture ? (this.isUseTexture = !0, loadTextureImage(this.gl, c.texture,
+                c.texture ? (this.isUseTexture = true, loadTextureImage(this.gl, c.texture,
                 function(c, d) {
                     b.image = d;
                     b.texture = c;
                     a && a();
                     b.webglLayer.render()
-                })) : (this.isUseTexture = !1, this.image = this.texture = null, a && a())
+                })) : (this.isUseTexture = false, this.image = this.texture = null, a && a())
             }
         }]);
         return a
@@ -11657,7 +11657,7 @@ default = Lb;
             b.startTime = b.options.startTime || 0;
             b.endTime = b.options.endTime;
             b.time = b.startTime;
-            b.autoUpdate = !0;
+            b.autoUpdate = true;
             return b
         }
         S(a, c);
@@ -11703,7 +11703,7 @@ default = Lb;
                     b.blendFunc(b.SRC_ALPHA, b.ONE_MINUS_SRC_ALPHA);
                     b.enableVertexAttribArray(k.attributes.aPos);
                     b.enableVertexAttribArray(k.attributes.aColor);
-                    b.uniformMatrix4fv(k.uniforms.u_matrix, !1, c);
+                    b.uniformMatrix4fv(k.uniforms.u_matrix, false, c);
                     b.uniform1f(k.uniforms.currentTime, this.time);
                     b.uniform1f(k.uniforms.trailLength, g.trailLength);
                     for (c = 0; c < a.vertex.length; c++) if (! (0 >= a.vertex[c].length)) {
@@ -11711,8 +11711,8 @@ default = Lb;
                         l = (new Float32Array(h[0])).BYTES_PER_ELEMENT;
                         h = l * h[0].length;
                         b.bindBuffer(b.ARRAY_BUFFER, a.vertexBuffer[c]);
-                        b.vertexAttribPointer(k.attributes.aPos, 4, b.FLOAT, !1, h, 0);
-                        b.vertexAttribPointer(k.attributes.aColor, 4, b.FLOAT, !1, h, 4 * l);
+                        b.vertexAttribPointer(k.attributes.aPos, 4, b.FLOAT, false, h, 0);
+                        b.vertexAttribPointer(k.attributes.aColor, 4, b.FLOAT, false, h, 4 * l);
                         b.bindBuffer(b.ELEMENT_ARRAY_BUFFER, a.indexBuffer[c]);
                         b.drawElements(b.TRIANGLE_STRIP, a.index[c].length, b.UNSIGNED_SHORT, 0);
                         b.bindBuffer(b.ARRAY_BUFFER, null);
@@ -11886,7 +11886,7 @@ default = Lb;
                 return {
                     children: a,
                     height: 1,
-                    leaf: !0,
+                    leaf: true,
                     minX: Infinity,
                     minY: Infinity,
                     maxX: -Infinity,
@@ -11947,7 +11947,7 @@ default = Lb;
                     return this
                 }
                 a = this._build(a.slice(), 0, a.length - 1, 0);
-                this.data.children.length ? this.data.height === a.height ? this._splitRoot(this.data, a) : (this.data.height < a.height && (b = this.data, this.data = a, a = b), this._insert(a, this.data.height - a.height - 1, !0)) : this.data = a;
+                this.data.children.length ? this.data.height === a.height ? this._splitRoot(this.data, a) : (this.data.height < a.height && (b = this.data, this.data = a, a = b), this._insert(a, this.data.height - a.height - 1, true)) : this.data = a;
                 return this
             };
             t.prototype.insert = function(a) {
@@ -11962,7 +11962,7 @@ default = Lb;
                 if (!a) return this;
                 for (var c = this.data,
                 d = this.toBBox(a), e = [], g = [], h, k, l; c || e.length;) {
-                    c || (c = e.pop(), k = e[e.length - 1], h = g.pop(), l = !0);
+                    c || (c = e.pop(), k = e[e.length - 1], h = g.pop(), l = true);
                     if (c.leaf) {
                         a: {
                             var m = a;
@@ -11983,7 +11983,7 @@ default = Lb;
                             break
                         }
                     }
-                    l || c.leaf || !q(c, d) ? k ? (h++, c = k.children[h], l = !1) : c = null: (e.push(c), g.push(h), h = 0, k = c, c = c.children[0])
+                    l || c.leaf || !q(c, d) ? k ? (h++, c = k.children[h], l = false) : c = null: (e.push(c), g.push(h), h = 0, k = c, c = c.children[0])
                 }
                 return this
             };
@@ -12018,7 +12018,7 @@ default = Lb;
                 }
                 d || (d = Math.ceil(Math.log(e) / Math.log(h)), h = Math.ceil(e / Math.pow(h, d - 1)));
                 k = u([]);
-                k.leaf = !1;
+                k.leaf = false;
                 k.height = d;
                 e = Math.ceil(e / h);
                 h = e * Math.ceil(Math.sqrt(h));
@@ -12073,7 +12073,7 @@ default = Lb;
             t.prototype._splitRoot = function(a, b) {
                 this.data = u([a, b]);
                 this.data.height = a.height + 1;
-                this.data.leaf = !1;
+                this.data.leaf = false;
                 g(this.data, this.toBBox)
             };
             t.prototype._chooseSplitIndex = function(a, b, c) {
@@ -12138,8 +12138,8 @@ default = Lb;
                     color: "#fff",
                     fontFamily: "Microsoft Yahei",
                     fontSize: 14,
-                    isFlat: !1,
-                    collides: !0,
+                    isFlat: false,
+                    collides: true,
                     offset: [0, 0],
                     padding: [2, 2],
                     margin: [0, 0]
@@ -12453,7 +12453,7 @@ default = Lb;
                 c = 1E4 <= b ? Math.round(b / 1E3) + "k": 1E3 <= b ? Math.round(b / 100) / 10 + "k": b;
                 return p(p({},
                 a.properties), {
-                    cluster: !0,
+                    cluster: true,
                     cluster_id: a.id,
                     point_count: b,
                     point_count_abbreviated: c
@@ -12557,8 +12557,8 @@ default = Lb;
                 radius: 40,
                 extent: 512,
                 nodeSize: 64,
-                log: !1,
-                generateId: !1,
+                log: false,
+                generateId: false,
                 reduce: null,
                 map: function(a) {
                     return a
@@ -12677,7 +12677,7 @@ default = Lb;
                     var h = a[g];
                     if (! (h.zoom <= b)) {
                         h.zoom = b;
-                        for (var k = this.trees[b + 1], l = k.within(h.x, h.y, d), m = h.numPoints || 1, n = h.x * m, p = h.y * m, q = e && 1 < m ? this._map(h, !0) : null, r = (g << 5) + (b + 1) + this.points.length, u = 0; u < l.length; u += 1) {
+                        for (var k = this.trees[b + 1], l = k.within(h.x, h.y, d), m = h.numPoints || 1, n = h.x * m, p = h.y * m, q = e && 1 < m ? this._map(h, true) : null, r = (g << 5) + (b + 1) + this.points.length, u = 0; u < l.length; u += 1) {
                             var t = k.points[l[u]];
                             if (! (t.zoom <= b)) {
                                 t.zoom = b;
@@ -12686,7 +12686,7 @@ default = Lb;
                                 p += t.y * v;
                                 m += v;
                                 t.parentId = r;
-                                e && (q || (q = this._map(h, !0)), e(q, this._map(t)))
+                                e && (q || (q = this._map(h, true)), e(q, this._map(t)))
                             }
                         }
                         1 === m ? c.push(h) : (h.parentId = r, c.push({
@@ -12744,8 +12744,8 @@ default = Lb;
                         "0.5": "rgb(250, 250, 56)",
                         1 : "rgb(250, 50, 56)"
                     },
-                    enableCluster: !1,
-                    showText: !0,
+                    enableCluster: false,
+                    showText: true,
                     textOptions: {
                         fontSize: 13,
                         color: "white"
@@ -12906,7 +12906,7 @@ default = Lb;
                 e = e.minZoom;
                 c > g ? c = g: c < e && (c = e);
                 if (this.zoom !== c) return this.zoom = c,
-                !0;
+                true;
                 if (!this.options.enableCluster) return ! 1;
                 c = a.getBounds();
                 a = c.ne;
@@ -13602,7 +13602,7 @@ default = Lb;
                         viewMatrix: c,
                         stateManager: this.stateManager
                     });
-                    "three" !== a.mapType && "cesium" !== a.mapType && !1 !== a.autoUpdate && this.clear();
+                    "three" !== a.mapType && "cesium" !== a.mapType && false !== a.autoUpdate && this.clear();
                     for (a = 0; a < this.renderArr.length; a++) this.renderArr[a] && this.renderArr[a].bind(this)(this.transferOptions)
                 }
             }
@@ -13669,13 +13669,13 @@ default = Lb;
         {
             key: "startAnimation",
             value: function() {
-                this.isAnimation || (this.isAnimation = !0, window.requestAnimationFrame(this._animation))
+                this.isAnimation || (this.isAnimation = true, window.requestAnimationFrame(this._animation))
             }
         },
         {
             key: "stopAnimation",
             value: function() {
-                this.isAnimation = !1
+                this.isAnimation = false
             }
         }]);
         return c
@@ -13835,7 +13835,7 @@ default = Lb;
             b.position = [];
             b.opacity = 1;
             b.currentScale = 1;
-            b.autoUpdate = !0;
+            b.autoUpdate = true;
             return b
         }
         S(a, c);
@@ -13913,8 +13913,8 @@ default = Lb;
                 g = a.viewMatrix;
                 a = this.program;
                 b.useProgram(a.program);
-                b.uniformMatrix4fv(a.uniforms.u_projectionMatrix, !1, c);
-                b.uniformMatrix4fv(a.uniforms.u_modelViewMatrix, !1, g);
+                b.uniformMatrix4fv(a.uniforms.u_projectionMatrix, false, c);
+                b.uniformMatrix4fv(a.uniforms.u_modelViewMatrix, false, g);
                 c = this.opacity;
                 void 0 !== this.options.opacity && (c = this.options.opacity);
                 b.uniform1f(a.uniforms.u_opacity, c);
@@ -13926,8 +13926,8 @@ default = Lb;
                 for (c = 0; c < this.bufferDataArr.length; c++) if (! (0 >= this.bufferDataArr[c].length)) {
                     g = (new Float32Array(this.bufferDataArr[c])).BYTES_PER_ELEMENT;
                     b.bindBuffer(b.ARRAY_BUFFER, this.vertexBuffer[c]);
-                    b.vertexAttribPointer(a.attributes.aColor, 4, b.FLOAT, !1, 7 * g, 3 * g);
-                    b.vertexAttribPointer(a.attributes.aPos, 3, b.FLOAT, !1, 7 * g, 0);
+                    b.vertexAttribPointer(a.attributes.aColor, 4, b.FLOAT, false, 7 * g, 3 * g);
+                    b.vertexAttribPointer(a.attributes.aPos, 3, b.FLOAT, false, 7 * g, 0);
                     g = this.position[c];
                     var k = C.create(),
                     h = [this.currentScale, this.currentScale, this.currentScale];
@@ -13935,7 +13935,7 @@ default = Lb;
                     C.identity(k);
                     C.translate(k, k, [g[0], g[1], 0]);
                     C.scale(k, k, h);
-                    b.uniformMatrix4fv(a.uniforms.u_modelMatrix, !1, k);
+                    b.uniformMatrix4fv(a.uniforms.u_modelMatrix, false, k);
                     b.bindBuffer(b.ELEMENT_ARRAY_BUFFER, this.indexBuffer[c]);
                     b.drawElements(b.TRIANGLES, this.indexDataArr[c].length, b.UNSIGNED_SHORT, 0);
                     b.bindBuffer(b.ARRAY_BUFFER, null);
@@ -13959,7 +13959,7 @@ default = Lb;
             b = R(this, (a.__proto__ || N(a)).call(this, b));
             b.bufferData = [];
             b.date = new Date;
-            b.autoUpdate = !0;
+            b.autoUpdate = true;
             return b
         }
         S(a, c);
@@ -14103,7 +14103,7 @@ default = Lb;
             b.endTime = Number(b.options.endTime);
             b.time = b.startTime;
             b.segs = Number(b.options.segs) || 10;
-            b.autoUpdate = !0;
+            b.autoUpdate = true;
             return b
         }
         S(a, c);
@@ -14171,10 +14171,10 @@ default = Lb;
                 c = a.matrix;
                 a = this.program;
                 b.useProgram(a.program);
-                b.uniformMatrix4fv(a.uniforms.u_matrix, !1, c);
+                b.uniformMatrix4fv(a.uniforms.u_matrix, false, c);
                 b.bindBuffer(b.ARRAY_BUFFER, this.buffer);
                 b.enableVertexAttribArray(a.attributes.aPos);
-                b.vertexAttribPointer(a.attributes.aPos, 4, b.FLOAT, !1, 0, 0);
+                b.vertexAttribPointer(a.attributes.aPos, 4, b.FLOAT, false, 0, 0);
                 c = this.normizedColor(this.options.color);
                 b.uniform3f(a.uniforms.uFragColor, c[0], c[1], c[2]);
                 b.uniform1f(a.uniforms.currentTime, this.time);
@@ -14210,7 +14210,7 @@ default = Lb;
                     minSize: 25,
                     maxSize: 40,
                     clusterRadius: 200,
-                    showText: !0,
+                    showText: true,
                     maxZoom: 19,
                     minZoom: 4,
                     gradient: {
@@ -14531,10 +14531,10 @@ default = Lb;
                 b.useProgram(c.program);
                 var g = this.normizedColor(this.options.color);
                 b.uniform4f(c.uniforms.uFragColor, g[0], g[1], g[2], g[3]);
-                b.uniformMatrix4fv(c.uniforms.uMatrix, !1, a);
+                b.uniformMatrix4fv(c.uniforms.uMatrix, false, a);
                 b.bindBuffer(b.ARRAY_BUFFER, this.buffer);
                 b.enableVertexAttribArray(c.attributes.aPos);
-                b.vertexAttribPointer(c.attributes.aPos, 3, b.FLOAT, !1, 0, 0);
+                b.vertexAttribPointer(c.attributes.aPos, 3, b.FLOAT, false, 0, 0);
                 b.enable(b.BLEND);
                 b.blendEquation(b.FUNC_ADD);
                 b.blendFunc(b.ONE, b.ONE);
@@ -14556,7 +14556,7 @@ default = Lb;
             b.startTime = b.options.startTime || 0;
             b.endTime = b.options.endTime;
             b.time = b.startTime;
-            b.autoUpdate = !0;
+            b.autoUpdate = true;
             return b
         }
         S(a, c);
@@ -14607,7 +14607,7 @@ default = Lb;
             value: function(a) {
                 var b = a.gl,
                 c = a.matrix;
-                0 >= this.bufferData.length || (a = this.program, b.useProgram(a.program), b.uniformMatrix4fv(a.uniforms.u_matrix, !1, c), b.bindBuffer(b.ARRAY_BUFFER, this.buffer), c = this.f32BufferData.BYTES_PER_ELEMENT, b.enableVertexAttribArray(a.attributes.aPos), b.vertexAttribPointer(a.attributes.aPos, 4, b.FLOAT, !1, 9 * c, 0), b.enableVertexAttribArray(a.attributes.aColor), b.vertexAttribPointer(a.attributes.aColor, 4, b.FLOAT, !1, 9 * c, 4 * c), b.enableVertexAttribArray(a.attributes.aSize), b.vertexAttribPointer(a.attributes.aSize, 1, b.FLOAT, !1, 9 * c, 8 * c), b.uniform1f(a.uniforms.currentTime, this.time), b.uniform1f(a.uniforms.trailLength, this.options.trailLength || 3), c = 1, this.options.shape && Jf[this.options.shape] && (c = Jf[this.options.shape]), b.uniform1i(a.uniforms.uShape, c), a = this.options.blend, b.enable(b.BLEND), b.blendEquation(b.FUNC_ADD), a && "lighter" === a ? b.blendFunc(b.SRC_ALPHA, b.ONE) : b.blendFunc(b.SRC_ALPHA, b.ONE_MINUS_SRC_ALPHA), b.drawArrays(b.POINTS, 0, this.bufferData.length / 9), b.bindBuffer(b.ARRAY_BUFFER, null), b.disable(b.BLEND), b.useProgram(null), this.time += this.options.step || .1, this.time > this.endTime && (this.time = this.startTime))
+                0 >= this.bufferData.length || (a = this.program, b.useProgram(a.program), b.uniformMatrix4fv(a.uniforms.u_matrix, false, c), b.bindBuffer(b.ARRAY_BUFFER, this.buffer), c = this.f32BufferData.BYTES_PER_ELEMENT, b.enableVertexAttribArray(a.attributes.aPos), b.vertexAttribPointer(a.attributes.aPos, 4, b.FLOAT, false, 9 * c, 0), b.enableVertexAttribArray(a.attributes.aColor), b.vertexAttribPointer(a.attributes.aColor, 4, b.FLOAT, false, 9 * c, 4 * c), b.enableVertexAttribArray(a.attributes.aSize), b.vertexAttribPointer(a.attributes.aSize, 1, b.FLOAT, false, 9 * c, 8 * c), b.uniform1f(a.uniforms.currentTime, this.time), b.uniform1f(a.uniforms.trailLength, this.options.trailLength || 3), c = 1, this.options.shape && Jf[this.options.shape] && (c = Jf[this.options.shape]), b.uniform1i(a.uniforms.uShape, c), a = this.options.blend, b.enable(b.BLEND), b.blendEquation(b.FUNC_ADD), a && "lighter" === a ? b.blendFunc(b.SRC_ALPHA, b.ONE) : b.blendFunc(b.SRC_ALPHA, b.ONE_MINUS_SRC_ALPHA), b.drawArrays(b.POINTS, 0, this.bufferData.length / 9), b.bindBuffer(b.ARRAY_BUFFER, null), b.disable(b.BLEND), b.useProgram(null), this.time += this.options.step || .1, this.time > this.endTime && (this.time = this.startTime))
             }
         }]);
         return a
@@ -14620,7 +14620,7 @@ default = Lb;
             b.startTime = b.options.startTime || 0;
             b.endTime = b.options.endTime;
             b.time = b.startTime;
-            b.autoUpdate = !0;
+            b.autoUpdate = true;
             return b
         }
         S(a, c);
@@ -14702,13 +14702,13 @@ default = Lb;
                 c = a.matrix;
                 a = this.program;
                 a.use(b);
-                b.uniformMatrix4fv(a.uniforms.u_matrix, !1, c);
+                b.uniformMatrix4fv(a.uniforms.u_matrix, false, c);
                 b.bindBuffer(b.ARRAY_BUFFER, this.buffer);
                 c = this.f32BufferData.BYTES_PER_ELEMENT;
                 b.enableVertexAttribArray(a.attributes.aPos);
-                b.vertexAttribPointer(a.attributes.aPos, 4, b.FLOAT, !1, 8 * c, 0);
+                b.vertexAttribPointer(a.attributes.aPos, 4, b.FLOAT, false, 8 * c, 0);
                 b.enableVertexAttribArray(a.attributes.aColor);
-                b.vertexAttribPointer(a.attributes.aColor, 4, b.FLOAT, !1, 8 * c, 4 * c);
+                b.vertexAttribPointer(a.attributes.aColor, 4, b.FLOAT, false, 8 * c, 4 * c);
                 c = this.normizedColor(this.options.color);
                 b.uniform3f(a.uniforms.uFragColor, c[0], c[1], c[2]);
                 b.uniform1f(a.uniforms.currentTime, this.time);
@@ -14732,7 +14732,7 @@ default = Lb;
             b = R(this, (a.__proto__ || N(a)).call(this, b, c));
             b.initData();
             b.date = new Date;
-            b.autoUpdate = !0;
+            b.autoUpdate = true;
             return b
         }
         S(a, c);
@@ -14743,8 +14743,8 @@ default = Lb;
                     color: "rgba(25, 25, 250, 1)",
                     blend: "normal",
                     width: 2,
-                    isFlat: !0,
-                    antialias: !1,
+                    isFlat: true,
+                    antialias: false,
                     lineJoin: "miter",
                     lineCap: "butt",
                     interval: .1,
@@ -14930,7 +14930,7 @@ default = Lb;
                 }));
                 var t = Ba(c.map(function(a) {
                     return - 1
-                }), !0),
+                }), true),
                 z = Ba(c),
                 v = Ba(c.map(rc( - 1))),
                 x = Ba(c.map(rc(1)));
@@ -14950,7 +14950,7 @@ default = Lb;
                     var k = this.getOptions(),
                     h = this.program;
                     h.use(b);
-                    var l = this.map ? this.map.getZoom() >= k.zoom && this.autoUpdate ? !0 : !1 : !0;
+                    var l = this.map ? this.map.getZoom() >= k.zoom && this.autoUpdate ? true : false : true;
                     h.setUniforms(T(this.getCommonUniforms(a), {
                         u_matrix: c,
                         miter: 1,
@@ -15208,7 +15208,7 @@ default = Lb;
     } else P.addEventListener && "function" == typeof postMessage && !P.importScripts ? (hc = function(c) {
         P.postMessage(c + "", "*")
     },
-    P.addEventListener("message", Pf, !1)) : hc = "onreadystatechange" in (xc ? xb.createElement("script") : {}) ?
+    P.addEventListener("message", Pf, false)) : hc = "onreadystatechange" in (xc ? xb.createElement("script") : {}) ?
     function(c) {
         md.appendChild(xc ? xb.createElement("script") : {}).onreadystatechange = function() {
             md.removeChild(this);
@@ -15230,12 +15230,12 @@ default = Lb;
     Nc = function(c) {
         try {
             return {
-                e: !1,
+                e: false,
                 v: c()
             }
         } catch(a) {
             return {
-                e: !0,
+                e: true,
                 v: a
             }
         }
@@ -15258,7 +15258,7 @@ default = Lb;
     Wf = function(c) {
         c = "function" == typeof X[c] ? X[c] : P[c];
         Ca && c && !c[Vf] && za.f(c, Vf, {
-            configurable: !0,
+            configurable: true,
             get: function() {
                 return this
             }
@@ -15292,9 +15292,9 @@ default = Lb;
             Qd.call(P, b)
         };
         else {
-            var g = !0,
+            var g = true,
             k = document.createTextNode(""); (new Sf(b)).observe(k, {
-                characterData: !0
+                characterData: true
             });
             d = function() {
                 k.data = g = !g
@@ -15331,11 +15331,11 @@ default = Lb;
     } (),
     ag = function(c) {
         var a;
-        return oa(c) && "function" == typeof(a = c.then) ? a: !1
+        return oa(c) && "function" == typeof(a = c.then) ? a: false
     },
     Vd = function(c, a) {
         if (!c._n) {
-            c._n = !0;
+            c._n = true;
             var b = c._c;
             Xf(function() {
                 for (var d = c._v,
@@ -15350,14 +15350,14 @@ default = Lb;
                     q = n.reject,
                     r = n.domain;
                     try {
-                        p ? (e || (2 == c._h && Vi(c), c._h = 1), !0 === p ? l = d: (r && r.enter(), l = p(d), r && (r.exit(), k = !0)), l === n.promise ? q(Yf("Promise-chain cycle")) : (h = ag(l)) ? h.call(l, m, q) : m(l)) : q(d)
+                        p ? (e || (2 == c._h && Vi(c), c._h = 1), true === p ? l = d: (r && r.enter(), l = p(d), r && (r.exit(), k = true)), l === n.promise ? q(Yf("Promise-chain cycle")) : (h = ag(l)) ? h.call(l, m, q) : m(l)) : q(d)
                     } catch(u) {
                         r && !k && r.exit(),
                         q(u)
                     }
                 }
                 c._c = [];
-                c._n = !1;
+                c._n = false;
                 a && !c._h && Wi(c)
             })
         }
@@ -15394,30 +15394,30 @@ default = Lb;
     },
     Gb = function(c) {
         var a = this;
-        a._d || (a._d = !0, a = a._w || a, a._v = c, a._s = 2, a._a || (a._a = a._c.slice()), Vd(a, !0))
+        a._d || (a._d = true, a = a._w || a, a._v = c, a._s = 2, a._a || (a._a = a._c.slice()), Vd(a, true))
     },
     Wd = function(c) {
         var a = this,
         b;
         if (!a._d) {
-            a._d = !0;
+            a._d = true;
             a = a._w || a;
             try {
                 if (a === c) throw Yf("Promise can't be resolved itself"); (b = ag(c)) ? Xf(function() {
                     var d = {
                         _w: a,
-                        _d: !1
+                        _d: false
                     };
                     try {
                         b.call(c, ka(Wd, d, 1), ka(Gb, d, 1))
                     } catch(e) {
                         Gb.call(d, e)
                     }
-                }) : (a._v = c, a._s = 1, Vd(a, !1))
+                }) : (a._v = c, a._s = 1, Vd(a, false))
             } catch(d) {
                 Gb.call({
                     _w: a,
-                    _d: !1
+                    _d: false
                 },
                 d)
             }
@@ -15438,20 +15438,20 @@ default = Lb;
             this._c = [];
             this._a = void 0;
             this._s = 0;
-            this._d = !1;
+            this._d = false;
             this._v = void 0;
             this._h = 0;
-            this._n = !1
+            this._n = false
         };
         Xd.prototype = Ud(Qa.prototype, {
             then: function(c, a) {
                 var b = jc(Lf(this, Qa));
-                b.ok = "function" == typeof c ? c: !0;
+                b.ok = "function" == typeof c ? c: true;
                 b.fail = "function" == typeof a && a;
                 b.domain = ic ? Fb.domain: void 0;
                 this._c.push(b);
                 this._a && this._a.push(b);
-                this._s && Vd(this, !1);
+                this._s && Vd(this, false);
                 return b.promise
             },
             "catch": function(c) {
@@ -15499,14 +15499,14 @@ default = Lb;
                 var b = [],
                 g = 0,
                 l = 1;
-                pb(c, !1,
+                pb(c, false,
                 function(c) {
                     var h = g++,
-                    k = !1;
+                    k = false;
                     b.push(void 0);
                     l++;
                     a.resolve(c).then(function(a) {
-                        k || (k = !0, b[h] = a, --l || d(b))
+                        k || (k = true, b[h] = a, --l || d(b))
                     },
                     e)
                 }); --l || d(b)
@@ -15519,7 +15519,7 @@ default = Lb;
             b = jc(a),
             d = b.reject,
             e = Nc(function() {
-                pb(c, !1,
+                pb(c, false,
                 function(c) {
                     a.resolve(c).then(b.resolve, d)
                 })
@@ -15556,7 +15556,7 @@ default = Lb;
     Zi = O(function(c) {
         c.exports = {
             "default": Yi,
-            __esModule: !0
+            __esModule: true
         }
     }),
     cg = Q(Zi),
@@ -15585,7 +15585,7 @@ default = Lb;
             });
             Ud(e.prototype, {
                 clear: function() {
-                    for (var b = eb(this, a), c = b._i, d = b._f; d; d = d.n) d.r = !0,
+                    for (var b = eb(this, a), c = b._i, d = b._f; d; d = d.n) d.r = true,
                     d.p && (d.p = d.p.n = void 0),
                     delete c[d.i];
                     b._f = b._l = void 0;
@@ -15597,7 +15597,7 @@ default = Lb;
                         var d = b.n,
                         e = b.p;
                         delete c._i[b.i];
-                        b.r = !0;
+                        b.r = true;
                         e && (e.n = d);
                         d && (d.p = e);
                         c._f == b && (c._f = d);
@@ -15625,12 +15625,12 @@ default = Lb;
             var d = Qc(c, a),
             e;
             d ? d.v = b: (c._l = d = {
-                i: e = dg(a, !0),
+                i: e = dg(a, true),
                 k: a,
                 v: b,
                 p: a = c._l,
                 n: void 0,
-                r: !1
+                r: false
             },
             c._f || (c._f = d), a && (a.n = d), c[kc]++, "F" !== e && (c._i[e] = d));
             return c
@@ -15648,7 +15648,7 @@ default = Lb;
                 b = this._l; b && b.r;) b = b.p;
                 return this._t && (this._l = b = b ? b.n: this._t._f) ? "keys" == a ? cb(0, b.k) : "values" == a ? cb(0, b.v) : cb(0, [b.k, b.v]) : (this._t = void 0, cb(1))
             },
-            b ? "entries": "values", !b, !0);
+            b ? "entries": "values", !b, true);
             Wf(a)
         }
     },
@@ -15707,7 +15707,7 @@ default = Lb;
             a in n && (!g || "clear" != a) && Ta(h.prototype, a,
             function(c, d) {
                 Lc(this, h, a);
-                if (!b && g && !oa(c)) return "get" == a ? void 0 : !1;
+                if (!b && g && !oa(c)) return "get" == a ? void 0 : false;
                 c = this._c[a](0 === c ? 0 : c, d);
                 return b ? this: c
             })
@@ -15715,7 +15715,7 @@ default = Lb;
             get: function() {
                 return this._c.size
             }
-        })) : (h = d.getConstructor(a, c, e, l), Ud(h.prototype, b), Dc.NEED = !0);
+        })) : (h = d.getConstructor(a, c, e, l), Ud(h.prototype, b), Dc.NEED = true);
         kb(h, c);
         p[c] = h;
         F(F.G + F.W + F.F, p);
@@ -15735,13 +15735,13 @@ default = Lb;
             return Yd.def(eb(this, "Map"), 0 === c ? 0 : c, a)
         }
     },
-    Yd, !0);
+    Yd, true);
     F(F.P + F.R, "Map", {
         toJSON: function(c) {
             return function() {
                 if (Ic(this) != c) throw TypeError(c + "#toJSON isn't generic");
                 var a = [];
-                pb(this, !1, a.push, a, void 0);
+                pb(this, false, a.push, a, void 0);
                 return a
             }
         } ("Map")
@@ -15763,11 +15763,11 @@ default = Lb;
                 if (d) {
                     var k = 0;
                     var h = ka(b, c, 2);
-                    pb(a, !1,
+                    pb(a, false,
                     function(a) {
                         g.push(h(a, k++))
                     })
-                } else pb(a, !1, g.push, g);
+                } else pb(a, false, g.push, g);
                 return new this(g)
             }
         })
@@ -15776,7 +15776,7 @@ default = Lb;
     fj = O(function(c) {
         c.exports = {
             "default": ej,
-            __esModule: !0
+            __esModule: true
         }
     }),
     eg = Q(fj),
@@ -15936,11 +15936,11 @@ default = Lb;
                 g = this.ctx,
                 k = [],
                 h = new eg,
-                l = !0,
-                n = !1,
+                l = true,
+                n = false,
                 p = void 0;
                 try {
-                    for (var m = gd(this.iconHash), q; ! (l = (q = m.next()).done); l = !0) {
+                    for (var m = gd(this.iconHash), q; ! (l = (q = m.next()).done); l = true) {
                         var r = db(q.value, 2),
                         u = r[1],
                         w = u.width,
@@ -15955,7 +15955,7 @@ default = Lb;
                         })
                     }
                 } catch(z) {
-                    n = !0,
+                    n = true,
                     p = z
                 } finally {
                     try { ! l && m.
@@ -16103,7 +16103,7 @@ default = Lb;
                     color: a.fillColor,
                     opacity: a.fillOpacity,
                     topColor: a.fillColor,
-                    useLight: !1
+                    useLight: false
                 });
                 this.lineLayer.setOptions({
                     color: a.lineColor,
@@ -16133,10 +16133,10 @@ default = Lb;
             key: "getDefaultOptions",
             value: function() {
                 return {
-                    enablePicked: !1,
+                    enablePicked: false,
                     selectedIndex: -1,
                     selectedColor: "#ff0000",
-                    autoSelect: !0,
+                    autoSelect: true,
                     lineColor: "rgba(250, 250, 25, 1)",
                     lineWidth: 2,
                     lineJoin: "miter",
@@ -16162,7 +16162,7 @@ default = Lb;
     Xa = Z.BoundingBox = function(c, a, b) {
         c = c || K.fromValues(Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY, Number.POSITIVE_INFINITY);
         a = a || K.fromValues(Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY, Number.NEGATIVE_INFINITY);
-        void 0 === b || !0 === b ? (this.min = K.clone(c), this.max = K.clone(a)) : (this.min = c, this.max = a);
+        void 0 === b || true === b ? (this.min = K.clone(c), this.max = K.clone(a)) : (this.min = c, this.max = a);
         this.transform = C.create()
     };
     Xa.prototype.updateBoundingBox = function(c) {
@@ -16207,7 +16207,7 @@ default = Lb;
             K.add(k, k, b);
             K.max(b, d, e);
             K.add(h, h, b);
-            g = new Xa(k, h, !1);
+            g = new Xa(k, h, false);
             g.calculateTransform();
             return g
         }
@@ -16217,7 +16217,7 @@ default = Lb;
         this.componentType = c.componentType;
         this.byteOffset = void 0 !== c.byteOffset ? c.byteOffset: 0;
         this.byteStride = a.byteStride;
-        this.normalized = void 0 !== c.normalized ? c.normalized: !1;
+        this.normalized = void 0 !== c.normalized ? c.normalized: false;
         this.count = c.count;
         this.type = c.type;
         this.size = hd[this.type];
@@ -16244,7 +16244,7 @@ default = Lb;
         this.buffer = c.createBuffer()
     };
     Zd.prototype.bindData = function(c) {
-        return this.target ? (c.bindBuffer(this.target, this.buffer), c.bufferData(this.target, this.data, c.STATIC_DRAW), c.bindBuffer(this.target, null), !0) : !1
+        return this.target ? (c.bindBuffer(this.target, this.buffer), c.bufferData(this.target, this.data, c.STATIC_DRAW), c.bindBuffer(this.target, null), true) : false
     };
     var jj = Z.Camera = function(c) {
         this.name = void 0 !== c.name ? c.name: null;
@@ -16276,7 +16276,7 @@ default = Lb;
         this.children = c.children || [];
         this.mesh = void 0 !== c.mesh ? Ja.glTF.meshes[c.mesh] : null;
         this.skin = void 0 !== c.skin ? c.skin: null;
-        void 0 !== c.extensions && void 0 !== c.extensions.gl_avatar && !0 === Ja.enableGLAvatar && (this.skin = new kj(Ja.glTF, Ja.skeletonGltf.skins[Ja.skeletonGltf.json.extensions.gl_avatar.skins[c.extensions.gl_avatar.skin.name]], c.extensions.gl_avatar.skin.inverseBindMatrices));
+        void 0 !== c.extensions && void 0 !== c.extensions.gl_avatar && true === Ja.enableGLAvatar && (this.skin = new kj(Ja.glTF, Ja.skeletonGltf.skins[Ja.skeletonGltf.json.extensions.gl_avatar.skins[c.extensions.gl_avatar.skin.name]], c.extensions.gl_avatar.skin.inverseBindMatrices));
         this.weights = void 0 !== c.weights ? c.weights: null;
         this.extensions = void 0 !== c.extensions ? c.extensions: null;
         this.extras = void 0 !== c.extras ? c.extras: null;
@@ -16331,7 +16331,7 @@ default = Lb;
         this.attributes = a.attributes;
         this.indices = void 0 !== a.indices ? a.indices: null;
         var b;
-        if (void 0 !== a.extensions && void 0 !== a.extensions.gl_avatar && !0 === Ja.enableGLAvatar && a.extensions.gl_avatar.attributes) for (b in a.extensions.gl_avatar.attributes) this.attributes[b] = a.extensions.gl_avatar.attributes[b];
+        if (void 0 !== a.extensions && void 0 !== a.extensions.gl_avatar && true === Ja.enableGLAvatar && a.extensions.gl_avatar.attributes) for (b in a.extensions.gl_avatar.attributes) this.attributes[b] = a.extensions.gl_avatar.attributes[b];
         null !== this.indices ? (this.indicesComponentType = c.json.accessors[this.indices].componentType, this.indicesLength = c.json.accessors[this.indices].count, this.indicesOffset = c.json.accessors[this.indices].byteOffset || 0) : (this.drawArraysCount = c.json.accessors[this.attributes.POSITION].count, this.drawArraysOffset = c.json.accessors[this.attributes.POSITION].byteOffset || 0);
         for (b in this.attributes) this.attributes[b] = c.accessors[this.attributes[b]];
         this.material = void 0 !== a.material ? c.materials[a.material] : null;
@@ -16340,7 +16340,7 @@ default = Lb;
         this.extensions = void 0 !== a.extensions ? a.extensions: null;
         this.extras = void 0 !== a.extras ? a.extras: null;
         this.boundingBox = this.shader = this.indexBuffer = this.vertexBuffer = this.vertexArray = null;
-        void 0 !== this.attributes.POSITION && (c = this.attributes.POSITION, c.max && "VEC3" === c.type && (this.boundingBox = new Xa(K.fromValues(c.min[0], c.min[1], c.min[2]), K.fromValues(c.max[0], c.max[1], c.max[2]), !1), this.boundingBox.calculateTransform()))
+        void 0 !== this.attributes.POSITION && (c = this.attributes.POSITION, c.max && "VEC3" === c.type && (this.boundingBox = new Xa(K.fromValues(c.min[0], c.min[1], c.min[2]), K.fromValues(c.max[0], c.max[1], c.max[2]), false), this.boundingBox.calculateTransform()))
     },
     ig = Z.Texture = function(c) {
         this.name = void 0 !== c.name ? c.name: null;
@@ -16416,7 +16416,7 @@ default = Lb;
         this.emissiveFactor = void 0 !== c.emissiveFactor ? c.emissiveFactor: [0, 0, 0];
         this.alphaMode = void 0 !== c.alphaMode ? c.alphaMode: "OPAQUE";
         this.alphaCutoff = void 0 !== c.alphaCutoff ? c.alphaCutoff: .5;
-        this.doubleSided = c.doubleSided || !1;
+        this.doubleSided = c.doubleSided || false;
         this.extensions = void 0 !== c.extensions ? c.extensions: null;
         this.extras = void 0 !== c.extras ? c.extras: null
     },
@@ -16435,7 +16435,7 @@ default = Lb;
         if (this.inverseBindMatrices) for (this.inverseBindMatricesData = sc(this.inverseBindMatrices), this.inverseBindMatrix = [], this.jointMatrixUniformBuffer = null, this.jointMatrixUnidormBufferData = new Float32Array(1040), b = 0, d = this.inverseBindMatricesData.length; b < d; b += 16) this.inverseBindMatrix.push(C.fromValues(this.inverseBindMatricesData[b], this.inverseBindMatricesData[b + 1], this.inverseBindMatricesData[b + 2], this.inverseBindMatricesData[b + 3], this.inverseBindMatricesData[b + 4], this.inverseBindMatricesData[b + 5], this.inverseBindMatricesData[b + 6], this.inverseBindMatricesData[b + 7], this.inverseBindMatricesData[b + 8], this.inverseBindMatricesData[b + 9], this.inverseBindMatricesData[b + 10], this.inverseBindMatricesData[b + 11], this.inverseBindMatricesData[b + 12], this.inverseBindMatricesData[b + 13], this.inverseBindMatricesData[b + 14], this.inverseBindMatricesData[b + 15]))
     },
     kj = Z.SkinLink = function(c, a, b) {
-        this.isLink = !0;
+        this.isLink = true;
         c.skins || (c.skins = []);
         c.skins.push(this);
         this.name = a.name;
@@ -16524,11 +16524,11 @@ default = Lb;
     Ib = Z.glTFLoader = function(c) {
         this._init();
         this.glTF = null;
-        this.enableGLAvatar = !1;
+        this.enableGLAvatar = false;
         this.linkSkeletonGltf = null
     };
     Ib.prototype._init = function() {
-        this._loadDone = !1;
+        this._loadDone = false;
         this._bufferLoaded = this._bufferRequested = 0;
         this._buffers = [];
         this._bufferTasks = {};
@@ -16537,11 +16537,11 @@ default = Lb;
         Ja = this
     };
     Ib.prototype._checkComplete = function() {
-        this._bufferRequested == this._bufferLoaded && this._imageRequested == this._imageLoaded && (this._loadDone = !0);
+        this._bufferRequested == this._bufferLoaded && this._imageRequested == this._imageLoaded && (this._loadDone = true);
         this._loadDone && this._pendingTasks == this._finishedPendingTasks && (this._postprocess(), this.onload(this.glTF))
     };
     Ib.prototype.loadGLTF_GL_Avatar_Skin = function(c, a, b) {
-        this.enableGLAvatar = !0;
+        this.enableGLAvatar = true;
         this.skeletonGltf = a;
         this.loadGLTF(c, b)
     };
@@ -16756,9 +16756,9 @@ default = Lb;
                 scale: b.scale
             });
             c.children = [c.gltfLayer];
-            c.autoUpdate = !0;
+            c.autoUpdate = true;
             c.index = 0;
-            c.isStarted = !1 === b.autoPlay ? !1 : !0;
+            c.isStarted = false === b.autoPlay ? false : true;
             return c
         }
         S(a, c);
@@ -16816,7 +16816,7 @@ default = Lb;
                 }
                 this.pointData = c;
                 this.gltfLayer.setData(c, {
-                    autoRender: !1
+                    autoRender: false
                 })
             }
         },
@@ -16874,13 +16874,13 @@ default = Lb;
         {
             key: "start",
             value: function() {
-                this.isStarted = !0
+                this.isStarted = true
             }
         },
         {
             key: "stop",
             value: function() {
-                this.isStarted = !1
+                this.isStarted = false
             }
         },
         {
@@ -16901,7 +16901,7 @@ default = Lb;
         this.parseColors(c)
     };
     ca.prototype.initialize = function(c) {
-        this._initialize || (this._initialize = !0)
+        this._initialize || (this._initialize = true)
     };
     ca.prototype.clearCache = function(c) {
         this.cache = {}
@@ -16943,7 +16943,7 @@ default = Lb;
         this._loadCount = {};
         for (h = 0; h < b.length; h++) d = b[h][0],
         c = b[h][1],
-        this._loadCount[d + "_" + c + "_" + b[h][2]] = !1;
+        this._loadCount[d + "_" + c + "_" + b[h][2]] = false;
         for (h = 0; h < b.length; h++) d = b[h][0],
         c = b[h][1],
         this.showTile(d, c, a)
@@ -16963,10 +16963,10 @@ default = Lb;
         this.lineLayer.setData(c)
     };
     ca.prototype.isAllLoaded = function() {
-        var c = !0,
+        var c = true,
         a;
         for (a in this._loadCount) if (!this._loadCount[a]) {
-            c = !1;
+            c = false;
             break
         }
         return c
@@ -16988,7 +16988,7 @@ default = Lb;
         l = "_cbk" + (1E5 * Math.random()).toFixed(0),
         n = this.getTileUrl(c, a, b, "BMapGL." + l);
         BMapGL[l] = function(n) {
-            d._loadCount[c + "_" + a + "_" + b] = !0;
+            d._loadCount[c + "_" + a + "_" + b] = true;
             var m = e.getCenter(),
             p = Math.round(e.getZoom());
             m.equals(g) && p === k ? (m = n.content && n.content.tf, n.data && (m = n.data), d.cache[h] = m ? {
@@ -16997,7 +16997,7 @@ default = Lb;
             }: null, d.drawTogether && d.isAllLoaded() && d.drawCurrentData()) : p !== k && d.clear();
             delete BMapGL[l]
         };
-        void 0 !== d.cache[h] ? (d._loadCount[c + "_" + a + "_" + b] = !0, d.drawTogether && d.isAllLoaded() && d.drawCurrentData()) : this.request(n)
+        void 0 !== d.cache[h] ? (d._loadCount[c + "_" + a + "_" + b] = true, d.drawTogether && d.isAllLoaded() && d.drawCurrentData()) : this.request(n)
     };
     ca.prototype.getTileUrl = function(c, a, b, d) {
         return "https://sp3.baidu.com/7_AZsjOpB1gCo2Kml5_Y_DAcsMJiwa/traffic/?qt=vtraffic&x=" + c + "&y=" + a + "&z=" + b + "&fn=" + d + "&t=" + (new Date).getTime()
@@ -17054,7 +17054,7 @@ default = Lb;
             a = a.target;
             a.parentNode.removeChild(a)
         },
-        !1) : d.attachEvent && d.attachEvent("onreadystatechange",
+        false) : d.attachEvent && d.attachEvent("onreadystatechange",
         function(a) {
             a = window.event.srcElement; ! a || "loaded" !== a.readyState && "complete" !== a.readyState || a.parentNode.removeChild(a)
         });
@@ -17078,7 +17078,7 @@ default = Lb;
         function a(b) {
             G(this, a);
             b = R(this, (a.__proto__ || N(a)).call(this, b));
-            b.autoUpdate = !0;
+            b.autoUpdate = true;
             b.getOptions();
             var c = new LineFlowLayer({
                 color: "rgba(257, 254, 47, 0.9)",
@@ -17384,9 +17384,9 @@ default = Lb;
         M(c, [{
             key: "addLayer",
             value: function(a) {
-                for (var b = !1,
+                for (var b = false,
                 c = 0; c < this.layers.length; c++) if (this.layers[c] === a) {
-                    b = !0;
+                    b = true;
                     break
                 }
                 b || (a.map = this.webglLayer.map, "threeLayer" === a.layerType ? (a.setWebglLayer(this.webglLayer), b = a.getThreeLayer(), this.addLayer(b), a.initialize && a.initialize(b)) : (a.setWebglLayer(this.webglLayer), a.commonInitialize && a.commonInitialize(this.webglLayer.gl), a.initialize && a.initialize(this.webglLayer.gl), a.onOptionsChanged(a.getOptions(), {}), a.onDataChanged(a.getData()), a.onChanged(a.getOptions(), a.getData())), this.layers.push(a));
@@ -17432,9 +17432,9 @@ default = Lb;
         {
             key: "isRequestAnimation",
             value: function() {
-                for (var a = !1,
+                for (var a = false,
                 b = 0; b < this.layers.length; b++) if (this.layers[b].isRequestAnimation()) {
-                    a = !0;
+                    a = true;
                     break
                 }
                 return a
@@ -17521,14 +17521,14 @@ default = Lb;
         {
             key: "onMousemove",
             value: function(a) {
-                for (var b = !1,
+                for (var b = false,
                 c = 0; c < this.layers.length; c++) {
                     var e = this.layers[c];
                     if ("threeLayer" !== e.layerType && "ThreeLayer" !== e.layerType && e.options.enablePicked && e.pick) {
                         var g = e.pick(a.x, a.y);
                         this.webglLayer.map.map.platform.style.cursor = -1 === g.dataIndex ? "default": "pointer";
                         if (e.options.onMousemove) e.options.onMousemove(g, a);
-                        e.options.autoSelect && (b = !0)
+                        e.options.autoSelect && (b = true)
                     }
                 }
                 b && (this.webglLayer.isAnimation || this.webglLayer.render())
@@ -17541,7 +17541,7 @@ default = Lb;
             var b = this;
             G(this, c);
             this.options = {
-                autoUpdate: !0
+                autoUpdate: true
             };
             T(this.options, a);
             var d = a.pointOffset;
@@ -17740,6 +17740,6 @@ default = Lb;
     x.mat2 = ki;
     x.glMatrix = li;
     Object.defineProperty(x, "__esModule", {
-        value: !0
+        value: true
     })
 });
