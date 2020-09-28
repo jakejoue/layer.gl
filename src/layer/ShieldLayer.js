@@ -3,24 +3,20 @@ import Layer from "./Layer";
 import Buffer from "../core/Buffer";
 import VertexArray from "../core/VertexArray";
 import Program from "../core/Program";
+import tesselateSphere from "../geometry/sphere";
 
 import { mat4 } from "gl-matrix";
 
-export default class FanLayer extends Layer {
+export default class ShieldLayer extends Layer {
     constructor(options) {
         super(options);
-
-        this.autoUpdate = true;
         this.group = [];
-        this.time = 0;
     }
 
     getDefaultOptions() {
         return {
-            totalRadian: Math.PI,
             color: [1, 0.02, 0.02, 1],
             radius: 50,
-            step: 0.1,
         };
     }
 
@@ -35,20 +31,19 @@ export default class FanLayer extends Layer {
             attribute vec3 aPos;
             uniform mat4 uMatrix;
             uniform mat4 uObjMatrix;
-            uniform vec3 glowColor;
-            varying vec4 vFragColor;
+            varying vec3 vPos;
 
             void main() {
-                gl_Position = uMatrix * uObjMatrix * vec4(aPos.xy, 0, 1.0);
-                vFragColor = vec4(glowColor, pow(aPos.z, 1.3));
+                gl_Position = uMatrix * uObjMatrix * vec4(aPos.xyz, 1.0);
+                vPos = aPos;
             }`,
                 fragmentShader: `
-                varying vec4 vFragColor;
+                uniform vec3 glowColor;
+                varying vec3 vPos;
 
                 void main() {
-                    gl_FragColor = vFragColor;
-                }
-                `,
+                    gl_FragColor = vec4(glowColor, pow(vPos.z, 1.3));
+                }`,
             },
             this
         );
@@ -56,6 +51,12 @@ export default class FanLayer extends Layer {
         this.buffer = new Buffer({
             gl: gl,
             target: "ARRAY_BUFFER",
+            usage: "STATIC_DRAW",
+        });
+        // 顶点索引
+        this.indexBuffer = new Buffer({
+            gl: gl,
+            target: "ELEMENT_ARRAY_BUFFER",
             usage: "STATIC_DRAW",
         });
         const attributes = [
@@ -67,6 +68,7 @@ export default class FanLayer extends Layer {
                 offset: 0,
             },
         ];
+
         this.vertexArray = new VertexArray({
             gl: gl,
             program: this.program,
@@ -85,49 +87,26 @@ export default class FanLayer extends Layer {
                 const radius = +this.getValue("radius", data);
                 const point = this.normizedPoint([coord[0], coord[1], radius]);
 
-                const bufferData = this.create3dCanvasRipple({
-                    // 扇形角度值
-                    totalRadian: this.getValue("totalRadian", data),
-                    // 半径
-                    radius: radius,
+                // 构建半圆球
+                const {
+                    attributes: { POSITION },
+                    indices,
+                } = tesselateSphere({
+                    nlat: Math.max(radius, 20),
+                    nlong: Math.max(radius, 20) * 2,
+                    endLong: Math.PI,
                 });
+
                 // 存入多边形
                 this.group.push({
-                    bufferData,
+                    indexData: indices.value,
+                    bufferData: POSITION.value,
                     color: this.normizedColor(this.getValue("color", data)),
                     point: [point[0], point[1], 0],
                     scale: point[2],
                 });
             }
         }
-    }
-
-    create3dCanvasRipple(data) {
-        const { totalRadian, radius } = data;
-
-        // 弧度和半径比
-        const l = totalRadian / Math.max(radius, 20);
-
-        // 所有顶点
-        const vertices = [];
-        for (let m = l; m <= totalRadian; m += l) {
-            const x = Math.cos(m),
-                y = Math.sin(m);
-
-            vertices.push([0, 0, m / totalRadian]);
-            vertices.push([x, y, m / totalRadian]);
-        }
-
-        const arrayData = [];
-        // 构建三角形
-        for (let i = 0; i < vertices.length - 3; i++) {
-            arrayData.push(
-                ...vertices[i],
-                ...vertices[i + 1],
-                ...vertices[i + 3]
-            );
-        }
-        return arrayData;
     }
 
     destroy() {
@@ -144,14 +123,16 @@ export default class FanLayer extends Layer {
 
         for (let i = 0; i < this.group.length; i++) {
             // 绑定顶点数据
-            const { bufferData, point, scale, color } = this.group[i];
+            const { indexData, bufferData, point, scale, color } = this.group[
+                i
+            ];
             this.buffer.updateData(new Float32Array(bufferData));
             this.vertexArray.bind();
+            this.indexBuffer.updateData(indexData);
 
             const m = mat4.create();
             mat4.translate(m, m, point);
-            mat4.scale(m, m, [-scale, scale, 1]);
-            mat4.rotateZ(m, m, 2 * Math.PI * this.time);
+            mat4.scale(m, m, [scale, scale, scale]);
 
             const uniforms = {
                 uMatrix: matrix,
@@ -163,10 +144,15 @@ export default class FanLayer extends Layer {
             gl.enable(gl.BLEND);
             gl.blendEquation(gl.FUNC_ADD);
             gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-            gl.drawArrays(gl.TRIANGLES, 0, bufferData.length / 3);
-        }
 
-        this.time += this.options.step / 10;
-        1 < this.time && (this.time = 0);
+            gl.drawElements(
+                gl.TRIANGLES,
+                indexData.length,
+                indexData instanceof Uint16Array
+                    ? gl.UNSIGNED_SHORT
+                    : gl.UNSIGNED_INT,
+                0
+            );
+        }
     }
 }

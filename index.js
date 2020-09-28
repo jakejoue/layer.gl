@@ -9,5 +9,6 @@ export { default as PointLayer } from "./src/layer/PointLayer";
 export { default as LineLayer } from "./src/layer/LineLayer";
 export { default as SparkLayer } from "./src/layer/SparkLayer";
 export { default as FanLayer } from "./src/layer/FanLayer";
+export { default as ShieldLayer } from "./src/layer/ShieldLayer";
 
 export { default as ThreeLayer } from "./src/three/ThreeLayer";
