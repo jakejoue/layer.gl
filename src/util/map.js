@@ -49,7 +49,8 @@ function getMapBoxGLMap(map) {
                 height: map.transform.height,
             };
         },
-        // 渲染相关
+        /* **************** 渲染相关 ***************** */
+        // 坐标转换
         normizedPoint(coord) {
             const x = transform.mercatorXfromLng(coord[0]);
             const y = transform.mercatorYfromLat(coord[1]);
@@ -57,12 +58,19 @@ function getMapBoxGLMap(map) {
 
             return [x, y, z];
         },
+        // 地图范围（矩阵范围）用于repeat
         worldSize() {
             return 1;
         },
+        // 当前zoom范围下图幅像素范围
+        getZoomUnits() {
+            return 1 / map.transform.worldSize;
+        },
+        // 矩阵
         getMatirx() {
             return map.transform.customLayerMatrix();
         },
+        /* **************** 渲染相关 ***************** */
         // 销毁方法
         destroy() {
             listeners.forEach((l) => {

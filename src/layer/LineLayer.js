@@ -4,7 +4,14 @@ import Buffer from "../core/Buffer";
 import VertexArray from "../core/VertexArray";
 import Program from "../core/Program";
 
-import { length, toOneArr, perp } from "../util/line";
+import {
+    length,
+    toOneArr,
+    perp,
+    shiftArray,
+    buildIndexArr,
+} from "../util/vertex";
+import { loadTextureImage } from "../util/texture";
 
 const LineStyle = {
     normal: null,
@@ -106,7 +113,7 @@ export default class LineLayer extends Layer {
 
                 vec2 project(vec4 coord) {
                     vec3 screen = coord.xyz / coord.w;
-                    vec2 clip = (screen.xy + 1.0)/2.0;
+                    vec2 clip = (screen.xy + 1.0) / 2.0;
                     return clip * MAPV_resolution;
                 }
                 vec4 unproject(vec2 projected, float z, float w) {
@@ -116,24 +123,24 @@ export default class LineLayer extends Layer {
                 }
                 vec3 getNormalAndWidth(vec2 currentScreen, vec2 previousScreen, vec2 nextScreen, float thickness) {
                     vec2 dir = vec2(0.0);
-                    if(currentScreen == previousScreen) {
+                    if (currentScreen == previousScreen) {
                         dir = normalize(nextScreen - currentScreen);
                     } else if(currentScreen == nextScreen) {
                         dir = normalize(currentScreen - previousScreen);
                     } else {
-                        vec2 dirA = normalize((currentScreen - previousScreen));
-                        if(miter == 1) {
-                            vec2 dirB = normalize((nextScreen - currentScreen));
+                        vec2 dirA = normalize(currentScreen - previousScreen);
+                        if (miter == 1) {
+                            vec2 dirB = normalize(nextScreen - currentScreen);
                             vec2 tangent = normalize(dirA + dirB);
                             vec2 perp = vec2(-dirA.y, dirA.x);
                             vec2 miter = vec2(-tangent.y, tangent.x);
                             dir = tangent;
                             float angle = 40.0;
-                            if(dot(dirA,dirB) > cos(radians(angle))) {
-                                thickness = thickness/dot(miter,perp);
+                            if (dot(dirA, dirB) > cos(radians(angle))) {
+                                thickness = thickness / dot(miter, perp);
                             }
                         } else {
-                            dir=dirA;
+                            dir = dirA;
                         }
                     }
                     vec2 normal = vec2(-dir.y, dir.x);
@@ -147,7 +154,7 @@ export default class LineLayer extends Layer {
                     vTotalDistance = aTotalDistance;
                     
                     #if defined(USE_TEXTURE)
-                    vUV=uv;
+                    vUV = uv;
                     #endif
                     
                     #if defined(PICK)
@@ -162,7 +169,7 @@ export default class LineLayer extends Layer {
                         width = nw.z;
                         vec2 normal = nw.xy;
                         vNormal = normal * direction;
-                        normal *= width/2.0;
+                        normal *= width / 2.0;
 
                         gl_Position = uMatrix * vec4(position.xy + normal * direction, position.z, 1.0);
                     } else {
@@ -272,7 +279,7 @@ export default class LineLayer extends Layer {
             usage: "STATIC_DRAW",
         });
 
-        const attributes = [
+        let attributes = [
             {
                 stride: 12,
                 name: "previous",
@@ -366,8 +373,8 @@ export default class LineLayer extends Layer {
                 if (coords && coords.length > 0) {
                     line =
                         "Polygon" === data[i].geometry.type
-                            ? coords[0].map(this.normizedPoint)
-                            : coords.map(this.normizedPoint);
+                            ? coords[0].map((p) => this.normizedPoint(p))
+                            : coords.map((p) => this.normizedPoint(p));
                 }
 
                 const color = this.normizedColor(
@@ -375,8 +382,8 @@ export default class LineLayer extends Layer {
                 );
                 const lines = this.addMultipleCoords(line);
 
-                for (let m = 0; m < lines.length; m++) {
-                    this.processData(this.dataMgr, lines[m], color);
+                for (let j = 0; j < lines.length; j++) {
+                    this.processData(this.dataMgr, lines[j], color);
                 }
 
                 if (options.enablePicked) {
@@ -441,43 +448,39 @@ export default class LineLayer extends Layer {
     }
 
     processData(dataMgr, line, color) {
-        let r = line.length,
-            u = dataMgr.position.length / 6,
-            y = length(line),
-            t = y.arr,
-            z = y.total;
-        y = perp(
-            t.map(function (a) {
-                return [a, z];
-            })
-        );
-        t = t.map(function (a) {
-            return [a, 0, a, 1];
-        });
-        const v = perp(
-                line.map(function (a) {
-                    return -1;
-                }),
-                true
-            ),
-            B = perp(line),
-            A = perp(line.map(rc(-1))),
-            D = perp(line.map(rc(1)));
-        line = perp(
-            line.map(function (a) {
-                return color;
-            })
-        );
-        r = Be(r, u);
+        const count = line.length,
+            u = dataMgr.position.length / 6;
+        const { arr, total } = length(line);
 
-        dataMgr.uv.push(W(toOneArr(t)));
-        dataMgr.counter.push(W(toOneArr(y)));
-        dataMgr.position.push(W(toOneArr(B)));
-        dataMgr.prev.push(W(toOneArr(A)));
-        dataMgr.next.push(W(toOneArr(D)));
-        dataMgr.direction.push(W(v));
-        dataMgr.color.push(W(toOneArr(line)));
-        dataMgr.index.push(W(r));
+        // uv贴图
+        const uv = arr.map((l) => [l, 0, l, 1]);
+        const counter = perp(arr.map((l) => [l, total]));
+
+        // 点集合
+        const postion = perp(line);
+        const prevV = perp(line.map(shiftArray(-1)));
+        const nextV = perp(line.map(shiftArray(1)));
+
+        // 方位
+        const direction = perp(
+            line.map(() => -1),
+            true
+        );
+
+        // 颜色
+        const colors = perp(line.map(() => color));
+
+        // 顶点索引
+        const indexArr = buildIndexArr(count, u);
+
+        dataMgr.uv.push(...toOneArr(uv));
+        dataMgr.counter.push(...toOneArr(counter));
+        dataMgr.position.push(...toOneArr(postion));
+        dataMgr.prev.push(...toOneArr(prevV));
+        dataMgr.next.push(...toOneArr(nextV));
+        dataMgr.direction.push(...direction);
+        dataMgr.color.push(...toOneArr(colors));
+        dataMgr.index.push(...indexArr);
     }
 
     render(transferOptions) {
@@ -498,7 +501,7 @@ export default class LineLayer extends Layer {
                     uFlat: options.isFlat,
                     zoomUnits: this.map.getZoomUnits(),
                     devicePixelRatio: window.devicePixelRatio,
-                    miter: 1,
+                    miter: +(options.lineJoin === "miter"),
                     thickness: options.width,
                     uDashArray: options.dashArray,
                     uDashOffset: options.dashOffset,
@@ -523,7 +526,6 @@ export default class LineLayer extends Layer {
 
             this.indexBuffer.bind();
             this.vertexArray.bind();
-
             gl.drawElements(
                 gl.TRIANGLES,
                 dataMgr.index.length,
@@ -536,16 +538,15 @@ export default class LineLayer extends Layer {
         }
     }
 
-    loadTexture(a) {
-        const b = this,
-            c = this.getOptions();
-        c.texture
-            ? loadTextureImage(this.gl, c.texture, function (c, d) {
-                  b.image = d;
-                  b.texture = c;
-                  a && a();
-                  b.webglLayer.render();
+    loadTexture(callback) {
+        const options = this.getOptions();
+        options.texture
+            ? loadTextureImage(this.gl, options.texture, (texture, img) => {
+                  this.image = img;
+                  this.texture = texture;
+                  callback && callback();
+                  this.webglLayer.render();
               })
-            : ((this.image = this.texture = null), a && a());
+            : ((this.image = this.texture = null), callback && callback());
     }
 }
