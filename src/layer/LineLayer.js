@@ -361,6 +361,10 @@ export default class LineLayer extends Layer {
         });
     }
 
+    destroy() {
+        this.gl = this.program = this.dataMgr = null;
+    }
+
     onChanged(options, data) {
         if (this.gl) {
             this.initData();
@@ -525,7 +529,6 @@ export default class LineLayer extends Layer {
                     gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
                 }
             }
-            gl.depthMask(false);
             gl.drawElements(
                 gl.TRIANGLES,
                 dataMgr.index.length,

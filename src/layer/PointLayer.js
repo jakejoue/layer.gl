@@ -198,7 +198,6 @@ export default class PointLayer extends Layer {
                 gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
             }
         }
-        gl.depthMask(false);
         gl.drawArrays(gl.POINTS, 0, this.bufferData.length / 8);
     }
 }

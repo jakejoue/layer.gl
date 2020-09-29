@@ -92,8 +92,8 @@ export default class ShieldLayer extends Layer {
                     attributes: { POSITION },
                     indices,
                 } = tesselateSphere({
-                    nlat: Math.max(radius, 20),
-                    nlong: Math.max(radius, 20) * 2,
+                    nlat: Math.floor(Math.max(radius, 20)),
+                    nlong: Math.floor(Math.max(radius, 20) * 2),
                     endLong: Math.PI,
                 });
 

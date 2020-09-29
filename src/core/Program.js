@@ -105,13 +105,13 @@ export default class Program {
         // 地图范围
         uniform vec2 MAPV_resolution;
 
-        // pick支持（暂时屏蔽）
+        // pick支持
         #if defined(PICK)
-        uniform bool uIsPickRender;
         attribute vec3 aPickColor;
-        uniform vec3 uPickedColor;
-        varying vec4 vPickColor;
         uniform bool uEnablePicked;
+        uniform vec3 uPickedColor;
+        uniform bool uIsPickRender;
+        varying vec4 vPickColor;
         bool mapvIsPicked() {
             return uEnablePicked && aPickColor == uPickedColor;
         }
