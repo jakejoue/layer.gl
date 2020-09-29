@@ -11,14 +11,14 @@ export default class SparkLayer extends Layer {
         this.autoUpdate = true;
         this.bufferData = [];
 
-        this.startTime = +(this.options.startTime) || 0;
-        this.endTime = +(this.options.endTime) || 10;
+        this.startTime = +this.options.startTime || 0;
+        this.endTime = +this.options.endTime || 10;
         this.time = this.startTime;
     }
 
     getDefaultOptions() {
         return {
-            color: [0.9, 0.1, 0.1, 1],
+            color: "rgba(250, 25, 25, 1)",
             trailLength: 3,
             height: 100,
             step: 0.1,
@@ -80,7 +80,7 @@ export default class SparkLayer extends Layer {
         const gl = this.gl;
         if (gl) {
             const arrayData = [],
-                segs = +(options.segs) || 10;
+                segs = +options.segs || 10;
 
             for (let i = 0; i < data.length; i++) {
                 const coord = data[i].geometry.coordinates;
@@ -97,14 +97,14 @@ export default class SparkLayer extends Layer {
                     arrayData.push(point[0], point[1], h);
                     0 === point[2]
                         ? arrayData.push(j)
-                        : arrayData.push(+(point[2]));
+                        : arrayData.push(+point[2]);
 
                     h += height / segs;
 
                     arrayData.push(point[0], point[1], h);
                     0 === point[2]
                         ? arrayData.push(j + 1)
-                        : arrayData.push(+(point[2]));
+                        : arrayData.push(+point[2]);
                 }
             }
 
@@ -140,7 +140,7 @@ export default class SparkLayer extends Layer {
         gl.blendEquation(gl.FUNC_ADD);
         gl.drawArrays(gl.LINES, 0, this.bufferData.length / 4);
 
-        this.time += +(this.options.step);
+        this.time += +this.options.step;
         this.time > 1.5 * this.endTime && (this.time = this.startTime);
     }
 }

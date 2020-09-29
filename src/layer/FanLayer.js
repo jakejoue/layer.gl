@@ -18,7 +18,7 @@ export default class FanLayer extends Layer {
     getDefaultOptions() {
         return {
             totalRadian: Math.PI,
-            color: [1, 0.02, 0.02, 1],
+            color: "rgba(255, 5, 5, 1)",
             radius: 50,
             step: 0.1,
         };

@@ -15,7 +15,7 @@ export default class ShieldLayer extends Layer {
 
     getDefaultOptions() {
         return {
-            color: [1, 0.02, 0.02, 1],
+            color: "rgba(25, 25, 250, 1)",
             radius: 50,
         };
     }

@@ -17,7 +17,7 @@ export default class PointLayer extends Layer {
 
     getDefaultOptions() {
         return {
-            color: [0.1, 0.1, 0.9, 1],
+            color: "rgba(25, 25, 250, 1)",
             blend: "normal",
             shape: "circle",
             size: 5,
