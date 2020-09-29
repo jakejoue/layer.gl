@@ -42,7 +42,7 @@ export default class ShieldLayer extends Layer {
                 varying vec3 vPos;
 
                 void main() {
-                    gl_FragColor = vec4(glowColor, pow(vPos.z, 1.3));
+                    gl_FragColor = vec4(glowColor, pow(1.0 - vPos.z, 1.3));
                 }`,
             },
             this
@@ -141,9 +141,9 @@ export default class ShieldLayer extends Layer {
             };
             this.program.setUniforms(uniforms);
 
-            gl.enable(gl.BLEND);
-            gl.blendEquation(gl.FUNC_ADD);
-            gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+            gl.depthMask(false)
+            gl.enable(gl.BLEND)
+            gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
 
             gl.drawElements(
                 gl.TRIANGLES,
