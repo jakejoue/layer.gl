@@ -160,6 +160,7 @@ export default class FanLayer extends Layer {
             };
             this.program.setUniforms(uniforms);
 
+            gl.clear(gl.DEPTH_BUFFER_BIT);
             gl.enable(gl.BLEND);
             gl.blendEquation(gl.FUNC_ADD);
             gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
