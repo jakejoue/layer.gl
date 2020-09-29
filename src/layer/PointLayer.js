@@ -162,7 +162,7 @@ export default class PointLayer extends Layer {
         }
     }
 
-    destroy() {
+    onDestroy() {
         this.gl = this.program = this.buffer = this.vertexArray = this.bufferData = null;
     }
 

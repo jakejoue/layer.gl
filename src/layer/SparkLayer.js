@@ -113,7 +113,7 @@ export default class SparkLayer extends Layer {
         }
     }
 
-    destroy() {
+    onDestroy() {
         this.gl = this.program = this.buffer = this.vertexArray = this.bufferData = null;
     }
 

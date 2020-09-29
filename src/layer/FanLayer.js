@@ -130,7 +130,7 @@ export default class FanLayer extends Layer {
         return arrayData;
     }
 
-    destroy() {
+    onDestroy() {
         this.gl = this.program = this.buffer = this.vertexArray = this.group = null;
     }
 

@@ -109,7 +109,7 @@ export default class ShieldLayer extends Layer {
         }
     }
 
-    destroy() {
+    onDestroy() {
         this.gl = this.program = this.buffer = this.vertexArray = this.group = null;
     }
 

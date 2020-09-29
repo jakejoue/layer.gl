@@ -361,9 +361,6 @@ export default class LineLayer extends Layer {
         });
     }
 
-    destroy() {
-        this.gl = this.program = this.dataMgr = null;
-    }
 
     onChanged(options, data) {
         if (this.gl) {
@@ -479,6 +476,10 @@ export default class LineLayer extends Layer {
         dataMgr.index.push(...indexArr);
     }
 
+    onDestroy() {
+        this.gl = this.program = this.dataMgr = this.prevBuffer = this.currentBuffer = this.nextBuffer = this.directionBuffer = this.colorBuffer = this.counterBuffer = this.uvBuffer = this.indexBuffer = null;
+    }
+    
     render(transferOptions) {
         const gl = transferOptions.gl,
             matrix = transferOptions.matrix,

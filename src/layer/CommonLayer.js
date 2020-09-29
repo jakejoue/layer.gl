@@ -25,6 +25,7 @@ export default class CommonLayer {
     initialize(gl) {}
 
     destroy() {
+        this.map = this.webglLayer = null;
         this.onDestroy();
     }
 
