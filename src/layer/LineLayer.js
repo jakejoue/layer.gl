@@ -387,38 +387,30 @@ export default class LineLayer extends Layer {
                 }
 
                 if (options.enablePicked) {
+                    const k = this.indexToRgb(i);
                     for (let p = 0; p < line.length; p++) {
-                        const color = this.indexToRgb(i);
-                        colorDataArray.push(
-                            color[0] / 255,
-                            color[1] / 255,
-                            color[2] / 255
-                        );
-                        colorDataArray.push(
-                            color[0] / 255,
-                            color[1] / 255,
-                            color[2] / 255
-                        );
+                        colorDataArray.push(k[0] / 255, k[1] / 255, k[2] / 255);
+                        colorDataArray.push(k[0] / 255, k[1] / 255, k[2] / 255);
                         if (options.repeat) {
                             colorDataArray.push(
-                                color[0] / 255,
-                                color[1] / 255,
-                                color[2] / 255
+                                k[0] / 255,
+                                k[1] / 255,
+                                k[2] / 255
                             );
                             colorDataArray.push(
-                                color[0] / 255,
-                                color[1] / 255,
-                                color[2] / 255
+                                k[0] / 255,
+                                k[1] / 255,
+                                k[2] / 255
                             );
                             colorDataArray.push(
-                                color[0] / 255,
-                                color[1] / 255,
-                                color[2] / 255
+                                k[0] / 255,
+                                k[1] / 255,
+                                k[2] / 255
                             );
                             colorDataArray.push(
-                                color[0] / 255,
-                                color[1] / 255,
-                                color[2] / 255
+                                k[0] / 255,
+                                k[1] / 255,
+                                k[2] / 255
                             );
                         }
                     }
@@ -486,6 +478,7 @@ export default class LineLayer extends Layer {
     render(transferOptions) {
         const gl = transferOptions.gl,
             matrix = transferOptions.matrix,
+            isPickRender = transferOptions.isPickRender,
             dataMgr = this.dataMgr;
 
         if (dataMgr && !(0 >= dataMgr.index.length) && this.map) {
@@ -517,24 +510,28 @@ export default class LineLayer extends Layer {
 
             program.setUniforms(uniforms);
 
-            gl.enable(gl.BLEND);
-            gl.blendEquation(gl.FUNC_ADD);
-
-            options.blend && "lighter" === options.blend
-                ? gl.blendFunc(gl.SRC_ALPHA, gl.ONE)
-                : gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-
             this.indexBuffer.bind();
             this.vertexArray.bind();
+
+            if (isPickRender) {
+                gl.disable(gl.BLEND);
+            } else {
+                gl.enable(gl.BLEND);
+                gl.blendEquation(gl.FUNC_ADD);
+
+                if (options.blend && "lighter" === options.blend) {
+                    gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
+                } else {
+                    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+                }
+            }
+            gl.depthMask(false);
             gl.drawElements(
                 gl.TRIANGLES,
                 dataMgr.index.length,
                 gl.UNSIGNED_INT,
                 0
             );
-            gl.bindBuffer(gl.ARRAY_BUFFER, null);
-            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
-            gl.disable(gl.BLEND);
         }
     }
 

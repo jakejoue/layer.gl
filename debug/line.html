@@ -32,7 +32,7 @@
             var map = (window.map = new mapboxgl.Map({
                 container: "map",
                 zoom: 10,
-                center: [106.526814,29.526265],
+                center: [106.526814, 29.526265],
                 style: "mapbox://styles/mapbox/dark-v10",
                 hash: false,
             }));
@@ -53,6 +53,11 @@
                         blend: "lighter",
                         width: 5,
                         color: "rgba(255, 71, 26, 0.8)",
+                        enablePicked: true,
+                        onClick: function (evt) {
+                            console.log(evt);
+                        },
+                        autoSelect: true,
                     });
                     view.addLayer(lineLayer);
                     lineLayer.setData(data);

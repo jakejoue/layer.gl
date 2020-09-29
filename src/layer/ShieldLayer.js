@@ -141,9 +141,9 @@ export default class ShieldLayer extends Layer {
             };
             this.program.setUniforms(uniforms);
 
-            gl.depthMask(false)
-            gl.enable(gl.BLEND)
-            gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA)
+            gl.depthMask(false);
+            gl.enable(gl.BLEND);
+            gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
             gl.drawElements(
                 gl.TRIANGLES,
