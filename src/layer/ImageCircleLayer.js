@@ -3,19 +3,24 @@ import Layer from "./Layer";
 import Buffer from "../core/Buffer";
 import VertexArray from "../core/VertexArray";
 import Program from "../core/Program";
+import { loadTextureImage } from "../util/texture";
+
+import { mat4 } from "gl-matrix";
 
 export default class ImageCircleLayer extends Layer {
     constructor(options) {
         super(options);
-        this.bufferData = [];
+
+        this.autoUpdate = true;
+        this.group = [];
         this.time = 0;
     }
 
     getDefaultOptions() {
         return {
-            color: [0, 0, 0, 0],
-            blend: "normal",
-            radius: 5,
+            totalRadian: Math.PI,
+            color: [1, 1, 1, 1],
+            radius: 50,
             step: 0.1,
         };
     }
@@ -27,49 +32,28 @@ export default class ImageCircleLayer extends Layer {
             this.gl,
             {
                 vertexShader: `
-            attribute vec3 aPos;
-            attribute vec4 aColor;
-            attribute float aSize;
-            uniform mat4 uMatrix;
-            varying vec4 vColor;
-            uniform vec4 uSelectedColor;
-
-            void main() {
-                if(aColor.w >= 0.0 && aColor.w <= 1.0) {
-                    vColor = aColor;
-                } else {
-                    vColor = vec4(aColor.xyz, 1.0);
-                }
-                gl_Position = uMatrix * vec4(aPos, 1.0);
-                gl_PointSize = aSize;
-
-                #if defined(PICK)
-                if(mapvIsPicked()) {
-                    vColor = uSelectedColor;
-                }
-                #endif
-            }`,
+                precision highp float;
+                attribute vec3 aPos;
+                uniform mat4 uMatrix;
+                uniform mat4 uObjMatrix;
+                varying vec3 vPos;
+                
+                void main() {
+                    gl_Position = uMatrix * uObjMatrix * vec4(aPos.xyz, 1.0);
+                    vPos = aPos;
+                }`,
                 fragmentShader: `
-                varying vec4 vColor;
-                uniform int uShape;
+                uniform sampler2D uSampler;
+                uniform vec4 glowColor;
+                varying vec3 vPos;
 
                 void main() {
-                    vec4 color = vColor;
-                    if(uShape == 1) {
-                        float d = distance(gl_PointCoord, vec2(0.5, 0.5));
-                        if(d > 0.5) {
-                            discard;
-                        }
-                        float blur = 1.0;
-                        blur = 1.0 - smoothstep(0.49, 0.5, d);
-                        color.a *= blur;
-                        gl_FragColor = color;
-                    } else {
-                        gl_FragColor = color;
+                    if (length(vPos.xy) > 1.0) {
+                        discard;
                     }
-                }
-                `,
-                defines: this.getOptions().enablePicked ? ["PICK"] : [],
+                    vec4 color = texture2D(uSampler, (vPos.xy + 1.0) / 2.0);
+                    gl_FragColor = color * glowColor;
+                }`,
             },
             this
         );
@@ -81,119 +65,124 @@ export default class ImageCircleLayer extends Layer {
         });
         const attributes = [
             {
-                stride: 32,
                 name: "aPos",
                 buffer: this.buffer,
-                size: 2,
+                size: 3,
                 type: "FLOAT",
                 offset: 0,
-            },
-            {
-                stride: 32,
-                name: "aColor",
-                buffer: this.buffer,
-                size: 4,
-                type: "FLOAT",
-                offset: 8,
-            },
-            {
-                stride: 32,
-                name: "aUv",
-                buffer: this.buffer,
-                size: 2,
-                type: "FLOAT",
-                offset: 24,
             },
         ];
         this.vertexArray = new VertexArray({
             gl: gl,
             program: this.program,
-            attributes: [...attributes, ...this.getCommonAttributes()],
+            attributes: attributes,
         });
     }
 
     onChanged(options, dataArray) {
-        if (this.gl) {
-            const arrayData = [];
+        this.group = [];
+        this.textureMap = new Map();
 
+        if (this.gl) {
             for (let i = 0; i < dataArray.length; i++) {
                 const data = dataArray[i];
-                const point = this.normizedPoint(data.geometry.coordinates);
 
-                let color = this.getValue("color", data);
-                color = this.normizedColor(color);
-                const size = +this.getValue("size", data);
+                const textureUrl = this.getValue("texture", data);
+                if (!textureUrl) continue;
 
-                const points = this.addMultipleCoords(point);
-                for (let j = 0; j < points.length; j++) {
-                    arrayData.push(-1, -1);
-                    arrayData.push(color[0], color[1], color[2], color[3]);
-                    arrayData.push(0, 0);
-                }
+                const coord = data.geometry.coordinates;
+                const radius = +this.getValue("radius", data);
+                const point = this.normizedPoint([coord[0], coord[1], radius]);
+
+                const bufferData = this.createCircle();
+
+                // 存入多边形
+                this.group.push({
+                    bufferData,
+                    texture: textureUrl,
+                    color: this.normizedColor(
+                        this.getValue("color", data) || [1, 1, 1, 1]
+                    ),
+                    point: [point[0], point[1], 0],
+                    scale: point[2],
+                });
+
+                this.loadTexture(textureUrl);
             }
-            this.bufferData = arrayData;
-            this.buffer.updateData(new Float32Array(arrayData));
-
-            options.enablePicked && this.parsePickData(dataArray);
         }
     }
 
-    parsePickData(arrayData) {
-        const options = this.getOptions(),
-            dataArray = [];
-        if (options.enablePicked) {
-            for (let i = 0; i < arrayData.length; i++) {
-                const k = this.indexToRgb(i);
-                dataArray.push(k[0] / 255, k[1] / 255, k[2] / 255);
+    createCircle() {
+        // 所有顶点
+        const vertices = [
+            [-1, 1, 0],
+            [1, 1, 0],
+            [-1, -1, 0],
+            [1, -1, 0],
+        ];
 
-                if (options.repeat) {
-                    dataArray.push(k[0] / 255, k[1] / 255, k[2] / 255);
-                    dataArray.push(k[0] / 255, k[1] / 255, k[2] / 255);
-                }
-            }
-        }
-        if (options.enablePicked) {
-            this.pickBuffer.updateData(new Float32Array(dataArray));
-        }
+        // 两个三角形
+        const arrayData = [
+            ...vertices[0],
+            ...vertices[1],
+            ...vertices[2],
+            ...vertices[1],
+            ...vertices[3],
+            ...vertices[2],
+        ];
+
+        return arrayData;
     }
 
-    destroy() {
-        this.gl = this.program = this.buffer = this.vertexArray = this.bufferData = null;
+    onDestroy() {
+        this.gl = this.program = this.buffer = this.vertexArray = this.group = this.textureMap = null;
     }
 
     render(transferOptions) {
         const gl = transferOptions.gl,
-            matrix = transferOptions.matrix,
-            isPickRender = transferOptions.isPickRender;
+            matrix = transferOptions.matrix;
 
-        if (this.bufferData.length <= 0) return;
+        if (this.group.length <= 0) return;
 
         this.program.use(gl);
-        this.vertexArray.bind();
 
-        const uniforms = Object.assign(
-            this.getCommonUniforms(transferOptions),
-            {
-                uShape: PointShapeTypes[this.options.shape] || 1,
+        for (let i = 0; i < this.group.length; i++) {
+            // 绑定顶点数据
+            const { bufferData, point, scale, texture, color } = this.group[i];
+            if (!this.textureMap.has(texture)) continue;
+
+            this.buffer.updateData(new Float32Array(bufferData));
+            this.vertexArray.bind();
+
+            const m = mat4.create();
+            mat4.translate(m, m, point);
+            mat4.scale(m, m, [-scale, scale, 1]);
+            mat4.rotateZ(m, m, 2 * Math.PI * this.time);
+
+            const uniforms = {
                 uMatrix: matrix,
-            }
-        );
-        this.program.setUniforms(uniforms);
+                uObjMatrix: m,
+                uSampler: this.textureMap.get(texture),
+                glowColor: color,
+            };
+            this.program.setUniforms(uniforms);
 
-        if (isPickRender) {
-            gl.disable(gl.BLEND);
-        } else {
             gl.enable(gl.BLEND);
             gl.blendEquation(gl.FUNC_ADD);
-
-            const blend = this.options.blend;
-            if (blend && "lighter" === blend) {
-                gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
-            } else {
-                gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-            }
+            gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+            gl.drawArrays(gl.TRIANGLES, 0, bufferData.length / 3);
         }
-        gl.depthMask(false);
-        gl.drawArrays(gl.POINTS, 0, this.bufferData.length / 8);
+
+        this.time += this.options.step / 10;
+        1 < this.time && (this.time = 0);
+    }
+
+    loadTexture(textureUrl) {
+        loadTextureImage(this.gl, textureUrl, (texture) => {
+            if (this.textureMap && !this.textureMap.has(textureUrl)) {
+                this.textureMap.set(textureUrl, texture);
+                this.webglLayer && this.webglLayer.render();
+            }
+        });
     }
 }

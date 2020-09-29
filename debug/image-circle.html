@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Mapbox GL JS debug page</title>
+        <meta charset="utf-8" />
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1.0, user-scalable=no"
+        />
+        <link rel="stylesheet" href="./mapbox-gl/mapbox-gl.css" />
+        <style>
+            body {
+                margin: 0;
+                padding: 0;
+            }
+            html,
+            body,
+            #map {
+                height: 100%;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div id="map"></div>
+
+        <script src="./mapbox-gl/mapbox-gl.js"></script>
+        <script src="./mapbox-gl/access_token_generated.js"></script>
+        <script src="./mapv.min.js"></script>
+        <script src="../build/layergl.js"></script>
+        <script>
+            var map = (window.map = new mapboxgl.Map({
+                container: "map",
+                zoom: 15,
+                center: [116.392394, 39.910683],
+                style: "mapbox://styles/mapbox/streets-v10",
+                hash: false,
+            }));
+
+            const view = new layergl.View({
+                map: layergl.map.getMapBoxGLMap(map),
+            });
+            var imageCircleLayer = new layergl.ImageCircleLayer({
+                color: "rgba(102, 0, 204, 0.6)",
+                texture: "./circular.png",
+                radius: function (data) {
+                    return data.properties.radius;
+                },
+                color: function (data) {
+                    return data.properties.color;
+                },
+                data: [
+                    {
+                        geometry: {
+                            type: "Point",
+                            coordinates: [116.392394, 39.910683],
+                        },
+                        properties: {
+                            radius: 200,
+                        },
+                    },
+                    {
+                        geometry: {
+                            type: "Point",
+                            coordinates: [116.402394, 39.910683],
+                        },
+                        properties: {
+                            radius: 500,
+                            color: "red",
+                        },
+                    },
+                ],
+            });
+            view.addLayer(imageCircleLayer);
+        </script>
+    </body>
+</html>
