@@ -27,16 +27,16 @@ export default class ShieldLayer extends Layer {
             this.gl,
             {
                 vertexShader: `
-            precision highp float;
-            attribute vec3 aPos;
-            uniform mat4 uMatrix;
-            uniform mat4 uObjMatrix;
-            varying vec3 vPos;
+                precision highp float;
+                attribute vec3 aPos;
+                uniform mat4 uMatrix;
+                uniform mat4 uObjMatrix;
+                varying vec3 vPos;
 
-            void main() {
-                gl_Position = uMatrix * uObjMatrix * vec4(aPos.xyz, 1.0);
-                vPos = aPos;
-            }`,
+                void main() {
+                    gl_Position = uMatrix * uObjMatrix * vec4(aPos.xyz, 1.0);
+                    vPos = aPos;
+                }`,
                 fragmentShader: `
                 uniform vec3 glowColor;
                 varying vec3 vPos;

@@ -31,24 +31,23 @@ export default class FanLayer extends Layer {
             this.gl,
             {
                 vertexShader: `
-            precision highp float;
-            attribute vec3 aPos;
-            uniform mat4 uMatrix;
-            uniform mat4 uObjMatrix;
-            uniform vec3 glowColor;
-            varying vec4 vFragColor;
+                precision highp float;
+                attribute vec3 aPos;
+                uniform mat4 uMatrix;
+                uniform mat4 uObjMatrix;
+                uniform vec3 glowColor;
+                varying vec4 vFragColor;
 
-            void main() {
-                gl_Position = uMatrix * uObjMatrix * vec4(aPos.xy, 0, 1.0);
-                vFragColor = vec4(glowColor, pow(aPos.z, 1.3));
-            }`,
+                void main() {
+                    gl_Position = uMatrix * uObjMatrix * vec4(aPos.xy, 0, 1.0);
+                    vFragColor = vec4(glowColor, pow(aPos.z, 1.3));
+                }`,
                 fragmentShader: `
                 varying vec4 vFragColor;
 
                 void main() {
                     gl_FragColor = vFragColor;
-                }
-                `,
+                }`,
             },
             this
         );
