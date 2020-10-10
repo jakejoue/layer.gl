@@ -6,6 +6,7 @@ import Program from "../core/Program";
 
 import { loadTextureImage } from "../util/texture";
 
+import earcut from "earcut";
 import { vec3, mat4 } from "gl-matrix";
 
 // 数据管理类
@@ -205,64 +206,80 @@ class DataMgr {
         }
 
         // 房顶
-        /* 
-        if ("gradual" != options.style) {
-            var t = Lb(xy_s),
-                z = t[0],
-                v = t[1],
-                B = t[2];
-            z = [xy_s[2 * z], xy_s[2 * z + 1], 1];
-            v = [xy_s[2 * v], xy_s[2 * v + 1], 1];
-            var A = [xy_s[2 * B], xy_s[2 * B + 1], 1];
-            B = [];
-            K.cross(
-                B,
-                [A[0] - v[0], A[1] - v[1], A[2] - v[2]],
-                [z[0] - v[0], z[1] - v[1], z[2] - v[2]]
+        if ("gradual" !== options.style) {
+            const indices = earcut(xy_s);
+
+            const index1 = indices[0],
+                index2 = indices[1],
+                index3 = indices[2];
+
+            const p1 = [xy_s[2 * index1], xy_s[2 * index1 + 1], 1];
+            const p2 = [xy_s[2 * index2], xy_s[2 * index2 + 1], 1];
+            const p3 = [xy_s[2 * index3], xy_s[2 * index3 + 1], 1];
+
+            const normal = [];
+            vec3.cross(
+                normal,
+                [p3[0] - p2[0], p3[1] - p2[1], p3[2] - p2[2]],
+                [p1[0] - p2[0], p1[1] - p2[1], p1[2] - p2[2]]
             );
-            v = vertexArray.length / 7;
-            if (options.texture) var D = this.getBounds(xy_s);
-            z = options.isTextureFull;
-            A = 0;
-            for (var E = xy_s.length; A < E; A += 2)
+
+            let bound;
+            if (options.texture) {
+                bound = this.getBounds(xy_s);
+            }
+
+            // 当前开始的索引
+            const startIndex = vertexArray.length / 7;
+
+            // 存入顶点信息
+            for (let i = 0; i < xy_s.length; i += 2) {
                 vertexArray.push(
-                    xy_s[A],
-                    xy_s[A + 1],
-                    z_s[A / 2],
+                    xy_s[i],
+                    xy_s[i + 1],
+                    z_s[i / 2],
                     1,
-                    B[0],
-                    B[1],
-                    B[2]
-                ),
-                    colorArray.push(
-                        color[0],
-                        color[1],
-                        color[2],
-                        color[3],
-                        preColor[0],
-                        preColor[1],
-                        preColor[2],
-                        preColor[3]
-                    ),
-                    heightArray.push(height, preHeight),
-                    options.texture &&
-                        (z
-                            ? (textureArray.push((xy_s[A] - D.minX) / D.width),
-                              textureArray.push(
-                                  (xy_s[A + 1] - D.minY) / D.height
-                              ))
-                            : (textureArray.push((xy_s[A] - D.minX) / u),
-                              textureArray.push((xy_s[A + 1] - D.minY) / y))),
-                    pickColor &&
-                        pickColorVertexArray.push(
-                            pickColor[0] / 255,
-                            pickColor[1] / 255,
-                            pickColor[2] / 255
+                    normal[0],
+                    normal[1],
+                    normal[2]
+                );
+                colorArray.push(
+                    color[0],
+                    color[1],
+                    color[2],
+                    color[3],
+                    preColor[0],
+                    preColor[1],
+                    preColor[2],
+                    preColor[3]
+                );
+                heightArray.push(height, preHeight);
+
+                if (options.texture) {
+                    if (isTextureFull) {
+                        textureArray.push((xy_s[i] - bound.minX) / bound.width);
+                        textureArray.push(
+                            (xy_s[i + 1] - bound.minY) / bound.height
                         );
-            D = 0;
-            for (B = t.length; D < B; D++) h.push(t[D] + v);
+                    } else {
+                        textureArray.push((xy_s[i] - bound.minX) / t_w);
+                        textureArray.push((xy_s[i + 1] - bound.minY) / t_h);
+                    }
+                }
+                if (pickColor) {
+                    pickColorVertexArray.push(
+                        pickColor[0] / 255,
+                        pickColor[1] / 255,
+                        pickColor[2] / 255
+                    );
+                }
+            }
+
+            // 存入多边形索引信息
+            for (let i = 0; i < indices.length; i++) {
+                indexArray.push(indices[i] + startIndex);
+            }
         }
-        */
 
         // 墙面
         if (!(height === preHeight && 0 >= height)) {
@@ -275,7 +292,7 @@ class DataMgr {
                     y = xy_s[i + 1];
                 // 顶点坐标和底部坐标
                 const p = [x, y, z_s[i / 2], 0],
-                    b_p = [x, y, z_s[i / 2], 1];
+                    t_p = [x, y, z_s[i / 2], 1];
 
                 // 下个顶点的坐标
                 let j = i + 2;
@@ -284,7 +301,7 @@ class DataMgr {
                 const n_x = xy_s[j],
                     n_y = xy_s[j + 1];
                 const n_p = (y = [n_x, n_y, z_s[i / 2], 0]),
-                    n_b_p = [n_x, n_y, z_s[i / 2], 1];
+                    n_t_p = [n_x, n_y, z_s[i / 2], 1];
 
                 const ll = Math.sqrt(
                     Math.pow(n_x - x, 2),
@@ -295,17 +312,17 @@ class DataMgr {
                 vec3.cross(
                     normal,
                     [n_p[0] - p[0], n_p[1] - p[1], n_p[2] - p[2]],
-                    [b_p[0] - p[0], b_p[1] - p[1], b_p[2] - p[2]]
+                    [t_p[0] - p[0], t_p[1] - p[1], t_p[2] - p[2]]
                 );
 
                 // 顶点
                 vertexArray.push(p[0], p[1], p[2], p[3]);
                 vertexArray.push(normal[0], normal[1], normal[2]);
-                vertexArray.push(b_p[0], b_p[1], b_p[2], b_p[3]);
+                vertexArray.push(t_p[0], t_p[1], t_p[2], t_p[3]);
                 vertexArray.push(normal[0], normal[1], normal[2]);
                 vertexArray.push(n_p[0], n_p[1], n_p[2], n_p[3]);
                 vertexArray.push(normal[0], normal[1], normal[2]);
-                vertexArray.push(n_b_p[0], n_b_p[1], n_b_p[2], n_b_p[3]);
+                vertexArray.push(n_t_p[0], n_t_p[1], n_t_p[2], n_t_p[3]);
                 vertexArray.push(normal[0], normal[1], normal[2]);
 
                 // 颜色
@@ -388,9 +405,9 @@ class DataMgr {
                 }
 
                 // 多边形索引
-                // 0 --- 2
-                // |     |
                 // 1 --- 3
+                // |     |
+                // 0 --- 2
                 indexArray.push(
                     startIndex,
                     startIndex + 2,
