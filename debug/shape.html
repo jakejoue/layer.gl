@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Mapbox GL JS debug page</title>
+        <meta charset="utf-8" />
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1.0, user-scalable=no"
+        />
+        <link rel="stylesheet" href="./mapbox-gl/mapbox-gl.css" />
+        <style>
+            body {
+                margin: 0;
+                padding: 0;
+            }
+            html,
+            body,
+            #map {
+                height: 100%;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div id="map"></div>
+
+        <script src="./mapbox-gl/mapbox-gl.js"></script>
+        <script src="./mapbox-gl/access_token_generated.js"></script>
+        <script src="./mapv.min.js"></script>
+        <script src="../build/layergl.js"></script>
+        <script>
+            var map = (window.map = new mapboxgl.Map({
+                container: "map",
+                zoom: 9,
+                center: [106.542353, 29.565448],
+                style: "mapbox://styles/mapbox/dark-v10",
+                hash: false,
+            }));
+
+            const view = new layergl.View({
+                map: layergl.map.getMapBoxGLMap(map),
+            });
+            fetch("./static/chongqing.json")
+                .then((response) => response.json())
+                .then((result) => {
+                    var data = result;
+                    var polygons = [];
+                    var len = data.length;
+                    for (var i = 0; i < len; i++) {
+                        var line = data[i];
+                        var polygon = [];
+                        var pt = [line[1] * 512, line[2] * 512];
+                        for (var j = 3; j < line.length; j += 2) {
+                            pt[0] += line[j] / 100 / 2;
+                            pt[1] += line[j + 1] / 100 / 2;
+                            polygon.push([pt[0], pt[1]]);
+                        }
+
+                        if (Math.random() > 0.5) {
+                            polygons.push({
+                                geometry: {
+                                    type: "Polygon",
+                                    coordinates: [polygon],
+                                },
+                                properties: {
+                                    height: line[0] / 2,
+                                },
+                            });
+                        }
+                    }
+
+                    var shapeLayer = new layergl.ShapeLayer({
+                        color: "rgba(194, 147, 75, 0.8)",
+                        height: function (data) {
+                            return data.properties.height;
+                        },
+                    });
+                    view.addLayer(shapeLayer);
+                    shapeLayer.setData(polygons);
+                });
+        </script>
+    </body>
+</html>

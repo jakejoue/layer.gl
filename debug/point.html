@@ -40,7 +40,7 @@
             const view = new layergl.View({
                 map: layergl.map.getMapBoxGLMap(map),
             });
-            fetch("./xuzhou.json")
+            fetch("./static/xuzhou.json")
                 .then((response) => response.json())
                 .then((result) => {
                     var pointLayer = new layergl.PointLayer({
