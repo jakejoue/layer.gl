@@ -1,7 +1,12 @@
 import { mat4 } from "gl-matrix";
 
 function getMapBoxGLMap(map) {
-    let transform = map.projection.getTransform();
+    const transform = map.projection.getTransform();
+
+    // 坐标偏移（相对于中心点）
+    const point = map.transform.point,
+        worldSize = map.transform.worldSize;
+    const pointOffset = [point.x / worldSize, point.y / worldSize];
 
     // 所有监听的事件
     let listeners = [];
@@ -54,8 +59,8 @@ function getMapBoxGLMap(map) {
         /* **************** 渲染相关 ***************** */
         // 坐标转换
         normizedPoint(coord) {
-            const x = transform.mercatorXfromLng(coord[0]);
-            const y = transform.mercatorYfromLat(coord[1]);
+            const x = transform.mercatorXfromLng(coord[0]) - pointOffset[0];
+            const y = transform.mercatorYfromLat(coord[1]) - pointOffset[1];
             const z = transform.mercatorZfromAltitude(coord[2] || 0, coord[1]);
 
             return [x, y, z];
@@ -70,7 +75,10 @@ function getMapBoxGLMap(map) {
         },
         // 坐标系矩阵
         getProjectionMatrix() {
-            return map.transform.mercatorMatrix.slice();
+            const m = map.transform.mercatorMatrix.slice();
+            mat4.translate(m, m, [pointOffset[0], pointOffset[1], 0]);
+
+            return m;
         },
         // 可视化矩阵
         getViewMatrix() {
@@ -82,7 +90,7 @@ function getMapBoxGLMap(map) {
             listeners.forEach((l) => {
                 map.off(l.type, l.handler);
             });
-            map = transform = listen = listeners = null;
+            map = listen = listeners = null;
         },
     };
 }

@@ -121,13 +121,14 @@ export default class WebglLayer {
         if (this.map) {
             const projectionMatrix = this.map.getProjectionMatrix();
             const viewMatrix = this.map.getViewMatrix();
+            const matrix = mat4.multiply([], projectionMatrix, viewMatrix);
 
             // 更新渲染参数
             Object.assign(this.transferOptions, {
                 gl: this.gl,
-                projectionMatrix: projectionMatrix,
-                viewMatrix: viewMatrix,
-                matrix: mat4.multiply([], projectionMatrix, viewMatrix),
+                projectionMatrix,
+                viewMatrix,
+                matrix,
                 stateManager: this.stateManager,
             });
 
