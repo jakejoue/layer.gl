@@ -70,11 +70,24 @@ class DataMgr {
                             z_s.push(b[2]);
                         });
 
+                        // 高度转换
+                        const coord = coords[j][0][0];
+                        const _height = this.shapeLayer.normizedPoint([
+                                coord[0],
+                                coord[1],
+                                height,
+                            ])[2],
+                            _preHeight = this.shapeLayer.normizedPoint([
+                                coord[0],
+                                coord[1],
+                                preHeight,
+                            ])[2];
+
                         this.parseBuilding3d(
                             xy_s,
                             z_s,
-                            preHeight,
-                            height,
+                            _preHeight,
+                            _height,
                             preColor,
                             color,
                             pickColor,
@@ -91,11 +104,24 @@ class DataMgr {
                         z_s.push(b[2]);
                     });
 
+                    // 高度转换
+                    const coord = coords[0][0];
+                    const _height = this.shapeLayer.normizedPoint([
+                            coord[0],
+                            coord[1],
+                            height,
+                        ])[2],
+                        _preHeight = this.shapeLayer.normizedPoint([
+                            coord[0],
+                            coord[1],
+                            preHeight,
+                        ])[2];
+
                     this.parseBuilding3d(
                         xy_s,
                         z_s,
-                        preHeight,
-                        height,
+                        _preHeight,
+                        _height,
                         preColor,
                         color,
                         pickColor,
@@ -158,8 +184,8 @@ class DataMgr {
         pickColor,
         h
     ) {
-        preHeight = preHeight || height;
-        preColor = preColor || color;
+        preHeight = preHeight !== undefined ? preHeight : height;
+        preColor = preColor !== undefined ? preColor : color;
 
         const options = this.shapeLayer.getOptions(),
             vertexArray = h.vertex,
@@ -415,6 +441,7 @@ export default class ShapeLayer extends Layer {
             riseTime: 0,
         };
     }
+
     initialize(gl) {
         this.gl = gl;
         const options = this.getOptions();
@@ -659,7 +686,7 @@ export default class ShapeLayer extends Layer {
             target: "ELEMENT_ARRAY_BUFFER",
             usage: "STATIC_DRAW",
         });
-        const attributes = [
+        let attributes = [
             {
                 name: "a_pos",
                 buffer: this.vertexBuffer,
@@ -770,7 +797,7 @@ export default class ShapeLayer extends Layer {
                         gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
                     }
 
-                    const l = LayerStyles[options.style] || 0;
+                    const style = LayerStyles[options.style] || 0;
                     if ("gradual" === options.style) {
                         gl.depthMask(false);
                         gl.enable(gl.BLEND);
@@ -800,7 +827,7 @@ export default class ShapeLayer extends Layer {
                         });
                     }
                     // 光照
-                    let light_dir = vec3.fromValues(0, -1, 2);
+                    let light_dir = vec3.fromValues(0.5, 0.5, 0.5);
                     if (options.lightDir) {
                         light_dir = vec3.fromValues(
                             options.lightDir[0],
@@ -818,7 +845,7 @@ export default class ShapeLayer extends Layer {
                             u_sampler: this.texture,
                             u_proj_matrix: projectionMatrix,
                             u_mv_matrix: viewMatrix,
-                            style: l,
+                            style: style,
                             top_color: topColor,
                             u_use_lighting: options.useLight,
                             u_use_texture: this.isUseTexture,

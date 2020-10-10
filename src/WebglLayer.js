@@ -1,6 +1,8 @@
 import StateManager from "./core/StateManager";
 import FrameBuffer from "./core/FrameBuffer";
 
+import { mat4 } from "gl-matrix";
+
 export default class WebglLayer {
     constructor(map, options = {}) {
         this.map = map;
@@ -117,16 +119,17 @@ export default class WebglLayer {
 
     render() {
         if (this.map) {
+            const projectionMatrix = this.map.getProjectionMatrix();
+            const viewMatrix = this.map.getViewMatrix();
+
             // 更新渲染参数
-            Object.assign(
-                this.transferOptions,
-                {
-                    gl: this.gl,
-                    matrix: this.map.getMatirx(),
-                    stateManager: this.stateManager,
-                },
-                this.map.getTransferOptions ? this.map.getTransferOptions() : {}
-            );
+            Object.assign(this.transferOptions, {
+                gl: this.gl,
+                projectionMatrix: projectionMatrix,
+                viewMatrix: viewMatrix,
+                matrix: mat4.multiply([], projectionMatrix, viewMatrix),
+                stateManager: this.stateManager,
+            });
 
             // 是否为手动更新
             false !== this.options.autoUpdate && this.clear();

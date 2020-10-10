@@ -31,8 +31,9 @@
         <script>
             var map = (window.map = new mapboxgl.Map({
                 container: "map",
-                zoom: 9,
-                center: [106.542353, 29.565448],
+                zoom: 14,
+                projection: "3857",
+                center: [11865367.980664369, 3425727.8138353787],
                 style: "mapbox://styles/mapbox/dark-v10",
                 hash: false,
             }));
@@ -71,6 +72,7 @@
 
                     var shapeLayer = new layergl.ShapeLayer({
                         color: "rgba(194, 147, 75, 0.8)",
+                        style: "water",
                         height: function (data) {
                             return data.properties.height;
                         },

@@ -1,3 +1,5 @@
+import { mat4 } from "gl-matrix";
+
 function getMapBoxGLMap(map) {
     let transform = map.projection.getTransform();
 
@@ -66,9 +68,13 @@ function getMapBoxGLMap(map) {
         getZoomUnits() {
             return 1 / map.transform.worldSize;
         },
-        // 矩阵
-        getMatirx() {
-            return map.transform.customLayerMatrix();
+        // 坐标系矩阵
+        getProjectionMatrix() {
+            return map.transform.mercatorMatrix.slice();
+        },
+        // 可视化矩阵
+        getViewMatrix() {
+            return mat4.create();
         },
         /* **************** 渲染相关 ***************** */
         // 销毁方法
