@@ -58,65 +58,35 @@ class DataMgr {
                 );
             }
 
-            const coords = data.geometry.coordinates;
+            let coords = data.geometry.coordinates;
             if (coords) {
                 if ("MultiPolygon" === data.geometry.type) {
-                    for (let j = 0; j < coords.length; j++) {
-                        const xy_s = [],
-                            z_s = [];
-
-                        coords[j][0].forEach((b) => {
-                            b = this.shapeLayer.normizedPoint(b);
-                            xy_s.push(b[0], b[1]);
-                            z_s.push(b[2]);
-                        });
-
-                        // 高度转换
-                        const coord = coords[j][0][0];
-                        const _height = this.shapeLayer.normizedPoint([
-                                coord[0],
-                                coord[1],
-                                height,
-                            ])[2],
-                            _preHeight = this.shapeLayer.normizedPoint([
-                                coord[0],
-                                coord[1],
-                                preHeight,
-                            ])[2];
-
-                        this.parseBuilding3d(
-                            xy_s,
-                            z_s,
-                            _preHeight,
-                            _height,
-                            preColor,
-                            color,
-                            pickColor,
-                            this.outBuilding3d
-                        );
-                    }
+                    // do nothing
                 } else {
+                    coords = [coords];
+                }
+
+                // 为多边形构建面数据
+                for (let j = 0; j < coords.length; j++) {
                     const xy_s = [],
                         z_s = [];
 
-                    coords[0].forEach((b) => {
+                    coords[j][0].forEach((b) => {
                         b = this.shapeLayer.normizedPoint(b);
                         xy_s.push(b[0], b[1]);
                         z_s.push(b[2]);
                     });
 
                     // 高度转换
-                    const coord = coords[0][0];
-                    const _height = this.shapeLayer.normizedPoint([
-                            coord[0],
-                            coord[1],
+                    const coord = coords[j][0][0];
+                    const _height = this.shapeLayer.normizedHeight(
                             height,
-                        ])[2],
-                        _preHeight = this.shapeLayer.normizedPoint([
-                            coord[0],
-                            coord[1],
+                            coord
+                        ),
+                        _preHeight = this.shapeLayer.normizedHeight(
                             preHeight,
-                        ])[2];
+                            coord
+                        );
 
                     this.parseBuilding3d(
                         xy_s,
@@ -201,8 +171,12 @@ class DataMgr {
         let t_w = 0,
             t_h = 0;
         if (this.shapeLayer.image) {
-            t_w = this.shapeLayer.image.width * options.textureScale;
-            t_h = this.shapeLayer.image.height * options.textureScale;
+            t_w = this.shapeLayer.normizedHeight(
+                this.shapeLayer.image.width * options.textureScale
+            );
+            t_h = this.shapeLayer.normizedHeight(
+                this.shapeLayer.image.height * options.textureScale
+            );
         }
 
         // 房顶

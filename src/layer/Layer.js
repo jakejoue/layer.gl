@@ -142,6 +142,11 @@ export default class Layer extends CommonLayer {
         return this.map.normizedPoint(point);
     }
 
+    normizedHeight(height, point = [0, 0]) {
+        if (!height || height <= 0) return 0;
+        return this.map.normizedPoint([point[0], point[1], height])[2];
+    }
+
     // 根据index生成color
     indexToRgb(index) {
         index++;
