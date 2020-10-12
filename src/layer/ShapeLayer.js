@@ -609,7 +609,9 @@ export default class ShapeLayer extends Layer {
                     vec4 color = vec4(v_color);
                     vec4 textureColor = vec4(1.0, 1.0, 1.0, 1.0);
                     
+                    // 使用纹理
                     if(u_use_texture) {
+                        // water 特效
                         if(style == 6.0) {
                             float x = v_texture_coord.s;
                             float y = v_texture_coord.t;
@@ -620,19 +622,23 @@ export default class ShapeLayer extends Layer {
                         } else {
                             textureColor = texture2D(u_sampler, vec2(v_texture_coord.s, v_texture_coord.t));
                         }
+                        // 光照
                         if(u_use_lighting) {
                             color = vec4(textureColor * v_color * 1.1);
                         } else {
                             color = textureColor;
                         }
                     }
+                    // window 和 windowAnimation
                     if(style == 1.0 || style == 2.0) {
                         float t = time / 1000.0;
                         float diffDistance = 5.0;
                         float modX = mod(v_position.x, diffDistance * 2.0);
                         float modZ = mod(v_position.z, diffDistance * 2.0);
+                        // 窗户判断
                         if (modX < diffDistance && modZ < diffDistance && v_position.z < v_height) {
                             color *= 1.05;
+                            // 动画特效
                             if(time > 0.0 && style == 2.0) {
                                 float iX = ceil(v_position.x / diffDistance);
                                 float iZ = ceil(v_position.z / diffDistance);
@@ -642,11 +648,13 @@ export default class ShapeLayer extends Layer {
                             }
                         }
                         color.a = alpha;
-                    } else if(style == 3.0) {
-                        float diffDistance = 10.0;
-                        float modX = mod(v_position.x, diffDistance * 2.0);
+                    }
+                    // 渐变色
+                    else if(style == 3.0) {
                         color.a = 1.0 - pow(v_position.z / v_height, 0.3);
-                    } else if(style == 4.0) {
+                    }
+                    // 波纹
+                    else if(style == 4.0) {
                         float dis = distance(u_ripple_center, v_position);
                         float rSize = 400.0;
                         if(v_position.z >= v_height) {
@@ -655,7 +663,9 @@ export default class ShapeLayer extends Layer {
                         if(dis > u_radius - rSize && dis < u_radius + rSize) {
                             color *= (1.0 - abs(dis-u_radius) / rSize) * 2.0 + 1.0;
                         }
-                    } else if(style == 5.0) {
+                    }
+                    // 未知
+                    else if(style == 5.0) {
                         float t = time / 1000.0;
                         float diffDistance = 10.0;
                         float modZ = mod(v_position.z - t * 40.0, diffDistance * 2.0);

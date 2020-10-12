@@ -72,7 +72,10 @@
 
                     var shapeLayer = new layergl.ShapeLayer({
                         color: "rgba(194, 147, 75, 0.8)",
-                        style: "water",
+                        style: "window",
+                        // texture: './static/wall2.png',
+                        // isTextureFull: true,
+                        // textureScale: 0.05,
                         useLight: true,
                         height: function (data) {
                             return data.properties.height;
