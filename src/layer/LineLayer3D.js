@@ -33,7 +33,7 @@ const LineStyle = {
     })(),
 };
 
-export default class LineLayer extends Layer {
+export default class LineLayer3D extends Layer {
     constructor(options) {
         super(options);
         this.initData();
