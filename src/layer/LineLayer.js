@@ -500,14 +500,27 @@ class DataMgr {
         return d;
     }
 
-    _extrusions(a, b, c, e, g, h, k, l, m) {
-        b.push(h[0], h[1], 0);
-        b.push(h[0], h[1], 0);
-        a.push(g[0], g[1], g[2], l, k, 0);
-        a.push(g[0], g[1], g[2], l, -k, 0);
-        c.push(l, 0, l, 1);
-        e.push(m[0], m[1], m[2], m[3]);
-        e.push(m[0], m[1], m[2], m[3]);
+    _extrusions(
+        positions,
+        normals,
+        uvs,
+        colors,
+        point,
+        normal,
+        thickness,
+        totalDis,
+        color
+    ) {
+        normals.push(normal[0], normal[1], 0);
+        normals.push(normal[0], normal[1], 0);
+
+        positions.push(point[0], point[1], point[2], totalDis, thickness, 0);
+        positions.push(point[0], point[1], point[2], totalDis, -thickness, 0);
+
+        uvs.push(totalDis, 0, totalDis, 1);
+
+        colors.push(color[0], color[1], color[2], color[3]);
+        colors.push(color[0], color[1], color[2], color[3]);
     }
 
     _calcDistance(point1, point2) {
@@ -517,14 +530,16 @@ class DataMgr {
         );
     }
 
-    _flipedUV(a, b, c, e) {
-        e
-            ? -1 === c
-                ? a.push(b, 0, b, 1, b, 0)
-                : a.push(b, 1, b, 0, b, 1)
-            : -1 === c
-            ? a.push(b, 0, b, 0, b, 1, b, 0)
-            : a.push(b, 1, b, 1, b, 0, b, 1);
+    _flipedUV(uvs, totalDis, dir, isBevel) {
+        if (isBevel) {
+            -1 === dir
+                ? uvs.push(totalDis, 0, totalDis, 1, totalDis, 0)
+                : uvs.push(totalDis, 1, totalDis, 0, totalDis, 1);
+        } else {
+            -1 === dir
+                ? uvs.push(totalDis, 0, totalDis, 0, totalDis, 1, totalDis, 0)
+                : uvs.push(totalDis, 1, totalDis, 1, totalDis, 0, totalDis, 1);
+        }
     }
 }
 
