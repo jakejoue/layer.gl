@@ -84,11 +84,12 @@ class DataMgr {
     }
 
     _segment(complex, start, prePoint, point, nextPoint, color) {
-        let d = 0,
-            l = vec2.create(),
-            m = vec2.create(),
-            p = vec2.create(),
-            n = vec2.create();
+        let pointSize = 0;
+
+        const avgNormal = vec2.create(),
+            tempNormal = vec2.create(),
+            preNormal = vec2.create(),
+            nextNormal = vec2.create();
 
         const indices = complex.indices,
             positions = complex.positions,
@@ -103,7 +104,7 @@ class DataMgr {
         let isBevelJoin = "bevel" === this.join,
             isRoundJoin = "round" === this.join;
 
-        subNormalize(m, xy, preXy);
+        subNormalize(preNormal, xy, preXy);
 
         let dis = 0;
         if (this.dash) {
@@ -111,24 +112,25 @@ class DataMgr {
             this._totalDistance += dis;
         }
 
+        // 对应的90度方向的向量
         if (!this._normal) {
             this._normal = vec2.create();
-            revertSet(this._normal, m);
+            revertSet(this._normal, preNormal);
         }
 
         // 头部点
         if (!this._started) {
             this._started = true;
 
-            // 四方形
+            // 方头
             if (isSquareCap) {
-                const normal = vec2.create();
-                const _normal = vec2.create();
+                const normal0 = vec2.create();
+                const normal1 = vec2.create();
 
-                vec2.add(normal, this._normal, m);
-                vec2.sub(_normal, this._normal, m);
-                normals.push(_normal[0], _normal[1], 0);
-                normals.push(normal[0], normal[1], 0);
+                vec2.add(normal0, this._normal, preNormal);
+                vec2.sub(normal1, this._normal, preNormal);
+                normals.push(normal1[0], normal1[1], 0);
+                normals.push(normal0[0], normal0[1], 0);
 
                 positions.push(
                     prePoint[0],
@@ -155,31 +157,32 @@ class DataMgr {
                 colors.push(color[0], color[1], color[2], color[3]);
                 colors.push(color[0], color[1], color[2], color[3]);
             }
-            // 圆角
+            // 圆角头
             else if (isRoundCap) {
-                const normal1 = vec2.fromValues(-m[0], -m[1]);
+                const normal0 = vec2.fromValues(-preNormal[0], -preNormal[1]);
+
+                const normal1 = vec2.create();
+                vec2.sub(normal1, this._normal, preNormal);
+                vec2.normalize(normal1, normal1);
+
                 const normal2 = vec2.create();
-                vec2.sub(normal2, this._normal, m);
+                vec2.add(normal2, this._normal, preNormal);
                 vec2.normalize(normal2, normal2);
 
-                const normal3 = vec2.create();
-                vec2.add(normal3, this._normal, m);
-                vec2.normalize(normal3, normal3);
-
-                const normal4 = vec2.fromValues(
+                const normal3 = vec2.fromValues(
                         this._normal[0],
                         this._normal[1]
                     ),
-                    normal5 = vec2.fromValues(
+                    normal4 = vec2.fromValues(
                         -this._normal[0],
                         -this._normal[1]
                     );
 
+                normals.push(normal0[0], normal0[1], 0);
                 normals.push(normal1[0], normal1[1], 0);
-                normals.push(normal2[0], normal2[1], 0);
-                normals.push(-normal3[0], -normal3[1], 0);
+                normals.push(-normal2[0], -normal2[1], 0);
+                normals.push(normal3[0], normal3[1], 0);
                 normals.push(normal4[0], normal4[1], 0);
-                normals.push(normal5[0], normal5[1], 0);
 
                 for (let k = 0; 5 > k; k++) {
                     positions.push(
@@ -194,6 +197,11 @@ class DataMgr {
                     colors.push(color[0], color[1], color[2], color[3]);
                 }
 
+                /**
+                 *   1 - 3
+                 * 0       
+                 *   2 - 4
+                 */
                 indices.push(
                     start + 0,
                     start + 2,
@@ -205,10 +213,10 @@ class DataMgr {
                     start + 2,
                     start + 4
                 );
-                d += 3;
+                pointSize += 3;
                 start += 3;
             }
-            // 尖角
+            // 平头（即没有突出部分）
             else {
                 this._extrusions(
                     positions,
@@ -242,40 +250,40 @@ class DataMgr {
                 return -1;
             }
 
-            // 计算当前点的法向量
-            subNormalize(p, [nextPoint[0], nextPoint[1]], xy);
+            // 计算下个点的方向
+            subNormalize(nextNormal, [nextPoint[0], nextPoint[1]], xy);
 
             const thickness = this.thickness;
-            vec2.add(n, m, p);
-            vec2.normalize(n, n);
+            vec2.add(avgNormal, preNormal, nextNormal);
+            vec2.normalize(avgNormal, avgNormal);
 
             // 计算相交向量
-            dis = vec2.fromValues(-n[1], n[0]);
-            m = vec2.fromValues(-m[1], m[0]);
-            m = [thickness / vec2.dot(dis, m), dis];
+            const normal = vec2.fromValues(-avgNormal[1], avgNormal[0]);
+            const normal2 = vec2.fromValues(-preNormal[1], preNormal[0]);
 
-            dis = m[0];
-            m = m[1];
+            dis = thickness / vec2.dot(normal, normal2);
 
-            if (isBevelJoin || "miter" !== this.join) {
+            // 判断是否要转成斜转角
+            if (!isBevelJoin && "miter" === this.join) {
                 if (Math.abs(dis) > this.miterLimit) {
                     isBevelJoin = true;
                 }
             }
 
             // 判断是上顶点还是下顶点
-            n = 0 < vec2.dot(n, this._normal) ? -1 : 1;
+            let lastFlip = 0 < vec2.dot(avgNormal, this._normal) ? -1 : 1;
+
             // 斜边
             if (isBevelJoin) {
                 const thickness = Math.min(2 * this.thickness, Math.abs(dis));
                 normals.push(this._normal[0], this._normal[1], 0);
-                normals.push(m[0], m[1], 0);
+                normals.push(normal[0], normal[1], 0);
                 positions.push(
                     point[0],
                     point[1],
                     point[2],
                     this._totalDistance,
-                    this.thickness * n,
+                    this.thickness * lastFlip,
                     0
                 );
                 positions.push(
@@ -283,48 +291,48 @@ class DataMgr {
                     point[1],
                     point[2],
                     this._totalDistance,
-                    -thickness * n,
+                    -thickness * lastFlip,
                     0
                 );
                 indices.push(
-                    ...(this._lastFlip === -n
+                    ...(this._lastFlip === -lastFlip
                         ? [start + 2, start + 1, start + 3]
                         : [start + 0, start + 2, start + 3])
                 );
-                revertSet(l, p);
-                vec2.copy(this._normal, l);
+                revertSet(tempNormal, nextNormal);
+                vec2.copy(this._normal, tempNormal);
                 normals.push(this._normal[0], this._normal[1], 0);
                 positions.push(
                     point[0],
                     point[1],
                     point[2],
                     this._totalDistance,
-                    this.thickness * n,
+                    this.thickness * lastFlip,
                     0
                 );
                 indices.push(
-                    ...(1 === n
+                    ...(1 === lastFlip
                         ? [start + 2, start + 3, start + 4]
                         : [start + 3, start + 2, start + 4])
                 );
-                this._flipedUV(uvs, this._totalDistance, n, true);
+                this._flipedUV(uvs, this._totalDistance, lastFlip, true);
                 colors.push(color[0], color[1], color[2], color[3]);
                 colors.push(color[0], color[1], color[2], color[3]);
                 colors.push(color[0], color[1], color[2], color[3]);
-                d += 3;
+                pointSize += 3;
             }
             // 圆角
             else if (isRoundJoin) {
                 isRoundJoin = Math.min(2 * this.thickness, Math.abs(dis));
                 normals.push(this._normal[0], this._normal[1], 0);
-                normals.push(m[0], m[1], 0);
-                normals.push(m[0], m[1], 0);
+                normals.push(normal[0], normal[1], 0);
+                normals.push(normal[0], normal[1], 0);
                 positions.push(
                     point[0],
                     point[1],
                     point[2],
                     this._totalDistance,
-                    this.thickness * n,
+                    this.thickness * lastFlip,
                     0
                 );
                 positions.push(
@@ -332,7 +340,7 @@ class DataMgr {
                     point[1],
                     point[2],
                     this._totalDistance,
-                    this.thickness * n,
+                    this.thickness * lastFlip,
                     0
                 );
                 positions.push(
@@ -340,11 +348,11 @@ class DataMgr {
                     point[1],
                     point[2],
                     this._totalDistance,
-                    -isRoundJoin * n,
+                    -isRoundJoin * lastFlip,
                     0
                 );
                 indices.push(
-                    ...(this._lastFlip === -n
+                    ...(this._lastFlip === -lastFlip
                         ? [
                               start + 2,
                               start + 1,
@@ -362,36 +370,38 @@ class DataMgr {
                               start + 4,
                           ])
                 );
-                revertSet(l, p);
-                vec2.copy(this._normal, l);
+                revertSet(tempNormal, nextNormal);
+                vec2.copy(this._normal, tempNormal);
                 normals.push(this._normal[0], this._normal[1], 0);
                 positions.push(
                     point[0],
                     point[1],
                     point[2],
                     this._totalDistance,
-                    this.thickness * n,
+                    this.thickness * lastFlip,
                     0
                 );
                 indices.push(
-                    ...(1 === n
+                    ...(1 === lastFlip
                         ? [start + 4, start + 3, start + 5]
                         : [start + 3, start + 4, start + 5])
                 );
-                this._flipedUV(uvs, this._totalDistance, n, false);
+                this._flipedUV(uvs, this._totalDistance, lastFlip, false);
                 colors.push(color[0], color[1], color[2], color[3]);
                 colors.push(color[0], color[1], color[2], color[3]);
                 colors.push(color[0], color[1], color[2], color[3]);
                 colors.push(color[0], color[1], color[2], color[3]);
-                d += 4;
-            } else {
+                pointSize += 4;
+            }
+            // 默认模式
+            else {
                 this._extrusions(
                     positions,
                     normals,
                     uvs,
                     colors,
                     point,
-                    m,
+                    normal,
                     dis,
                     this._totalDistance,
                     color
@@ -401,23 +411,25 @@ class DataMgr {
                         ? [start + 2, start + 1, start + 3]
                         : [start + 2, start + 0, start + 3])
                 );
-                n = -1;
-                vec2.copy(this._normal, m);
-                d += 2;
+                lastFlip = -1;
+                vec2.copy(this._normal, normal);
+                pointSize += 2;
             }
-            this._lastFlip = n;
+            this._lastFlip = lastFlip;
         }
-        // 末尾
+        // 末尾的点
         else {
-            revertSet(this._normal, m);
-            // 正方形
+            revertSet(this._normal, preNormal);
+            // 方头
             if (isSquareCap) {
-                l = vec2.create();
-                p = vec2.create();
-                vec2.add(l, m, this._normal);
-                vec2.sub(p, m, this._normal);
-                normals.push(l[0], l[1], 0);
-                normals.push(p[0], p[1], 0);
+                const normal0 = vec2.create();
+                const normal1 = vec2.create();
+
+                vec2.add(normal0, preNormal, this._normal);
+                vec2.sub(normal1, preNormal, this._normal);
+                normals.push(normal0[0], normal0[1], 0);
+                normals.push(normal1[0], normal1[1], 0);
+
                 positions.push(
                     point[0],
                     point[1],
@@ -438,19 +450,42 @@ class DataMgr {
                 colors.push(color[0], color[1], color[2], color[3]);
                 colors.push(color[0], color[1], color[2], color[3]);
             }
-            // 圆角
-            else if (isRoundCap) {
-                l = vec2.create();
-                vec2.add(l, m, this._normal);
-                vec2.normalize(l, l);
-                p = vec2.create();
-                vec2.sub(p, m, this._normal);
-                vec2.normalize(p, p);
-                isRoundJoin = vec2.fromValues(m[0], m[1]);
+            // 没有头
+            else {
+                this._extrusions(
+                    positions,
+                    normals,
+                    uvs,
+                    colors,
+                    point,
+                    this._normal,
+                    this.thickness,
+                    this._totalDistance,
+                    color
+                );
+            }
+            indices.push(
+                ...(-1 === this._lastFlip
+                    ? [start + 2, start + 1, start + 3]
+                    : [start + 2, start + 0, start + 3])
+            );
+            pointSize += 2;
 
-                normals.push(l[0], l[1], 0);
-                normals.push(p[0], p[1], 0);
-                normals.push(isRoundJoin[0], isRoundJoin[1], 0);
+            // 圆头
+            if (isRoundCap) {
+                const normal0 = vec2.create();
+                vec2.add(normal0, preNormal, this._normal);
+                vec2.normalize(normal0, normal0);
+
+                const normal1 = vec2.create();
+                vec2.sub(normal1, preNormal, this._normal);
+                vec2.normalize(normal1, normal1);
+
+                const normal2 = vec2.fromValues(preNormal[0], preNormal[1]);
+
+                normals.push(normal0[0], normal0[1], 0);
+                normals.push(normal1[0], normal1[1], 0);
+                normals.push(normal2[0], normal2[1], 0);
 
                 for (let i = 0; 3 > i; i++) {
                     positions.push(
@@ -465,6 +500,11 @@ class DataMgr {
                     colors.push(color[0], color[1], color[2], color[3]);
                 }
 
+                /**
+                 * 2 - 4
+                 *       6
+                 * 3 - 5
+                 */
                 indices.push(
                     start + 2,
                     start + 3,
@@ -476,28 +516,10 @@ class DataMgr {
                     start + 5,
                     start + 6
                 );
-                d += 3;
-            } else {
-                this._extrusions(
-                    positions,
-                    normals,
-                    uvs,
-                    colors,
-                    point,
-                    this._normal,
-                    this.thickness,
-                    this._totalDistance,
-                    color
-                );
-                indices.push(
-                    ...(-1 === this._lastFlip
-                        ? [start + 2, start + 1, start + 3]
-                        : [start + 2, start + 0, start + 3])
-                );
-                d += 2;
+                pointSize += 3;
             }
         }
-        return d;
+        return pointSize;
     }
 
     _extrusions(
