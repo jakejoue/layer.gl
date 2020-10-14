@@ -244,8 +244,8 @@ export default class Program {
                 case gl.SAMPLER_2D:
                 case gl.SAMPLER_CUBE:
                     gl.activeTexture(gl["TEXTURE" + this.textureIndex]);
-                    gl.uniform1i(uniformLocation, this.textureIndex);
                     gl.bindTexture(gl.TEXTURE_2D, data);
+                    gl.uniform1i(uniformLocation, this.textureIndex);
                     this.textureIndex++;
                     break;
                 case gl.INT:

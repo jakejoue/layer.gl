@@ -25,7 +25,12 @@ export function createTexture(gl, texture, param) {
     );
     const webglTexture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, webglTexture);
+
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+    for (const key in param) {
+        gl.texParameteri(gl.TEXTURE_2D, gl[key], gl[param[key]]);
+    }
+
     gl.texImage2D(
         gl.TEXTURE_2D,
         0,
@@ -34,9 +39,6 @@ export function createTexture(gl, texture, param) {
         gl.UNSIGNED_BYTE,
         texture
     );
-    for (const key in param) {
-        gl.texParameteri(gl.TEXTURE_2D, gl[key], gl[param[key]]);
-    }
     gl.bindTexture(gl.TEXTURE_2D, null);
     return webglTexture;
 }
