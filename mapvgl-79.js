@@ -193,7 +193,7 @@ function(z) {
         return a
     }
     function tb(f, c, a) {
-        a = U({
+        a = Object.assign({
             TEXTURE_MAG_FILTER: "LINEAR",
             TEXTURE_MIN_FILTER: "LINEAR",
             TEXTURE_WRAP_S: "REPEAT",
@@ -1748,7 +1748,7 @@ function(z) {
     qa.P = 8;
     qa.B = 16;
     qa.W = 32;
-    qa.U = 64;
+    qa.Object.assign = 64;
     qa.R = 128;
     var F = qa,
     Ac = function(f, c) {
@@ -1802,7 +1802,6 @@ function(z) {
             __esModule: true
         }
     }),
-    U = T(mh),
     Oe = md("IE_PROTO"),
     nh = Object.prototype,
     Pe = Object.getPrototypeOf ||
@@ -5621,9 +5620,9 @@ function(z) {
         function f(c) {
             I(this, f);
             this.options = this.getCommonDefaultOptions();
-            this.options = U(this.options, this.getDefaultOptions());
+            this.options = Object.assign(this.options, this.getDefaultOptions());
             this.autoUpdate = false;
-            this.options = U(this.options, c);
+            this.options = Object.assign(this.options, c);
             this.options.data && (this.data = this.options.data, delete this.options.data)
         }
         M(f, [{
@@ -5671,9 +5670,9 @@ function(z) {
             key: "setOptions",
             value: function(c) {
                 c = c || {};
-                var a = U({},
+                var a = Object.assign({},
                 this.getOptions());
-                U(this.options, c);
+                Object.assign(this.options, c);
                 this.onOptionsChanged && this.onOptionsChanged(this.getOptions(), a);
                 this.onChanged && this.onChanged(this.getOptions(), this.getData());
                 c.data ? (this.setData(c.data), delete c.data) : this.webglLayer && this.webglLayer.render()
@@ -5927,7 +5926,7 @@ function(z) {
             value: function(c) {
                 var a = this.gl,
                 b = this.getCurrentState();
-                c = U(this.getDefaultState(), c);
+                c = Object.assign(this.getDefaultState(), c);
                 c.blend !== b.blend && (c.blend ? a.enable(a.BLEND) : a.disable(a.BLEND));
                 c.depthTest !== b.depthTest && (c.depthTest ? a.enable(a.DEPTH_TEST) : a.disable(a.DEPTH_TEST));
                 c.cullFace !== b.cullFace && (c.cullFace ? a.enable(a.CULL_FACE) : a.disable(a.CULL_FACE));
@@ -6043,7 +6042,7 @@ function(z) {
         function c(a) {
             I(this, c);
             this.options = {};
-            U(this.options, a);
+            Object.assign(this.options, a);
             this.vertex = [ - 1, 1, 0, -1, -1, 0, 1, 1, 0, 1, 1, 0, -1, -1, 0, 1, -1, 0];
             this.sampleCoord = [0, 1, 0, 0, 1, 1, 1, 1, 0, 0, 1, 0]
         }
@@ -6628,7 +6627,7 @@ function(z) {
                 if (b.enablePicked) {
                     var g = 0 <= b.selectedIndex ? b.selectedIndex: -1;
                     g = b.autoSelect ? this.pickedColor: this.indexToRgb(g);
-                    c = U(c, {
+                    c = Object.assign(c, {
                         uSelectedColor: this.normizedColor(b.selectedColor),
                         uEnablePicked: b.enablePicked,
                         uPickedColor: g.map(function(a) {
@@ -6853,7 +6852,7 @@ function(z) {
                 this.vertexArray.bind();
                 this.indexBuffer.bind();
                 var h = this.map.getZoomUnits();
-                U(this.uniforms, this.getCommonUniforms(a), {
+                Object.assign(this.uniforms, this.getCommonUniforms(a), {
                     uZoomUnits: "px" === this.options.unit ? h: 1,
                     uMatrix: g
                 });
@@ -7035,7 +7034,7 @@ function(z) {
                 this.vertexArray.bind();
                 this.indexBuffer.bind();
                 var g = this.map.getZoomUnits();
-                U(this.uniforms, {
+                Object.assign(this.uniforms, {
                     uTime: (new Date - this.initializeTime) / 1E3,
                     uZoomUnits: "m" === this.options.unit ? 1 : g,
                     lineWidth: this.options.lineWidth * g,
@@ -11206,7 +11205,7 @@ default = Lb;
                             var n = this.normalMatrix;
                             E.invert(n, g);
                             E.transpose(n, n);
-                            k.setUniforms(U(this.getCommonUniforms(a), {
+                            k.setUniforms(Object.assign(this.getCommonUniforms(a), {
                                 u_normal_matrix: n,
                                 u_sampler: this.texture,
                                 u_proj_matrix: c,
@@ -11414,7 +11413,7 @@ default = Lb;
         M(a, [{
             key: "getDefaultOptions",
             value: function() {
-                return U(Ya(a.prototype.__proto__ || N(a.prototype), "getDefaultOptions", this).call(this), {
+                return Object.assign(Ya(a.prototype.__proto__ || N(a.prototype), "getDefaultOptions", this).call(this), {
                     style: "grid",
                     gridSize: 500,
                     height: function() {
@@ -12504,7 +12503,7 @@ default = Lb;
                     var h = this.getOptions(),
                     k = this.program;
                     k.use(b);
-                    a = U(this.getCommonUniforms(a), {
+                    a = Object.assign(this.getCommonUniforms(a), {
                         uMatrix: c,
                         uFlat: h.flat,
                         zoomUnits: this.map.getZoomUnits(),
@@ -12515,7 +12514,7 @@ default = Lb;
                         uAntialias: h.antialias,
                         uOffset: h.offset
                     });
-                    this.isUseTexture && (a = U(a, {
+                    this.isUseTexture && (a = Object.assign(a, {
                         uTextureMargin: 140,
                         textureImage: this.texture
                     }));
@@ -12924,7 +12923,7 @@ default = Lb;
                     var h = this.getOptions(),
                     k = this.program;
                     k.use(b);
-                    a = U(this.getCommonUniforms(a), {
+                    a = Object.assign(this.getCommonUniforms(a), {
                         u_matrix: c,
                         u_zoom_units: this.map.getZoomUnits(),
                         u_dash_array: h.dashArray,
@@ -12932,12 +12931,12 @@ default = Lb;
                         u_antialias: h.antialias,
                         u_offset: h.offset
                     });
-                    this.isUseTexture && (a = U(a, {
+                    this.isUseTexture && (a = Object.assign(a, {
                         u_texture_width: h.width,
                         u_texture_margin: 140,
                         u_sampler: this.texture
                     }));
-                    this.isAnimateLine && (c = this.map.getZoom(), a = U(a, {
+                    this.isAnimateLine && (c = this.map.getZoom(), a = Object.assign(a, {
                         u_time: (new Date - this.date) / 1E3,
                         u_animate: c >= h.minZoom && c <= h.maxZoom && this.autoUpdate ? true : false,
                         u_duration: h.duration,
@@ -14272,7 +14271,7 @@ default = Lb;
                     b.blendFunc(b.SRC_ALPHA, b.ONE_MINUS_SRC_ALPHA);
                     b.disable(b.DEPTH_TEST);
                     var k = this.map.getZoomUnits();
-                    h.setUniforms(U(this.getCommonUniforms(a), {
+                    h.setUniforms(Object.assign(this.getCommonUniforms(a), {
                         matrix: c,
                         devicePixelRatio: Db,
                         textureImage: this.texture,
@@ -14789,12 +14788,12 @@ default = Lb;
             value: function() {
                 var a = 0 < arguments.length && void 0 !== arguments[0] ? arguments[0] : {},
                 c = this.options.textOptions;
-                a.textOptions && U(c, a.textOptions);
+                a.textOptions && Object.assign(c, a.textOptions);
                 var e = a.minZoom,
                 g = a.maxZoom,
                 h = a.size;
                 e = g && g !== this.options.maxZoom || e && e !== this.options.minZoom || h && h !== this.options.size;
-                U(this.options, a, {
+                Object.assign(this.options, a, {
                     textOptions: c
                 });
                 if (e) this.onChanged(this.options, this.data);
@@ -15038,7 +15037,7 @@ default = Lb;
             value: function(a) {
                 this.map.addEventListener("mousemove",
                 function(b) {
-                    a(U(b, {
+                    a(Object.assign(b, {
                         x: b.x,
                         y: b.y
                     }))
@@ -15050,7 +15049,7 @@ default = Lb;
             value: function(a) {
                 this.map.addEventListener("click",
                 function(b) {
-                    a(U(b, {
+                    a(Object.assign(b, {
                         x: b.x,
                         y: b.y
                     }))
@@ -15062,7 +15061,7 @@ default = Lb;
             value: function(a) {
                 this.map.addEventListener("dblclick",
                 function(b) {
-                    a(U(b, {
+                    a(Object.assign(b, {
                         x: b.x,
                         y: b.y
                     }))
@@ -15074,7 +15073,7 @@ default = Lb;
             value: function(a) {
                 this.map.addEventListener("rightclick",
                 function(b) {
-                    a(U(b, {
+                    a(Object.assign(b, {
                         x: b.x,
                         y: b.y
                     }))
@@ -15170,7 +15169,7 @@ default = Lb;
             value: function(a) {
                 this.map.addEventListener("mousemove",
                 function(b) {
-                    a(U(b, {
+                    a(Object.assign(b, {
                         x: b.pixel.x,
                         y: b.pixel.y
                     }))
@@ -15182,7 +15181,7 @@ default = Lb;
             value: function(a) {
                 this.map.addEventListener("click",
                 function(b) {
-                    a(U(b, {
+                    a(Object.assign(b, {
                         x: b.pixel.x,
                         y: b.pixel.y
                     }))
@@ -15194,7 +15193,7 @@ default = Lb;
             value: function(a) {
                 this.map.addEventListener("dblclick",
                 function(b) {
-                    a(U(b, {
+                    a(Object.assign(b, {
                         x: b.pixel.x,
                         y: b.pixel.y
                     }))
@@ -15206,7 +15205,7 @@ default = Lb;
             value: function(a) {
                 this.map.addEventListener("rightclick",
                 function(b) {
-                    a(U(b, {
+                    a(Object.assign(b, {
                         x: b.pixel.x,
                         y: b.pixel.y
                     }))
@@ -15617,7 +15616,7 @@ default = Lb;
                         c = new Float32Array([e[0], e[1], e[2], e[3], e[4], e[5], e[6], e[7], e[8], e[9], e[10], e[11], e[12], e[13], e[14], e[15]])
                     } else "B_EARTH_MAP" === this.map.map.mapType ? (b = this.map.map.getEarth().scene._camera.getProjectionMatrix(), c = this.map.map.getEarth().scene._camera.getModelViewMatrix()) : (this.updateProjectionMatrix(), this.updateModelViewMatrix());
                     e = E.multiply(this.matrix, b, c);
-                    U(this.transferOptions, {
+                    Object.assign(this.transferOptions, {
                         gl: this.gl,
                         matrix: e,
                         pointToPixelMatrix: this.pointToPixelMatrix,
@@ -15836,7 +15835,7 @@ default = Lb;
                     var k = 1;
                     this.options.shape && Pf[this.options.shape] && (k = Pf[this.options.shape]);
                     a = this.getCommonUniforms(a);
-                    a = U(a, {
+                    a = Object.assign(a, {
                         uShape: k,
                         uMatrix: c
                     });
@@ -16104,7 +16103,7 @@ default = Lb;
                     a = this.getCommonUniforms(a);
                     var l = 1;
                     "m" === h.unit && this.map && (l = this.map.getZoomUnits());
-                    a = U(a, {
+                    a = Object.assign(a, {
                         zoomUnits: l,
                         uTime: (new Date - this.date) / 1E3,
                         duration: h.duration,
@@ -17128,7 +17127,7 @@ default = Lb;
                     g.use(b);
                     b.enable(b.BLEND);
                     b.blendFunc(b.SRC_ALPHA, b.ONE_MINUS_SRC_ALPHA);
-                    g.setUniforms(U(this.getCommonUniforms(a), {
+                    g.setUniforms(Object.assign(this.getCommonUniforms(a), {
                         u_icon: this.texture,
                         u_matrix: c,
                         devicePixelRatio: window.devicePixelRatio
@@ -17190,7 +17189,7 @@ default = Lb;
             b = Q(this, (a.__proto__ || N(a)).call(this, b));
             b.pointLayer = new PointLayer(b.options);
             b.textLayer = new Od(b.options.textOptions);
-            var c = U({},
+            var c = Object.assign({},
             b.options, b.options.iconOptions);
             b.iconLayer = new IconLayer(c);
             b.children = [b.pointLayer, b.textLayer, b.iconLayer];
@@ -17232,12 +17231,12 @@ default = Lb;
             value: function() {
                 var a = 0 < arguments.length && void 0 !== arguments[0] ? arguments[0] : {},
                 c = this.options.textOptions;
-                a.textOptions && U(c, a.textOptions);
+                a.textOptions && Object.assign(c, a.textOptions);
                 var e = a.minZoom,
                 g = a.maxZoom,
                 h = a.clusterRadius;
                 e = g && g !== this.options.maxZoom || e && e !== this.options.minZoom || h && h !== this.options.clusterRadius;
-                U(this.options, a, {
+                Object.assign(this.options, a, {
                     textOptions: c
                 });
                 if (e) this.onChanged(this.options, this.data);
@@ -17339,13 +17338,13 @@ default = Lb;
                     e = b,
                     g = "";
                     a.properties && a.properties.point_count && (g = a.properties.point_count, c = m.getSize(g) || c, e = m.getColor(g), g = p ? p(g) : g);
-                    c = U({},
+                    c = Object.assign({},
                     a.properties, {
                         text: g,
                         size: c,
                         color: e
                     });
-                    return U({},
+                    return Object.assign({},
                     a, {
                         properties: c,
                         children: a.id
@@ -17399,7 +17398,7 @@ default = Lb;
         M(a, [{
             key: "getDefaultOptions",
             value: function() {
-                return U(Ya(a.prototype.__proto__ || N(a.prototype), "getDefaultOptions", this).call(this), {
+                return Object.assign(Ya(a.prototype.__proto__ || N(a.prototype), "getDefaultOptions", this).call(this), {
                     style: "grid",
                     gridSize: 500,
                     gradient: {
@@ -17971,7 +17970,7 @@ default = Lb;
                         var l = this.map.getZoom();
                         l = l >= h.minZoom && l <= h.maxZoom && this.autoUpdate ? true : false
                     } else l = true;
-                    k.setUniforms(U(this.getCommonUniforms(a), {
+                    k.setUniforms(Object.assign(this.getCommonUniforms(a), {
                         u_matrix: c,
                         thickness: h.width,
                         uAntialias: h.antialias,
@@ -19618,7 +19617,7 @@ default = Lb;
             this.options = {
                 autoUpdate: true
             };
-            U(this.options, a);
+            Object.assign(this.options, a);
             var d = a.pointOffset;
             this.webglLayer = a.webglLayer || new WebglLayer(a.map, this.options);
             this.layerManager = new Gj({

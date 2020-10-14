@@ -17,7 +17,7 @@ function getMapBoxGLMap(map) {
 
     return {
         mapType: "mapboxgl",
-        // 必要的实践
+        /* *********** 事件同步 ************** */
         onResize(handler) {
             listen("resize", handler);
         },
@@ -46,7 +46,7 @@ function getMapBoxGLMap(map) {
                 }
             });
         },
-        // 容器更新相关
+        /* *************** 容器相关 **************** */
         getContainer() {
             return map.getCanvasContainer();
         },
@@ -72,6 +72,10 @@ function getMapBoxGLMap(map) {
         // 当前zoom范围下图幅像素范围
         getZoomUnits() {
             return 1 / map.transform.worldSize;
+        },
+        // 获取zoom
+        getZoom() {
+            return map.getZoom();
         },
         // 坐标系矩阵
         getProjectionMatrix() {

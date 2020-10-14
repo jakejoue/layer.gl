@@ -4,6 +4,8 @@ import Buffer from "../core/Buffer";
 import VertexArray from "../core/VertexArray";
 import Program from "../core/Program";
 
+import { road } from "../util/cavans";
+
 import {
     length,
     toOneArr,
@@ -15,22 +17,7 @@ import { loadTextureImage } from "../util/texture";
 
 const LineStyle = {
     normal: null,
-    road: (function () {
-        const c = document.createElement("canvas");
-        c.width = c.height = 32;
-        const a = c.getContext("2d");
-        a.save();
-        a.moveTo(0, 0);
-        a.lineTo(20, 0);
-        a.lineTo(32, 16);
-        a.lineTo(20, 32);
-        a.lineTo(0, 32);
-        a.lineTo(10, 16);
-        a.fillStyle = "#fff";
-        a.fill();
-        a.restore();
-        return c;
-    })(),
+    road: road(),
 };
 
 export default class LineLayer3D extends Layer {
@@ -361,7 +348,6 @@ export default class LineLayer3D extends Layer {
         });
     }
 
-
     onChanged(options, data) {
         if (this.gl) {
             this.initData();
@@ -479,7 +465,7 @@ export default class LineLayer3D extends Layer {
     onDestroy() {
         this.gl = this.program = this.dataMgr = this.prevBuffer = this.currentBuffer = this.nextBuffer = this.directionBuffer = this.colorBuffer = this.counterBuffer = this.uvBuffer = this.indexBuffer = null;
     }
-    
+
     render(transferOptions) {
         const gl = transferOptions.gl,
             matrix = transferOptions.matrix,
