@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Mapbox GL JS debug page</title>
+        <meta charset="utf-8" />
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1.0, user-scalable=no"
+        />
+        <link rel="stylesheet" href="./mapbox-gl/mapbox-gl.css" />
+        <style>
+            body {
+                margin: 0;
+                padding: 0;
+            }
+            html,
+            body,
+            #map {
+                height: 100%;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div id="map"></div>
+
+        <script src="./mapbox-gl/mapbox-gl.js"></script>
+        <script src="./mapbox-gl/access_token_generated.js"></script>
+        <script src="../build/layergl.js"></script>
+        <script>
+            var map = (window.map = new mapboxgl.Map({
+                container: "map",
+                zoom: 15,
+                projection: "3857",
+                center: [12948633.62602241, 4846678.8745609615],
+                style: {
+                    version: 8,
+                    sources: {
+                        cartodb: {
+                            type: "raster",
+                            tiles: [
+                                "http://b.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png",
+                            ],
+                            tileSize: 256,
+                        },
+                    },
+                    layers: [
+                        {
+                            id: "1",
+                            type: "raster",
+                            source: "cartodb",
+                        },
+                    ],
+                },
+                hash: false,
+            }));
+
+            const view = new layergl.View({
+                map: layergl.map.getMapBoxGLMap(map),
+            });
+
+            var timeOffset = 1526774400;
+
+            fetch("./static/guiji.xierqi.json")
+                .then(function (rs) {
+                    return rs.json();
+                })
+                .then(function (rs) {
+                    rs = rs.data;
+                    var data = [];
+
+                    var startTime = null;
+                    var endTime = null;
+
+                    for (var key in rs) {
+                        var group = rs[key];
+                        for (var i = 0; i < group.length; i++) {
+                            var line = group[i];
+                            var traj_base = line.traj_base.split(",");
+                            traj_base[0] = ~~traj_base[0];
+                            traj_base[1] = ~~traj_base[1];
+
+                            var time_base = ~~line.time_base;
+                            if (startTime === null) {
+                                startTime = time_base;
+                            }
+
+                            if (endTime === null) {
+                                endTime = time_base;
+                            }
+
+                            startTime = Math.min(startTime, time_base);
+                            endTime = Math.max(endTime, time_base);
+
+                            var traj_list = line.traj_list;
+                            var time_list = line.time_list;
+                            var add = 0;
+                            var traj = [];
+                            var timeArr = [];
+                            for (var j = 0; j < time_list.length; j++) {
+                                timeArr.push(time_base + ~~time_list[j]);
+                                traj.push([
+                                    traj_base[0] + ~~traj_list[j][0],
+                                    traj_base[1] + ~~traj_list[j][1],
+                                    1,
+                                    time_base + ~~time_list[j] - timeOffset,
+                                ]);
+                            }
+                            data.push({
+                                time: timeArr,
+                                geometry: {
+                                    type: "LineString",
+                                    coordinates: traj,
+                                },
+                            });
+                        }
+                    }
+
+                    var lineLayer = new layergl.LineTripLayer({
+                        step: 0.3,
+                        trailLength: 20,
+                        startTime: startTime - timeOffset,
+                        endTime: endTime - timeOffset,
+                        color: [0, 255, 255],
+                    });
+                    view.addLayer(lineLayer);
+                    lineLayer.setData(data);
+                });
+        </script>
+    </body>
+</html>
