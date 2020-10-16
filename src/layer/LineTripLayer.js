@@ -9,9 +9,6 @@ export default class LineTripLayer extends Layer {
         super(options);
 
         this.bufferData = [];
-        this.startTime = this.options.startTime || 0;
-        this.endTime = this.options.endTime;
-        this.time = this.startTime;
         this.autoUpdate = true;
     }
 
@@ -117,7 +114,7 @@ export default class LineTripLayer extends Layer {
                     bufferData.push(point[0]);
                     bufferData.push(point[1]);
                     bufferData.push(point[2]);
-                    void 0 === coords[j][3]
+                    undefined === coords[j][3]
                         ? bufferData.push(j)
                         : bufferData.push(Number(coords[j][3]));
 
@@ -130,7 +127,7 @@ export default class LineTripLayer extends Layer {
                     bufferData.push(point[0]);
                     bufferData.push(point[1]);
                     bufferData.push(point[2]);
-                    void 0 === coords[j + 1][3]
+                    undefined === coords[j + 1][3]
                         ? bufferData.push(j + 1)
                         : bufferData.push(Number(coords[j + 1][3]));
 
@@ -140,9 +137,10 @@ export default class LineTripLayer extends Layer {
                     bufferData.push(color[3]);
                 }
             }
-            if (0 === options.endTime) {
-                this.endTime = endTime;
-            }
+
+            this.startTime = +options.startTime || 0;
+            this.endTime = +options.endTime || endTime;
+            this.time = this.startTime;
 
             this.bufferData = bufferData;
             this.buffer.updateData(new Float32Array(bufferData));

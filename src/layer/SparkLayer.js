@@ -10,10 +10,6 @@ export default class SparkLayer extends Layer {
 
         this.autoUpdate = true;
         this.bufferData = [];
-
-        this.startTime = +this.options.startTime || 0;
-        this.endTime = +this.options.endTime || 10;
-        this.time = this.startTime;
     }
 
     getDefaultOptions() {
@@ -107,6 +103,10 @@ export default class SparkLayer extends Layer {
                         : arrayData.push(+point[2]);
                 }
             }
+
+            this.startTime = +options.startTime || 0;
+            this.endTime = +options.endTime || 10;
+            this.time = this.startTime;
 
             this.bufferData = arrayData;
             this.buffer.updateData(new Float32Array(arrayData));
