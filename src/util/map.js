@@ -79,14 +79,14 @@ function getMapBoxGLMap(map) {
         },
         // 坐标系矩阵
         getProjectionMatrix() {
+            return mat4.create();
+        },
+        // 可视化矩阵
+        getViewMatrix() {
             const m = map.transform.mercatorMatrix.slice();
             mat4.translate(m, m, [pointOffset[0], pointOffset[1], 0]);
 
             return m;
-        },
-        // 可视化矩阵
-        getViewMatrix() {
-            return mat4.create();
         },
         /* **************** 渲染相关 ***************** */
         // 销毁方法
