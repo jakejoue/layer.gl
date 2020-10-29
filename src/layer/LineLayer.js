@@ -4,8 +4,8 @@ import Buffer from "../core/Buffer";
 import VertexArray from "../core/VertexArray";
 import Program from "../core/Program";
 
-import { loadTextureImage } from "../util/texture";
-import { road, arrow } from "../util/cavans";
+import { loadTextureImage } from "../helper/texture";
+import { road, arrow } from "../helper/cavans";
 
 import { vec2 } from "gl-matrix";
 

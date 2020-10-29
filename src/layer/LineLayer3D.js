@@ -4,7 +4,7 @@ import Buffer from "../core/Buffer";
 import VertexArray from "../core/VertexArray";
 import Program from "../core/Program";
 
-import { road } from "../util/cavans";
+import { road } from "../helper/cavans";
 
 import {
     length,
@@ -12,8 +12,8 @@ import {
     perp,
     shiftArray,
     buildIndexArr,
-} from "../util/vertex";
-import { loadTextureImage } from "../util/texture";
+} from "../helper/vertex";
+import { loadTextureImage } from "../helper/texture";
 
 const LineStyle = {
     normal: null,

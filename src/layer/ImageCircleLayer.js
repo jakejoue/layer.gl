@@ -3,7 +3,7 @@ import Layer from "./Layer";
 import Buffer from "../core/Buffer";
 import VertexArray from "../core/VertexArray";
 import Program from "../core/Program";
-import { loadTextureImage } from "../util/texture";
+import { loadTextureImage } from "../helper/texture";
 
 import { mat4 } from "gl-matrix";
 

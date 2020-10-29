@@ -4,7 +4,7 @@ import Buffer from "../core/Buffer";
 import VertexArray from "../core/VertexArray";
 import Program from "../core/Program";
 
-import { loadTextureImage } from "../util/texture";
+import { loadTextureImage } from "../helper/texture";
 
 import earcut from "earcut";
 import { vec3, mat4 } from "gl-matrix";
