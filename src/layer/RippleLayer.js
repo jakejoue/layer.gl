@@ -52,7 +52,7 @@ export default class RippleLayer extends Layer {
                     vColor.a = 1.0 - percent;
 
                     gl_Position = uMatrix * vec4(aPos.xyz, 1.0);
-                    gl_PointSize = aSize * zoomUnits * percent;
+                    gl_PointSize = aSize / zoomUnits * percent;
                     
                     #if defined(PICK)
                     if(mapvIsPicked()) {
@@ -132,7 +132,12 @@ export default class RippleLayer extends Layer {
 
                 bufferData.push(coords[0], coords[1], coords[2]);
                 bufferData.push(color[0], color[1], color[2], color[3]);
-                bufferData.push(size * window.devicePixelRatio);
+
+                if (options.unit === "px") {
+                    bufferData.push(size * window.devicePixelRatio);
+                } else {
+                    bufferData.push(this.normizedHeight(size, coords));
+                }
             }
             this.bufferData = bufferData;
             this.buffer.updateData(new Float32Array(bufferData));
