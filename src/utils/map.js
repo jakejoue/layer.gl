@@ -59,7 +59,7 @@ function getMapBoxGLMap(map) {
         normizedPoint(coord) {
             // 转为墨卡托坐标
             const mCoords = mapboxgl.MercatorCoordinate.fromLngLat(
-                coord,
+                coord.slice(0, 3),
                 coord[2] || 0,
                 transform.projection
             );
