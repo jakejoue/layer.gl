@@ -1,5 +1,7 @@
 // 创建地图的工具类
 export { default as map } from "./src/utils/map";
+export { default as csv } from "./src/utils/csv";
+export { default as utilCityCenter } from "./src/utils/cityCenter";
 
 // 入口
 export { default as View } from "./src/View";

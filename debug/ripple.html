@@ -26,7 +26,6 @@
 
         <script src="./mapbox-gl/mapbox-gl.js"></script>
         <script src="./mapbox-gl/access_token_generated.js"></script>
-        <script src="./mapv.min.js"></script>
         <script src="../build/layergl.js"></script>
         <script>
             var map = (window.map = new mapboxgl.Map({
@@ -80,7 +79,7 @@
 
             // 构造数据
             while (randomCount--) {
-                var cityCenter = mapv.utilCityCenter.getCenterByCityName(
+                var cityCenter = layergl.utilCityCenter.getCenterByCityName(
                     citys[parseInt(Math.random() * citys.length, 10)]
                 );
                 data.push({

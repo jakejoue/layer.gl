@@ -26,7 +26,6 @@
 
         <script src="./mapbox-gl/mapbox-gl.js"></script>
         <script src="./mapbox-gl/access_token_generated.js"></script>
-        <script src="./mapv.min.js"></script>
         <script src="../build/layergl.js"></script>
         <script>
             var map = (window.map = new mapboxgl.Map({
@@ -74,7 +73,7 @@
             ];
             var colors = ["#f00", "#ff0", "#0ff", "#00f"];
             var data = cities.map((city, index) => {
-                var cityCenter = mapv.utilCityCenter.getCenterByCityName(city);
+                var cityCenter = layergl.utilCityCenter.getCenterByCityName(city);
                 return {
                     geometry: {
                         type: "Point",

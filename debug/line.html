@@ -26,7 +26,6 @@
 
         <script src="./mapbox-gl/mapbox-gl.js"></script>
         <script src="./mapbox-gl/access_token_generated.js"></script>
-        <script src="./mapv.min.js"></script>
         <script src="../build/layergl.js"></script>
         <script>
             var map = (window.map = new mapboxgl.Map({
@@ -46,8 +45,7 @@
                     return rs.text();
                 })
                 .then(function (csvstr) {
-                    var dataSet = mapv.csv.getDataSet(csvstr);
-                    var data = dataSet.get();
+                    var data = layergl.csv.getDataArray(csvstr);
 
                     var lineLayer = new layergl.LineLayer({
                         blend: "lighter",
