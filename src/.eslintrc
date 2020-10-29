@@ -13,6 +13,7 @@
     "no-undef": "error"
   },
   "globals": {
+    "mapboxgl": "readonly",
     "THREE": "readonly"
   }
 }

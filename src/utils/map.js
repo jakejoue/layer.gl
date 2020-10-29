@@ -1,12 +1,7 @@
 import { mat4 } from "gl-matrix";
 
 function getMapBoxGLMap(map) {
-    const transform = map.projection.getTransform();
-
-    // 坐标偏移（相对于中心点）
-    const point = map.transform.point,
-        worldSize = map.transform.worldSize;
-    const pointOffset = [point.x / worldSize, point.y / worldSize];
+    const transform = map.transform;
 
     // 所有监听的事件
     let listeners = [];
@@ -52,18 +47,23 @@ function getMapBoxGLMap(map) {
         },
         getSize() {
             return {
-                width: map.transform.width,
-                height: map.transform.height,
+                width: transform.width,
+                height: transform.height,
             };
         },
         /* **************** 渲染相关 ***************** */
-        // 坐标转换
+        /**
+         * 坐标转换
+         * @param {Array} coord
+         */
         normizedPoint(coord) {
-            const x = transform.mercatorXfromLng(coord[0]) - pointOffset[0];
-            const y = transform.mercatorYfromLat(coord[1]) - pointOffset[1];
-            const z = transform.mercatorZfromAltitude(coord[2] || 0, coord[1]);
-
-            return [x, y, z];
+            // 转为墨卡托坐标
+            const mCoords = mapboxgl.MercatorCoordinate.fromLngLat(
+                coord,
+                coord[2] || 0,
+                transform.projection
+            );
+            return [mCoords.x, mCoords.y, mCoords.z];
         },
         // 地图范围（矩阵范围）用于repeat
         worldSize() {
@@ -71,22 +71,44 @@ function getMapBoxGLMap(map) {
         },
         // 当前zoom范围下图幅像素范围
         getZoomUnits() {
-            return 1 / map.transform.worldSize;
+            return 1 / transform.worldSize;
         },
         // 获取zoom
         getZoom() {
             return map.getZoom();
         },
-        // 坐标系矩阵
+        // 视图矩阵
         getProjectionMatrix() {
-            return mat4.create();
+            return mat4.perspective(
+                [],
+                transform._fov,
+                transform.width / transform.height,
+                1,
+                4e3
+            );
         },
         // 可视化矩阵
         getViewMatrix() {
-            const m = map.transform.mercatorMatrix.slice();
-            mat4.translate(m, m, [pointOffset[0], pointOffset[1], 0]);
+            // 中心点
+            const point = transform.point;
+            const x = point.x,
+                y = point.y;
 
-            return m;
+            const cameraToCenterDistance =
+                (0.5 / Math.tan(transform._fov / 2)) * transform.height;
+
+            const m = mat4.create();
+            mat4.scale(m, m, [1, -1, 1]);
+            mat4.translate(m, m, [0, 0, -cameraToCenterDistance]);
+            mat4.rotateX(m, m, transform._pitch);
+            mat4.rotateZ(m, m, transform.angle);
+            mat4.translate(m, m, [-x, -y, 0]);
+
+            return mat4.scale([], m, [
+                transform.worldSize,
+                transform.worldSize,
+                transform.worldSize,
+            ]);
         },
         /* **************** 渲染相关 ***************** */
         // 销毁方法
