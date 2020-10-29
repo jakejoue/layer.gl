@@ -79,36 +79,11 @@ function getMapBoxGLMap(map) {
         },
         // 视图矩阵
         getProjectionMatrix() {
-            return mat4.perspective(
-                [],
-                transform._fov,
-                transform.width / transform.height,
-                1,
-                4e3
-            );
+            return mat4.create();
         },
         // 可视化矩阵
         getViewMatrix() {
-            // 中心点
-            const point = transform.point;
-            const x = point.x,
-                y = point.y;
-
-            const cameraToCenterDistance =
-                (0.5 / Math.tan(transform._fov / 2)) * transform.height;
-
-            const m = mat4.create();
-            mat4.scale(m, m, [1, -1, 1]);
-            mat4.translate(m, m, [0, 0, -cameraToCenterDistance]);
-            mat4.rotateX(m, m, transform._pitch);
-            mat4.rotateZ(m, m, transform.angle);
-            mat4.translate(m, m, [-x, -y, 0]);
-
-            return mat4.scale([], m, [
-                transform.worldSize,
-                transform.worldSize,
-                transform.worldSize,
-            ]);
+            return transform.mercatorMatrix.slice();
         },
         /* **************** 渲染相关 ***************** */
         // 销毁方法

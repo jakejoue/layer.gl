@@ -1,3 +1,19 @@
+import { mat4 } from "gl-matrix";
+
+// 矩阵平移转换
+function translateTransferOptions(transferOptions, layer) {
+    const pointOffset = layer.getPointOffset();
+    pointOffset[2] = pointOffset[2] || 0;
+    
+    const { projectionMatrix, viewMatrix } = transferOptions;
+    const tViewMatrix = mat4.translate([], viewMatrix, pointOffset);
+
+    return Object.assign({}, transferOptions, {
+        viewMatrix: tViewMatrix,
+        matrix: mat4.multiply([], projectionMatrix, tViewMatrix),
+    });
+}
+
 export default class LayerManager {
     constructor(options) {
         this.layers = [];
@@ -115,7 +131,7 @@ export default class LayerManager {
                 gl.depthFunc(gl.LEQUAL);
                 gl.enable(gl.POLYGON_OFFSET_FILL);
                 gl.polygonOffset(1, 1);
-                layer.render(transferOptions);
+                layer.render(translateTransferOptions(transferOptions, layer));
                 this.afterRender(transferOptions);
             }
         }
@@ -126,7 +142,9 @@ export default class LayerManager {
     renderThreeLayer(transferOptions) {
         for (let i = 0; i < this.layers.length; i++) {
             const layer = this.layers[i];
-            "ThreeLayer" === layer.layerType && layer.render(transferOptions);
+            if ("ThreeLayer" === layer.layerType) {
+                layer.render(transferOptions);
+            }
         }
     }
 
@@ -135,7 +153,7 @@ export default class LayerManager {
             const layer = this.layers[i];
             if ("threeLayer" === layer.layerType) {
                 this.beforeRender(transferOptions);
-                layer.render(transferOptions);
+                layer.render(transferOptions, layer);
                 this.afterRender(transferOptions);
             }
         }

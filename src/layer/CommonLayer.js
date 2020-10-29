@@ -32,6 +32,7 @@ export default class CommonLayer {
     render() {}
 
     setData(data, options = {}) {
+        delete this.pointOffset;
         this.data = data;
         this.onDataChanged(this.getData());
         this.onChanged(this.getOptions(), this.getData());
@@ -46,6 +47,7 @@ export default class CommonLayer {
     }
 
     setOptions(options = {}) {
+        delete this.pointOffset;
         const preOptions = Object.assign({}, this.getOptions());
         Object.assign(this.options, options);
         this.onOptionsChanged(this.getOptions(), preOptions);

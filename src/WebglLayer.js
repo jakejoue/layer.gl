@@ -119,8 +119,8 @@ export default class WebglLayer {
 
     render() {
         if (this.map) {
-            const projectionMatrix = this.map.getProjectionMatrix();
-            const viewMatrix = this.map.getViewMatrix();
+            const projectionMatrix = this.map.getProjectionMatrix().slice();
+            const viewMatrix = this.map.getViewMatrix().slice();
             const matrix = mat4.multiply([], projectionMatrix, viewMatrix);
 
             // 更新渲染参数

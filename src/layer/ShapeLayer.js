@@ -503,6 +503,9 @@ export default class ShapeLayer extends Layer {
                 void main() {
                     vec4 pos = a_pos;
                     pos.z = pos.z + pos.w * getTransitionValue(a_pre_height, a_height, dataTime, riseTime);
+                    gl_Position = u_proj_matrix * u_mv_matrix * vec4(pos.xyz, 1.0);
+
+                    // varing变量赋值
                     v_position = pos.xyz;
                     v_height = a_height;
 
@@ -511,17 +514,16 @@ export default class ShapeLayer extends Layer {
                         v_texture_coord = a_texture_coord;
                     }
                     #endif
-                    
-                    vec4 position = u_proj_matrix * u_mv_matrix * vec4(pos.xyz, 1.0);
-                    gl_Position = position;
+
+                    // 后面开始颜色计算
                     vec4 icolor = a_color;
-                    
                     #if defined(PICK)
                     if(mapvIsPicked()) {
                         icolor = uSelectedColor;
                     }
                     #endif
                     
+                    // 如果使用光照
                     if(u_use_lighting) {
                         vec3 N = normalize(vec3(u_normal_matrix * vec4(a_normal, 1.0)));
                         vec4 point_dir = u_mv_matrix * vec4(0, 1, 0, 0);
@@ -537,6 +539,8 @@ export default class ShapeLayer extends Layer {
                         vec4 light_dir_2 = u_mv_matrix * vec4(0, 0, -1, 0);
                         vec3 L2 = normalize(light_dir_2.xyz);
                         float lambert_2 = max(0.0, dot(N, -L2));
+
+                        // 如果顶部颜色和初始颜色相同
                         if(a_pre_color.r == a_color.r && a_pre_color.g == a_color.g && a_pre_color.b == a_color.b) {
 
                         } else {
@@ -546,9 +550,12 @@ export default class ShapeLayer extends Layer {
                                 icolor.b = a_pre_color.b + (a_color.b - a_pre_color.b) * (dataTime / riseTime);
                             }
                         }
+
+                        // 计算加入光照后的颜色
                         v_color.rgb = icolor.rgb + icolor.rgb * light_color * lambert + icolor.rgb * light_color_2 * lambert_2 + icolor.rgb * point_color * lambert_point;
                         v_color.a = icolor.a;
 
+                        // 如果是贴图模式
                         if(u_use_texture) {
                             mat3 normalMatrix = mat3(u_normal_matrix);
                             vec3 transformedNormal = normalMatrix * a_normal;

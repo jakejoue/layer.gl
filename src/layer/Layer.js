@@ -113,6 +113,38 @@ export default class Layer extends CommonLayer {
         this.webglLayer.stateManager.setState(state);
     }
 
+    getPointOffset() {
+        if (!this.pointOffset) {
+            // 如果参数中存在 pointOffset
+            if (this.options.pointOffset) {
+                this.pointOffset = this.map.normizedPoint(
+                    this.options.pointOffset
+                );
+            }
+            // 否则尝试从data中获取
+            else if (this.data && this.data.length) {
+                // 取靠近中心的数据
+                let coords = this.data[
+                    Math.max(0, Math.floor(this.data.length / 2))
+                ].geometry.coordinates;
+
+                while (Array.isArray(coords)) {
+                    if (Array.isArray(coords[0])) {
+                        coords = coords[0];
+                    } else {
+                        break;
+                    }
+                }
+                this.pointOffset = this.map.normizedPoint(coords);
+            }
+        }
+        if (this.pointOffset) {
+            return this.pointOffset;
+        } else {
+            return [0, 0];
+        }
+    }
+
     /* ************** 通用方法接口 ************** */
     // 获取对象的方法
     getValue(key, data) {
@@ -139,7 +171,13 @@ export default class Layer extends CommonLayer {
 
     normizedPoint(point) {
         if (!point || isNaN(+point[0]) || isNaN(+point[1])) return [0, 0, 0];
-        return this.map.normizedPoint(point);
+        const pointOffset = this.getPointOffset();
+        const nPoint = this.map.normizedPoint(point);
+        return [
+            nPoint[0] - pointOffset[0],
+            nPoint[1] - pointOffset[1],
+            nPoint[2],
+        ];
     }
 
     normizedHeight(height, point = [0, 0]) {
