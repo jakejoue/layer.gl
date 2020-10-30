@@ -582,6 +582,7 @@ export default class ShapeLayer extends Layer {
                 uniform float style;
                 uniform float alpha;
                 uniform float time;
+                uniform float u_zoom_unit;
                 uniform sampler2D u_sampler;
                 uniform bool u_use_lighting;
                 uniform bool u_use_texture;
@@ -613,7 +614,7 @@ export default class ShapeLayer extends Layer {
                     // window 和 windowAnimation
                     if(style == 1.0 || style == 2.0) {
                         float t = time / 1000.0;
-                        float diffDistance = 5.0;
+                        float diffDistance = 5.0 * u_zoom_unit;
                         float modX = mod(v_position.x, diffDistance * 2.0);
                         float modZ = mod(v_position.z, diffDistance * 2.0);
                         // 窗户判断
@@ -850,17 +851,29 @@ export default class ShapeLayer extends Layer {
                     program.setUniforms(
                         Object.assign(this.getCommonUniforms(transferOptions), {
                             u_normal_matrix: m,
-                            u_sampler: this.texture,
                             u_proj_matrix: projectionMatrix,
                             u_mv_matrix: viewMatrix,
+                            u_zoom_unit: this.normizedHeight(
+                                1,
+                                this.map.getCenter()
+                            ),
                             style: style,
-                            top_color: topColor,
-                            u_use_lighting: options.useLight,
+
+                            // 纹理相关
                             u_use_texture: this.isUseTexture,
+                            u_sampler: this.texture,
+
+                            // window样式下的整体的透明度
                             alpha: parseFloat(options.opacity),
+                            // 顶部颜色，ripple模式下的使用
+                            top_color: topColor,
+
+                            // 时间相关
                             time: new Date() - this.initializeTime,
                             dataTime: new Date() - this.dataTime,
                             riseTime: options.riseTime,
+                            // 光照相关
+                            u_use_lighting: options.useLight,
                             u_side_light_dir: light_dir,
                         })
                     );

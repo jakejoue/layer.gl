@@ -216,7 +216,7 @@ class SimpleCircleLayer extends Layer {
                 uZoomUnits:
                     "px" === this.options.unit
                         ? this.map.getZoomUnits()
-                        : this.normizedHeight(1),
+                        : this.normizedHeight(1, this.map.getCenter()),
                 uMatrix: matrix,
             }
         );
@@ -564,7 +564,9 @@ class AnimateCircleLayer extends Layer {
         Object.assign(this.uniforms, this.getCommonUniforms(transferOptions), {
             uTime: (new Date() - this.initializeTime) / 1e3,
             uZoomUnits:
-                "m" === this.options.unit ? this.normizedHeight(1) : zoomUnit,
+                "m" === this.options.unit
+                    ? this.normizedHeight(1, this.map.getCenter())
+                    : zoomUnit,
             lineWidth: this.options.lineWidth * zoomUnit,
             uMatrix: matrix,
         });

@@ -53,7 +53,7 @@ function getMapBoxGLMap(map) {
         },
         /* ************** 地图参数相关 ************** */
         getCenter() {
-            return map.getCenter();
+            return map.getCenter().toArray();
         },
         getZoom() {
             return map.getZoom();
