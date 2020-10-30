@@ -12,7 +12,7 @@ function getMapBoxGLMap(map) {
 
     return {
         mapType: "mapboxgl",
-        /* *********** 事件同步 ************** */
+        /* *********** 事件同步相关 ************** */
         onResize(handler) {
             listen("resize", handler);
         },
@@ -51,19 +51,12 @@ function getMapBoxGLMap(map) {
                 height: transform.height,
             };
         },
-        /* **************** 渲染相关 ***************** */
-        /**
-         * 坐标转换
-         * @param {Array} coord
-         */
-        normizedPoint(coord) {
-            // 转为墨卡托坐标
-            const mCoords = mapboxgl.MercatorCoordinate.fromLngLat(
-                coord.slice(0, 3),
-                coord[2] || 0,
-                transform.projection
-            );
-            return [mCoords.x, mCoords.y, mCoords.z];
+        /* ************** 地图参数相关 ************** */
+        getCenter() {
+            return map.getCenter();
+        },
+        getZoom() {
+            return map.getZoom();
         },
         // 地图范围（矩阵范围）用于repeat
         worldSize() {
@@ -73,9 +66,16 @@ function getMapBoxGLMap(map) {
         getZoomUnits() {
             return 1 / transform.worldSize;
         },
-        // 获取zoom
-        getZoom() {
-            return map.getZoom();
+        /* *********** 矩阵和坐标转换相关 ************ */
+        // 坐标转换
+        normizedPoint(coord) {
+            // 转为墨卡托坐标
+            const mCoords = mapboxgl.MercatorCoordinate.fromLngLat(
+                coord.slice(0, 3),
+                coord[2] || 0,
+                transform.projection
+            );
+            return [mCoords.x, mCoords.y, mCoords.z];
         },
         // 视图矩阵
         getProjectionMatrix() {
@@ -85,7 +85,7 @@ function getMapBoxGLMap(map) {
         getViewMatrix() {
             return transform.mercatorMatrix.slice();
         },
-        /* **************** 渲染相关 ***************** */
+        /* **************** 销毁接口 ***************** */
         // 销毁方法
         destroy() {
             listeners.forEach((l) => {
