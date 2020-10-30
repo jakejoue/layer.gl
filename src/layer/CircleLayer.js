@@ -272,8 +272,8 @@ const fragmentShaders = {
                 if(alpha >= 0.5 && alpha <= 0.6) {
                     color.a = smoothstep(0.0, 0.1, alpha - 0.5);
                 }
-                if(d >= 0.98 * R && d <= R) {
-                    color.a *= 1.0 - smoothstep(0.98, 1.0, d / R);
+                if(d >= center && d <= R) {
+                    color.a *= 1.0 - smoothstep(center, R, d);
                 }
             } else {
                 color.a = 0.0;
