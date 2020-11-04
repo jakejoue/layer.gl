@@ -52,6 +52,11 @@
                         lineCap: "round",
                         width: 5,
                         color: "rgba(255, 71, 26, 0.8)",
+                        enablePicked: true,
+                        onClick: function (evt) {
+                            console.log(evt);
+                        },
+                        autoSelect: true,
                     });
                     view.addLayer(lineLayer);
                     lineLayer.setData(data);

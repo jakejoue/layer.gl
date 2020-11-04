@@ -7,7 +7,7 @@ import Program from "../core/Program";
 import { loadTextureImage } from "../helper/texture";
 
 import earcut from "earcut";
-import { vec3, mat4 } from "gl-matrix";
+import { vec3 } from "gl-matrix";
 
 // 数据管理类
 class DataMgr {
@@ -191,11 +191,9 @@ class DataMgr {
             const p2 = [xy_s[2 * index2], xy_s[2 * index2 + 1], 1];
             const p3 = [xy_s[2 * index3], xy_s[2 * index3 + 1], 1];
 
-            const normal = [];
-            vec3.cross(
-                normal,
-                [p3[0] - p2[0], p3[1] - p2[1], p3[2] - p2[2]],
-                [p1[0] - p2[0], p1[1] - p2[1], p1[2] - p2[2]]
+            const normal = vec3.normalize(
+                [],
+                vec3.cross([], vec3.sub([], p3, p2), vec3.sub([], p1, p2))
             );
 
             let bound;
@@ -282,12 +280,15 @@ class DataMgr {
                     Math.pow(n_y - y, 2)
                 );
 
-                const normal = [];
-                vec3.cross(
-                    normal,
-                    [n_p[0] - p[0], n_p[1] - p[1], n_p[2] - p[2]],
-                    [t_p[0] - p[0], t_p[1] - p[1], t_p[2] - p[2]]
+                let normal = vec3.normalize(
+                    [],
+                    vec3.cross([], vec3.sub([], n_p, p), vec3.sub([], t_p, p))
                 );
+                // 如果是无方向向量
+                if (normal[0] === 0 && normal[1] === 0 && normal[1] === 0) {
+                    normal = vec3.normalize([], vec3.sub([], n_p, p));
+                    normal = [normal[1], -normal[0], 0];
+                }
 
                 // 顶点
                 vertexArray.push(p[0], p[1], p[2], p[3]);
@@ -462,7 +463,6 @@ export default class ShapeLayer extends Layer {
                 uniform vec4 uSelectedColor;
                 uniform mat4 u_proj_matrix;
                 uniform mat4 u_mv_matrix;
-                uniform mat4 u_normal_matrix;
                 uniform vec3 u_side_light_dir;
                 uniform bool u_use_lighting;
                 uniform bool u_use_texture;
@@ -473,17 +473,21 @@ export default class ShapeLayer extends Layer {
                 uniform float time;
                 uniform float dataTime;
                 uniform float riseTime;
+                uniform float u_zoom_unit;
 
                 varying float v_height;
                 varying vec4 v_color;
                 varying vec3 v_position;
                 varying vec2 v_texture_coord;
 
+                // 上光源
                 const vec3 point_color = vec3(0.06, 0.06, 0.06);
+                // 侧部光源
                 const vec3 light_color = vec3(0.53, 0.53, 0.53);
+                // 底部光源
                 const vec3 light_color_2 = vec3(0.4, 0.4, 0.4);
+                // 贴图模式使用的散射光和直射光
                 const vec3 uAmbientColor = vec3(0.8, 0.8, 0.8);
-                const vec3 uLightingDirection = vec3(0.0, 1.0, 1.0);
                 const vec3 uDirectionalColor = vec3(1.0, 1.0, 1.0);
 
                 float getTransitionValue(float pre_value, float to_value, float dataTime, float riseTime) {
@@ -525,19 +529,24 @@ export default class ShapeLayer extends Layer {
                     
                     // 如果使用光照
                     if(u_use_lighting) {
-                        vec3 N = normalize(vec3(u_normal_matrix * vec4(a_normal, 1.0)));
-                        vec4 point_dir = u_mv_matrix * vec4(0, 1, 0, 0);
-                        vec3 L_point = normalize(point_dir.xyz);
+                        vec3 N = normalize(a_normal);
+
+                        // 自上而下的点光源
+                        vec3 L_point = normalize(vec3(0, 1, 0));
                         float lambert_point = max(0.0, dot(N, -L_point));
-                        vec4 light_dir = u_mv_matrix * vec4(u_side_light_dir, 0);
-                        vec3 L = normalize(light_dir.xyz);
+
+                        // 外部光照
+                        vec3 L = normalize(u_side_light_dir);
                         float lambert = max(0.0, dot(N, -L));
-                        if(pos.z < 5.0) {
-                            float deepGradientColor = (5.0 - pos.z) / 8.0;
+
+                        float H = pos.z / u_zoom_unit;
+                        if(H < 5.0) {
+                            float deepGradientColor = (5.0 - H) / 8.0;
                             lambert = lambert - deepGradientColor;
                         }
-                        vec4 light_dir_2 = u_mv_matrix * vec4(0, 0, -1, 0);
-                        vec3 L2 = normalize(light_dir_2.xyz);
+
+                        // 自下而上的光源
+                        vec3 L2 = vec3(0, 0, -1);
                         float lambert_2 = max(0.0, dot(N, -L2));
 
                         // 如果顶部颜色和初始颜色相同
@@ -552,19 +561,16 @@ export default class ShapeLayer extends Layer {
                         }
 
                         // 计算加入光照后的颜色
-                        v_color.rgb = icolor.rgb + icolor.rgb * light_color * lambert + icolor.rgb * light_color_2 * lambert_2 + icolor.rgb * point_color * lambert_point;
+                        v_color.rgb = icolor.rgb + 
+                            icolor.rgb * light_color * lambert + 
+                            icolor.rgb * light_color_2 * lambert_2 +
+                            icolor.rgb * point_color * lambert_point;
                         v_color.a = icolor.a;
 
                         // 如果是贴图模式
                         if(u_use_texture) {
-                            mat3 normalMatrix = mat3(u_normal_matrix);
-                            vec3 transformedNormal = normalMatrix * a_normal;
-                            vec3 dir = uLightingDirection;
-                            dir = vec3(normalMatrix * vec3(0.0, -1.0, 2.0));
-                            float directionalLightWeighting = max(dot(normalize(transformedNormal), normalize(dir)), 0.0);
-                            vec4 vLightWeighting;
-                            vLightWeighting = vec4(uAmbientColor + uDirectionalColor * directionalLightWeighting, 1.0);
-                            v_color = vLightWeighting;
+                            float directionalLightWeighting = max(dot(N, normalize(vec3(0.0, -1.0, 2.0))), 0.0);
+                            v_color = vec4(uAmbientColor + uDirectionalColor * directionalLightWeighting, 1.0);
                         }
                     } else {
                         v_color = icolor;
@@ -600,7 +606,7 @@ export default class ShapeLayer extends Layer {
                             vec2 cPos = -1.0 + 2.0 * gl_FragCoord.xy / MAPV_resolution;
                             float cLength = length(cPos);
                             vec2 uv = gl_FragCoord.xy / MAPV_resolution + (cPos / cLength) * cos(cLength * 12.0 - time / 1000.0 * 4.0) * 0.03;
-                            textureColor = texture2D(u_sampler, uv / 2.0 + vec2(x,y));
+                            textureColor = texture2D(u_sampler, uv / 2.0 + vec2(x, y));
                         } else {
                             textureColor = texture2D(u_sampler, vec2(v_texture_coord.s, v_texture_coord.t));
                         }
@@ -762,7 +768,6 @@ export default class ShapeLayer extends Layer {
             attributes: attributes,
         });
         this.initializeTime = new Date();
-        this.normalMatrix = mat4.create();
     }
 
     onChanged(options, dataArray) {
@@ -792,7 +797,7 @@ export default class ShapeLayer extends Layer {
                 const program = this.program;
                 program.use(gl);
 
-                if (!options.texture || this.texture) {
+                if (!this.isUseTexture || this.texture) {
                     gl.disable(gl.CULL_FACE);
 
                     if (options.blend) {
@@ -836,7 +841,7 @@ export default class ShapeLayer extends Layer {
                         });
                     }
                     // 光照
-                    let light_dir = vec3.fromValues(0.5, 0.5, 0.5);
+                    let light_dir = vec3.fromValues(0, -1, 2);
                     if (options.lightDir) {
                         light_dir = vec3.fromValues(
                             options.lightDir[0],
@@ -844,13 +849,9 @@ export default class ShapeLayer extends Layer {
                             options.lightDir[2]
                         );
                     }
-                    const m = this.normalMatrix;
-                    mat4.invert(m, viewMatrix);
-                    mat4.transpose(m, m);
 
                     program.setUniforms(
                         Object.assign(this.getCommonUniforms(transferOptions), {
-                            u_normal_matrix: m,
                             u_proj_matrix: projectionMatrix,
                             u_mv_matrix: viewMatrix,
                             u_zoom_unit: this.normizedHeight(

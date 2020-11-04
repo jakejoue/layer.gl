@@ -124,13 +124,13 @@ export default class WebglLayer {
             const matrix = mat4.multiply([], projectionMatrix, viewMatrix);
 
             // 更新渲染参数
-            Object.assign(this.transferOptions, {
+            this.transferOptions = {
                 gl: this.gl,
                 projectionMatrix,
                 viewMatrix,
                 matrix,
                 stateManager: this.stateManager,
-            });
+            };
 
             // 是否为手动更新
             false !== this.options.autoUpdate && this.clear();

@@ -654,7 +654,7 @@ export default class LineLayer extends Layer {
                     
                     #if defined(PICK)
                     if(mapvIsPicked()) {
-                        v_color=uSelectedColor;
+                        v_color = uSelectedColor;
                     }
                     #endif
                     

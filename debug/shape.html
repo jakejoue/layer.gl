@@ -88,8 +88,8 @@
                     }
 
                     var shapeLayer = new layergl.ShapeLayer({
-                        color: "rgba(194, 147, 75, 0.8)",
-                        style: "window",
+                        color: "rgba(194, 147, 75, 1.0)",
+                        // style: "window",
                         // texture: './static/wall2.png',
                         // isTextureFull: true,
                         // textureScale: 0.05,
@@ -97,6 +97,11 @@
                         height: function (data) {
                             return data.properties.height;
                         },
+                        enablePicked: true,
+                        onClick: function (evt) {
+                            console.log(evt);
+                        },
+                        autoSelect: true,
                     });
                     view.addLayer(shapeLayer);
                     shapeLayer.setData(polygons);

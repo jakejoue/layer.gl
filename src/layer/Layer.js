@@ -2,6 +2,8 @@ import CommonLayer from "./CommonLayer";
 import Buffer from "../core/Buffer";
 import Color from "color";
 
+import { translateTransferOptions } from "../helper/offset";
+
 export default class Layer extends CommonLayer {
     constructor(options) {
         super(options);
@@ -83,7 +85,7 @@ export default class Layer extends CommonLayer {
                 {
                     isPickRender: true,
                 },
-                this.webglLayer.transferOptions
+                translateTransferOptions(this.webglLayer.transferOptions, this)
             )
         );
         // 颜色
