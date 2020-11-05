@@ -461,8 +461,7 @@ export default class ShapeLayer extends Layer {
                 #endif
                 
                 uniform vec4 uSelectedColor;
-                uniform mat4 u_proj_matrix;
-                uniform mat4 u_mv_matrix;
+                uniform mat4 u_matrix;
                 uniform vec3 u_side_light_dir;
                 uniform bool u_use_lighting;
                 uniform bool u_use_texture;
@@ -507,7 +506,7 @@ export default class ShapeLayer extends Layer {
                 void main() {
                     vec4 pos = a_pos;
                     pos.z = pos.z + pos.w * getTransitionValue(a_pre_height, a_height, dataTime, riseTime);
-                    gl_Position = u_proj_matrix * u_mv_matrix * vec4(pos.xyz, 1.0);
+                    gl_Position = u_matrix * vec4(pos.xyz, 1.0);
 
                     // varing变量赋值
                     v_position = pos.xyz;
@@ -786,8 +785,7 @@ export default class ShapeLayer extends Layer {
 
     render(transferOptions) {
         const gl = transferOptions.gl,
-            projectionMatrix = transferOptions.projectionMatrix,
-            viewMatrix = transferOptions.viewMatrix;
+            matrix = transferOptions.matrix;
 
         if (this._isShow) {
             const data = this.getData();
@@ -852,8 +850,7 @@ export default class ShapeLayer extends Layer {
 
                     program.setUniforms(
                         Object.assign(this.getCommonUniforms(transferOptions), {
-                            u_proj_matrix: projectionMatrix,
-                            u_mv_matrix: viewMatrix,
+                            u_matrix: matrix,
                             u_zoom_unit: this.normizedHeight(
                                 1,
                                 this.map.getCenter()
