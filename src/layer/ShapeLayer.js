@@ -425,10 +425,10 @@ export default class ShapeLayer extends Layer {
     getDefaultOptions() {
         return {
             color: "rgba(50, 50, 230, 1.0)",
-            opacity: 0.8,
+            opacity: 1.0,
             isTextureFull: false,
-            topColor: "rgba(76, 76, 76, 76)",
             textureScale: 1,
+            topColor: "rgba(76, 76, 76, 76)",
             useLight: true,
             riseTime: 0,
         };
@@ -465,11 +465,7 @@ export default class ShapeLayer extends Layer {
                 uniform vec3 u_side_light_dir;
                 uniform bool u_use_lighting;
                 uniform bool u_use_texture;
-                uniform vec3 u_ripple_center;
-                uniform float u_radius;
-                uniform float style;
                 uniform float alpha;
-                uniform float time;
                 uniform float dataTime;
                 uniform float riseTime;
                 uniform float u_zoom_unit;
@@ -489,7 +485,8 @@ export default class ShapeLayer extends Layer {
                 const vec3 uAmbientColor = vec3(0.8, 0.8, 0.8);
                 const vec3 uDirectionalColor = vec3(1.0, 1.0, 1.0);
 
-                float getTransitionValue(float pre_value, float to_value, float dataTime, float riseTime) {
+                // 根据时间计算目标高度
+                float getTransitionValue(float pre_value, float to_value) {
                     float result = 0.0;
                     if(pre_value == to_value) {
                         result = to_value;
@@ -505,12 +502,12 @@ export default class ShapeLayer extends Layer {
                 
                 void main() {
                     vec4 pos = a_pos;
-                    pos.z = pos.z + pos.w * getTransitionValue(a_pre_height, a_height, dataTime, riseTime);
+                    pos.z = pos.z + pos.w * getTransitionValue(a_pre_height, a_height);
                     gl_Position = u_matrix * vec4(pos.xyz, 1.0);
 
                     // varing变量赋值
                     v_position = pos.xyz;
-                    v_height = a_height;
+                    v_height = a_pos.z + a_height;
 
                     #if defined(USE_TEXTURE)
                     if(u_use_texture) {
@@ -574,6 +571,8 @@ export default class ShapeLayer extends Layer {
                     } else {
                         v_color = icolor;
                     }
+                    // 加入外部整体透明度
+                    v_color *= alpha;
                 }`,
                 fragmentShader: `precision highp float;
                 varying vec4 v_color;
@@ -585,7 +584,6 @@ export default class ShapeLayer extends Layer {
                 uniform vec4 top_color;
                 uniform float u_radius;
                 uniform float style;
-                uniform float alpha;
                 uniform float time;
                 uniform float u_zoom_unit;
                 uniform sampler2D u_sampler;
@@ -634,7 +632,6 @@ export default class ShapeLayer extends Layer {
                                 color *= (1.0 + mod(t, timeDistance) / timeDistance);
                             }
                         }
-                        color.a = alpha;
                     }
                     // 渐变色
                     else if(style == 3.0) {
@@ -648,7 +645,7 @@ export default class ShapeLayer extends Layer {
                             color = top_color;
                         }
                         if(dis > u_radius - rSize && dis < u_radius + rSize) {
-                            color *= (1.0 - abs(dis-u_radius) / rSize) * 2.0 + 1.0;
+                            color *= (1.0 - abs(dis - u_radius) / rSize) * 2.0 + 1.0;
                         }
                     }
                     // 未知
