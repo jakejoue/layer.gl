@@ -128,7 +128,7 @@ export default class Program {
         return str;
     }
 
-    use(gl, a) {
+    use(gl) {
         this.gl = gl;
         gl.useProgram(this.program);
 
