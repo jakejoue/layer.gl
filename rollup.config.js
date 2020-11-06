@@ -1,6 +1,7 @@
 import babel from "@rollup/plugin-babel";
 import commonResolve from "@rollup/plugin-commonjs";
 import nodeResolve from "@rollup/plugin-node-resolve";
+import glslify from "rollup-plugin-glslify";
 
 export default {
     input: "index.js",
@@ -19,6 +20,7 @@ export default {
     },
     external: ["mapboxgl", "maptalks", "openlayers", "leaflet", "three"],
     plugins: [
+        glslify(),
         commonResolve(),
         nodeResolve(),
         babel({ babelHelpers: "bundled" }),

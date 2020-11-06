@@ -4,6 +4,9 @@ import Buffer from "../core/Buffer";
 import VertexArray from "../core/VertexArray";
 import Program from "../core/Program";
 
+import rippleVert from "../shaders/ripple.vertex.glsl";
+import rippleFrag from "../shaders/ripple.fragment.glsl";
+
 export default class RippleLayer extends Layer {
     constructor(options) {
         super(options);
@@ -28,52 +31,8 @@ export default class RippleLayer extends Layer {
         this.program = new Program(
             this.gl,
             {
-                vertexShader: `
-                attribute vec3 aPos;
-                attribute vec4 aColor;
-                attribute float aSize;
-                
-                uniform mat4 uMatrix;
-                uniform vec4 uSelectedColor;
-                uniform float uTime;
-                uniform float duration;
-                uniform float zoomUnits;
-                
-                varying vec4 vColor;
-                
-                void main(void) {
-                    if(aColor.w >= 0.0 && aColor.w <= 1.0) {
-                        vColor = aColor;
-                    } else {
-                        vColor = vec4(aColor.xyz, 1.0);
-                    }
-
-                    float percent = mod(uTime, duration) / duration;
-                    vColor.a = 1.0 - percent;
-
-                    gl_Position = uMatrix * vec4(aPos.xyz, 1.0);
-                    gl_PointSize = aSize / zoomUnits * percent;
-                    
-                    #if defined(PICK)
-                    if(mapvIsPicked()) {
-                        vColor = uSelectedColor;
-                    }
-                    #endif
-                }`,
-                fragmentShader: `
-                varying vec4 vColor;
-                
-                void main(void) {
-                    vec4 color = vColor;
-                    float d = distance(gl_PointCoord, vec2(0.5, 0.5));
-                    if(d > 0.5) {
-                        discard;
-                    }
-                    float blur = 1.0;
-                    blur = 1.0 - smoothstep(0.49, 0.5, d);
-                    color.a *= blur;
-                    gl_FragColor = color;
-                }`,
+                vertexShader: rippleVert,
+                fragmentShader: rippleFrag,
                 defines: this.getOptions().enablePicked ? ["PICK"] : [],
             },
             this

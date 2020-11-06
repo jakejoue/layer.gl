@@ -18,6 +18,7 @@
     "@rollup/plugin-commonjs": "^15.1.0",
     "@rollup/plugin-node-resolve": "^9.0.0",
     "rollup": "^2.28.1",
+    "rollup-plugin-glslify": "^1.2.0",
     "uglify-js": "^3.1.9"
   },
   "dependencies": {

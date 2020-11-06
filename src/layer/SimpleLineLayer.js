@@ -4,6 +4,9 @@ import Buffer from "../core/Buffer";
 import VertexArray from "../core/VertexArray";
 import Program from "../core/Program";
 
+import simplelineVert from "../shaders/simple_line.vertex.glsl";
+import simplelineFrag from "../shaders/simple_line.fragment.glsl";
+
 export default class SimpleLineLayer extends Layer {
     constructor(options) {
         super(options);
@@ -15,41 +18,8 @@ export default class SimpleLineLayer extends Layer {
         this.program = new Program(
             this.gl,
             {
-                vertexShader: `
-                uniform mat4 u_matrix;
-                attribute vec3 aPos;
-                attribute vec4 aColor;
-                varying vec4 vColor;
-                
-                #if defined(DASH)
-                varying vec3 vPos;
-                #endif
-                
-                void main() {
-                    if(aColor.w >= 0.0 && aColor.w <= 1.0) {
-                        vColor = aColor;
-                    } else {
-                        vColor = vec4(aColor.xyz, 1.0);
-                    }
-                    gl_Position = u_matrix * vec4(aPos, 1.0);
-                    
-                    #if defined(DASH)
-                    vPos = aPos;
-                    #endif
-                }`,
-                fragmentShader: `
-                precision highp float;
-                varying vec4 vColor;
-                varying vec3 vPos;
-                void main() {
-                    #if defined(DASH)
-                    if(mod(vPos.x, 3.0) < 1.5) {
-                        discard;
-                    }
-                    #endif
-                    
-                    gl_FragColor = vColor;
-                }`,
+                vertexShader: simplelineVert,
+                fragmentShader: simplelineFrag,
                 defines: this.getOptions().useDash ? ["DASH"] : "",
             },
             this

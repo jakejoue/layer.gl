@@ -96,7 +96,8 @@ export default class Program {
         if (this.map && "cesium" === this.map.type) {
             definedStr = "#define LOG_DEPTH\n";
         }
-        definedStr += `// 相关defined的后处理函数
+        definedStr += `
+        // 相关defined的后处理函数
         // cesium 支持（暂时保留）
         #ifdef LOG_DEPTH
         varying float v_depthFromNearPlusOne;
@@ -131,7 +132,7 @@ export default class Program {
                 vPickColor.a = 1.0;
             }
             #endif
-        }`;
+        }\n`;
         shaderStr = this.getDefines() + definedStr + shaderStr;
         shaderStr = shaderStr.replace("void main", "void originMain");
         return shaderStr + "void main() {originMain(); afterMain();}";
@@ -181,7 +182,7 @@ export default class Program {
             #if defined(LOG_DEPTH)
             writeLogDepth(v_depthFromNearPlusOne);
             #endif
-        }`;
+        }\n`;
         shaderStr = this.getDefines() + definedStr + shaderStr;
         shaderStr = shaderStr.replace("void main", "void originMain");
         return shaderStr + "void main() {originMain(); afterMain();}";

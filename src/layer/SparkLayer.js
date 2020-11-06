@@ -4,6 +4,9 @@ import Buffer from "../core/Buffer";
 import VertexArray from "../core/VertexArray";
 import Program from "../core/Program";
 
+import sparkVert from "../shaders/spark.vertex.glsl";
+import sparkFrag from "../shaders/spark.fragment.glsl";
+
 export default class SparkLayer extends Layer {
     constructor(options) {
         super(options);
@@ -29,25 +32,8 @@ export default class SparkLayer extends Layer {
     initialize(gl) {
         this.gl = gl;
         this.program = new Program(this.gl, {
-            vertexShader: `precision mediump float;
-            attribute vec4 aPos;
-            uniform mat4 u_matrix;
-            uniform float currentTime;
-            uniform float trailLength;
-            varying float vTime;
-            void main() {
-                gl_Position = u_matrix * vec4(aPos.xyz, 1.0);
-                vTime = 1.0 - ((currentTime - aPos.w) / trailLength);
-            }`,
-            fragmentShader: `precision mediump float;
-            uniform vec3 uFragColor;
-            varying float vTime;
-            void main() {
-                if(vTime > 1.0 || vTime < 0.0) {
-                    discard;
-                }
-                gl_FragColor = vec4(uFragColor, 1.0 * vTime);
-            }`,
+            vertexShader: sparkVert,
+            fragmentShader: sparkFrag,
         });
 
         // 顶点相关数据

@@ -4,6 +4,9 @@ import Buffer from "../core/Buffer";
 import VertexArray from "../core/VertexArray";
 import Program from "../core/Program";
 
+import pointVert from "../shaders/point.vertex.glsl";
+import pointFrag from "../shaders/point.fragment.glsl";
+
 const PointShapeTypes = {
     circle: 1,
     square: 2,
@@ -30,49 +33,8 @@ export default class PointLayer extends Layer {
         this.program = new Program(
             this.gl,
             {
-                vertexShader: `
-                attribute vec3 aPos;
-                attribute vec4 aColor;
-                attribute float aSize;
-                uniform mat4 uMatrix;
-                varying vec4 vColor;
-                uniform vec4 uSelectedColor;
-
-                void main() {
-                    if(aColor.w >= 0.0 && aColor.w <= 1.0) {
-                        vColor = aColor;
-                    } else {
-                        vColor = vec4(aColor.xyz, 1.0);
-                    }
-                    gl_Position = uMatrix * vec4(aPos, 1.0);
-                    gl_PointSize = aSize;
-
-                    #if defined(PICK)
-                    if(mapvIsPicked()) {
-                        vColor = uSelectedColor;
-                    }
-                    #endif
-                }`,
-                fragmentShader: `
-                varying vec4 vColor;
-                uniform int uShape;
-
-                void main() {
-                    vec4 color = vColor;
-                    if(uShape == 1) {
-                        float d = distance(gl_PointCoord, vec2(0.5, 0.5));
-                        if(d > 0.5) {
-                            discard;
-                        }
-                        float blur = 1.0;
-                        blur = 1.0 - smoothstep(0.49, 0.5, d);
-                        color.a *= blur;
-                        gl_FragColor = color;
-                    } else {
-                        gl_FragColor = color;
-                    }
-                }
-                `,
+                vertexShader: pointVert,
+                fragmentShader: pointFrag,
                 defines: this.getOptions().enablePicked ? ["PICK"] : [],
             },
             this

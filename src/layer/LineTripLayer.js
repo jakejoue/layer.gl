@@ -4,6 +4,9 @@ import Buffer from "../core/Buffer";
 import VertexArray from "../core/VertexArray";
 import Program from "../core/Program";
 
+import lineTripVert from "../shaders/line_trip.vertex.glsl";
+import lineTripFrag from "../shaders/line_trip.fragment.glsl";
+
 export default class LineTripLayer extends Layer {
     constructor(options) {
         super(options);
@@ -25,32 +28,8 @@ export default class LineTripLayer extends Layer {
         this.program = new Program(
             this.gl,
             {
-                vertexShader: `precision highp float;
-                attribute vec4 aPos;
-                attribute vec4 aColor;
-
-                uniform mat4 u_matrix;
-                uniform float currentTime;
-                uniform float trailLength;
-                
-                varying float vTime;
-                varying vec4 vColor;
-                
-                void main() {
-                    gl_Position = u_matrix * vec4(aPos.xyz, 1.0);
-                    vColor = aColor;
-                    vTime = 1.0 - ((currentTime - aPos.w) / trailLength);
-                }`,
-                fragmentShader: `precision highp float;
-                varying vec4 vColor;
-                varying float vTime;
-                
-                void main() {
-                    if(vTime > 1.0 || vTime < 0.0) {
-                        discard;
-                    }
-                    gl_FragColor = vec4(vColor.rgb, 1.0 * vTime);
-                }`,
+                vertexShader: lineTripVert,
+                fragmentShader: lineTripFrag,
             },
             this
         );

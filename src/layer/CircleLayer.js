@@ -4,6 +4,12 @@ import Buffer from "../core/Buffer";
 import VertexArray from "../core/VertexArray";
 import Program from "../core/Program";
 
+import circleSimpleVert from "../shaders/circle_simple.vertex.glsl";
+import circleSimpleFrag from "../shaders/circle_simple.fragment.glsl";
+import circleAnimateVert from "../shaders/circle_animate.vertex.glsl";
+import circleWaveFrag from "../shaders/circle_wave.fragment.glsl";
+import circleBubbleFrag from "../shaders/circle_bubble.fragment.glsl";
+
 // 简单圆圈图层
 class SimpleCircleLayer extends Layer {
     constructor(options) {
@@ -25,77 +31,8 @@ class SimpleCircleLayer extends Layer {
         this.program = new Program(
             this.gl,
             {
-                vertexShader: `
-                attribute vec3 aPos;
-                attribute float aSize;
-                attribute float aIndex;
-                attribute vec4 aColor;
-                
-                varying vec4 vColor;
-                varying vec4 vPosition;
-                varying vec4 vFragPosition;
-                varying float vSize;
-                
-                uniform mat4 uMatrix;
-                uniform float uZoomUnits;
-                uniform vec4 uSelectedColor;
-                
-                void main() {
-                    vColor = aColor;
-                    
-                    float x = aPos.x;
-                    float y = aPos.y;
-                    vSize = aSize * uZoomUnits;
-                    
-                    if(aIndex == 1.0) {
-                        x -= vSize;
-                        y += vSize;
-                    } else if(aIndex == 2.0) {
-                        x += vSize;
-                        y -= vSize;
-                    } else if(aIndex == 3.0) {
-                        x += vSize;
-                        y += vSize;
-                    } else {
-                        x -= vSize;
-                        y -= vSize;
-                    }
-                    
-                    vPosition = vec4(aPos.xyz, 1.0);
-                    vFragPosition = vec4(x, y, aPos.z, 1.0);
-                    
-                    gl_Position = uMatrix * vFragPosition;
-                    
-                    #if defined(PICK)
-                    if(mapvIsPicked()) {
-                        vColor = uSelectedColor;
-                    }
-                    #endif
-                }`,
-                fragmentShader: `
-                varying vec4 vPosition;
-                varying float vSize;
-                varying vec4 vFragPosition;
-                varying vec4 vColor;
-                
-                uniform mat4 uMatrix;
-                uniform float uTime;
-                uniform float duration;
-                uniform float trail;
-                uniform float lineWidth;
-                
-                void main() {
-                    float d = distance(vFragPosition.xy, vPosition.xy);
-                    if(d > vSize) {
-                        discard;
-                    }
-                    vec4 color = vColor;
-                    
-                    if(d > 0.9 * vSize && d <= vSize) {
-                        color.a = 1.0 - smoothstep(0.9 * vSize, vSize, d);
-                    }
-                    gl_FragColor = color;
-                }`,
+                vertexShader: circleSimpleVert,
+                fragmentShader: circleSimpleFrag,
                 defines: this.getOptions().enablePicked ? ["PICK"] : [],
             },
             this
@@ -233,105 +170,8 @@ class SimpleCircleLayer extends Layer {
 
 // 动画圆圈的 shader
 const fragmentShaders = {
-    wave: `
-    varying vec4 vPosition;
-    varying float vSize;
-    varying vec4 vFragPosition;
-    varying vec4 vColor;
-    varying float vStartTime;
-    varying float vRadius;
-    varying float vWidth;
-
-    uniform mat4 uMatrix;
-    uniform float uTime;
-    uniform float duration;
-    uniform float trail;
-
-    void main() {
-        float d = distance(vFragPosition.xy, vPosition.xy);
-        if(d >= vRadius) {
-            discard;
-        }
-        vec4 color = vColor;
-        float R = vRadius;
-        float center = vSize;
-        float time = vStartTime + uTime;
-        float alpha = sin((R - d) / R * trail * 2.0 * 3.14 + time / duration);
-        
-        if(d <= center) {
-            if(d > 0.9 * center && d <= center) {
-                if(alpha >= 0.5) {
-                    color.a = 0.9;
-                } else {
-                    color.a = 1.0 - smoothstep(0.9 * center, center, d);
-                }
-            }
-        } else {
-            if(alpha >= 0.5) {
-                color.a = 0.9;
-                if(alpha >= 0.5 && alpha <= 0.6) {
-                    color.a = smoothstep(0.0, 0.1, alpha - 0.5);
-                }
-                if(d >= center && d <= R) {
-                    color.a *= 1.0 - smoothstep(center, R, d);
-                }
-            } else {
-                color.a = 0.0;
-            }
-        }
-        gl_FragColor = color;
-    }`,
-    bubble: `
-    varying vec4 vPosition;
-    varying float vSize;
-    varying vec4 vFragPosition;
-    varying vec4 vColor;
-    varying float vStartTime;
-    varying float vRadius;
-    varying float vWidth;
-    
-    uniform mat4 uMatrix;
-    uniform float uTime;
-    uniform float duration;
-    uniform float trail;
-    
-    void main() {
-        float d = distance(vFragPosition.xy, vPosition.xy);
-        if(d >= vRadius) {
-            discard;
-        }
-        
-        float time = vStartTime + uTime;
-        float range = mod(time, (duration + trail));
-        float percent = 0.0;
-        if(range <= duration) {
-            percent = range / duration;
-        } else {
-            percent = 1.0;
-        }
-        float center = vSize;
-        float R = vRadius;
-        float r = R * percent;
-        vec4 color = vColor;
-
-        if(d <= center) {
-            if(d > 0.9 * center && d <= center) {
-                color.a = 1.0 - smoothstep(0.9 * center, center, d);
-            }
-        } else {
-            if(d < r) {
-                color.a = smoothstep(0.1, 0.9, pow(d / r, 2.0) * 0.9);
-                if(d >= 0.9 * r && d <= r) {
-                    color.a *= 1.0 - smoothstep(0.9, 1.0, d / r);
-                } if(range > duration) {
-                    color.a *= 1.0 - (range - duration) / trail;
-                }
-            } else {
-                color.a = 0.0;
-            }
-        }
-        gl_FragColor = color;
-    }`,
+    wave: circleWaveFrag,
+    bubble: circleBubbleFrag,
 };
 
 // 动画圆圈图层
@@ -362,60 +202,7 @@ class AnimateCircleLayer extends Layer {
         this.program = new Program(
             this.gl,
             {
-                vertexShader: `
-                attribute vec3 aPos;
-                attribute float aSize;
-                attribute float aIndex;
-                attribute vec4 aColor;
-                attribute float aStartTime;
-                attribute float aRadius;
-                
-                varying vec4 vColor;
-                varying vec4 vPosition;
-                varying vec4 vFragPosition;
-                varying float vSize;
-                varying float vWidth;
-                varying float vStartTime;
-                varying float vRadius;
-                
-                uniform mat4 uMatrix;
-                uniform float uZoomUnits;
-                uniform float lineWidth;
-                uniform vec4 uSelectedColor;
-                
-                void main() {
-                    vColor = aColor;
-                    vWidth = lineWidth;
-                    vStartTime = aStartTime;
-                    vSize = aSize * uZoomUnits;
-                    vRadius = aRadius * uZoomUnits;
-
-                    float x = aPos.x;
-                    float y = aPos.y;
-                    float R = vRadius;
-                    if(aIndex == 1.0) {
-                        x -= R;
-                        y += R;
-                    } else if(aIndex == 2.0) {
-                        x += R;
-                        y -= R;
-                    } else if(aIndex == 3.0) {
-                        x += R;
-                        y += R;
-                    } else {
-                        x -= R;
-                        y -= R;
-                    }
-                    vPosition = vec4(aPos.xyz, 1.0);
-                    vFragPosition = vec4(x, y, aPos.z, 1.0);
-                    gl_Position = uMatrix * vFragPosition;
-                    
-                    #if defined(PICK)
-                    if(mapvIsPicked()) {
-                        vColor = uSelectedColor;
-                    }
-                    #endif
-                }`,
+                vertexShader: circleAnimateVert,
                 fragmentShader:
                     fragmentShaders[this.options.type] ||
                     fragmentShaders["bubble"],
