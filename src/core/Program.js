@@ -1,3 +1,6 @@
+import preludeVert from "../shaders/_prelude.vertex.glsl";
+import preludeFrag from "../shaders/_prelude.fragment.glsl";
+
 export default class Program {
     constructor(gl, options, layer) {
         this.gl = gl;
@@ -96,43 +99,7 @@ export default class Program {
         if (this.map && "cesium" === this.map.type) {
             definedStr = "#define LOG_DEPTH\n";
         }
-        definedStr += `
-        // 相关defined的后处理函数
-        // cesium 支持（暂时保留）
-        #ifdef LOG_DEPTH
-        varying float v_depthFromNearPlusOne;
-        #endif
-
-        // 地图范围
-        uniform vec2 MAPV_resolution;
-
-        // pick支持
-        #if defined(PICK)
-        attribute vec3 aPickColor;
-        uniform bool uEnablePicked;
-        uniform vec3 uPickedColor;
-        uniform bool uIsPickRender;
-        varying vec4 vPickColor;
-        bool mapvIsPicked() {
-            return uEnablePicked && aPickColor == uPickedColor;
-        }
-        #endif
-
-        void afterMain() {
-            // cesium 后处理
-            #if defined(LOG_DEPTH)
-            v_depthFromNearPlusOne = (gl_Position.w - 0.1) + 1.0;
-            gl_Position.z = clamp(gl_Position.z / gl_Position.w, -1.0, 1.0) * gl_Position.w;
-            #endif
-
-            // pick后处理
-            #if defined(PICK)
-            vPickColor = vec4(aPickColor, 0.0);
-            if (mapvIsPicked()) {
-                vPickColor.a = 1.0;
-            }
-            #endif
-        }\n`;
+        definedStr += preludeVert + "\n";
         shaderStr = this.getDefines() + definedStr + shaderStr;
         shaderStr = shaderStr.replace("void main", "void originMain");
         return shaderStr + "void main() {originMain(); afterMain();}";
@@ -144,45 +111,7 @@ export default class Program {
         if (this.map && "cesium" === this.map.type) {
             definedStr = "#define LOG_DEPTH\n";
         }
-        definedStr += `// 相关后处理函数
-        #if defined(LOG_DEPTH)
-        #extension GL_EXT_frag_depth : enable
-        #endif
-
-        precision highp float;
-        uniform vec2 MAPV_resolution;
-
-        #if defined(PICK)
-        uniform bool uIsPickRender;
-        varying vec4 vPickColor;
-        bool mapvIsPicked() {
-            return vPickColor.a == 1.0;
-        }
-        #endif
-
-        #if defined(LOG_DEPTH)
-        uniform float oneOverLog2FarDepthFromNearPlusOne;
-        uniform float farDepthFromNearPlusOne;
-        varying float v_depthFromNearPlusOne;
-        void writeLogDepth(float depth) {
-            if(depth <= 0.9999999 || depth > farDepthFromNearPlusOne) {
-                discard;
-            }
-            gl_FragDepthEXT = log2(depth) * oneOverLog2FarDepthFromNearPlusOne;
-        }
-        #endif
-
-        void afterMain() {
-            #if defined(PICK)
-            if(uIsPickRender) {
-                gl_FragColor = vec4(vPickColor.rgb, 1.0);
-                return;
-            }
-            #endif
-            #if defined(LOG_DEPTH)
-            writeLogDepth(v_depthFromNearPlusOne);
-            #endif
-        }\n`;
+        definedStr += preludeFrag + "\n";
         shaderStr = this.getDefines() + definedStr + shaderStr;
         shaderStr = shaderStr.replace("void main", "void originMain");
         return shaderStr + "void main() {originMain(); afterMain();}";
