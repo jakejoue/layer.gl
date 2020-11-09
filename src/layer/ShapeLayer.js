@@ -247,21 +247,20 @@ export default class ShapeLayer extends Layer {
                             1,
                             this.map.getCenter()
                         ),
-                        style: style,
+                        u_style: style,
+                        u_alpha: parseFloat(options.opacity),
 
                         // 纹理相关
                         u_use_texture: this.isUseTexture,
                         u_sampler: this.texture,
 
-                        // window样式下的整体的透明度
-                        alpha: parseFloat(options.opacity),
                         // 顶部颜色，ripple模式下的使用
-                        top_color: topColor,
+                        u_top_color: topColor,
 
                         // 时间相关
-                        time: new Date() - this.initializeTime,
-                        dataTime: new Date() - this.dataTime,
-                        riseTime: options.riseTime,
+                        u_time: new Date() - this.initializeTime,
+                        u_dataTime: new Date() - this.dataTime,
+                        u_riseTime: options.riseTime,
                         // 光照相关
                         u_use_lighting: options.useLight,
                         u_side_light_dir: light_dir,

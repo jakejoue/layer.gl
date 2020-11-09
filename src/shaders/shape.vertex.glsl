@@ -15,9 +15,9 @@ uniform mat4 u_matrix;
 uniform vec3 u_side_light_dir;
 uniform bool u_use_lighting;
 uniform bool u_use_texture;
-uniform float alpha;
-uniform float dataTime;
-uniform float riseTime;
+uniform float u_alpha;
+uniform float u_dataTime;
+uniform float u_riseTime;
 uniform float u_zoom_unit;
 
 varying float v_height;
@@ -41,8 +41,8 @@ float getTransitionValue(float pre_value, float to_value) {
     if(pre_value == to_value) {
         result = to_value;
     } else {
-        if(riseTime > 0.0 && dataTime < riseTime) {
-            result = (pre_value + (to_value - pre_value) * (dataTime / riseTime));
+        if(u_riseTime > 0.0 && u_dataTime < u_riseTime) {
+            result = (pre_value + (to_value - pre_value) * (u_dataTime / u_riseTime));
         } else {
             result = to_value;
         }
@@ -99,10 +99,10 @@ void main() {
         if(a_pre_color.r == a_color.r && a_pre_color.g == a_color.g && a_pre_color.b == a_color.b) {
 
         } else {
-            if(riseTime > 0.0 && dataTime < riseTime) {
-                icolor.r = a_pre_color.r + (a_color.r - a_pre_color.r) * (dataTime / riseTime);
-                icolor.g = a_pre_color.g + (a_color.g - a_pre_color.g) * (dataTime / riseTime);
-                icolor.b = a_pre_color.b + (a_color.b - a_pre_color.b) * (dataTime / riseTime);
+            if(u_riseTime > 0.0 && u_dataTime < u_riseTime) {
+                icolor.r = a_pre_color.r + (a_color.r - a_pre_color.r) * (u_dataTime / u_riseTime);
+                icolor.g = a_pre_color.g + (a_color.g - a_pre_color.g) * (u_dataTime / u_riseTime);
+                icolor.b = a_pre_color.b + (a_color.b - a_pre_color.b) * (u_dataTime / u_riseTime);
             }
         }
 
@@ -122,5 +122,5 @@ void main() {
         v_color = icolor;
     }
     // 加入外部整体透明度
-    v_color *= alpha;
+    v_color *= u_alpha;
 }
