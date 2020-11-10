@@ -9,6 +9,7 @@ export { default as View } from "./src/View";
 // 图层
 export { default as PointLayer } from "./src/layer/PointLayer";
 export { default as RippleLayer } from "./src/layer/RippleLayer";
+export { default as GroundRippleLayer } from "./src/layer/GroundRippleLayer";
 export { default as CircleLayer } from "./src/layer/CircleLayer";
 export { default as SimpleLineLayer } from "./src/layer/SimpleLineLayer";
 export { default as LineLayer3D } from "./src/layer/LineLayer3D";

@@ -9,10 +9,9 @@ import { mat4 } from "gl-matrix";
 export default class GroundRippleLayer extends Layer {
     constructor(options) {
         super(options);
-        this.opacity = 1;
-        this.currentScale = 1;
 
         this.group = [];
+        this.date = new Date();
         this.autoUpdate = true;
     }
 
@@ -20,9 +19,9 @@ export default class GroundRippleLayer extends Layer {
         return {
             color: [0.1, 0.1, 0.9, 1],
             size: 5,
-            segs: 36,
-            scale: 2,
-            step: 0.1,
+            segs: 90,
+            duration: 2,
+            width: 400,
         };
     }
 
@@ -30,31 +29,52 @@ export default class GroundRippleLayer extends Layer {
         this.gl = gl;
         this.program = new Program(this.gl, {
             vertexShader: `
-            uniform mat4 u_projectionMatrix;
-            uniform mat4 u_modelViewMatrix;
+            uniform mat4 u_matrix;
             uniform mat4 u_modelMatrix;
-            uniform float u_opacity;
 
-            attribute vec4 aPos;
+            attribute vec3 aPos;
             attribute vec4 aColor;
 
             varying vec4 vColor;
+            varying vec2 vPos;
             
             void main() {
+                vec4 pos = u_modelMatrix * vec4(aPos, 1.0);
+                gl_Position = u_matrix * pos;
+
                 vColor = aColor;
-                vColor.a = u_opacity;
-                
-                gl_Position = u_projectionMatrix * u_modelViewMatrix * u_modelMatrix * vec4(aPos.xyz, 1.0);
+                vPos = aPos.xy;
             }`,
             fragmentShader: `
             precision highp float;
+
+            uniform vec2 u_center;
+            uniform float u_radius;
+            uniform float u_width;
+            uniform float u_time;
+            uniform float u_duration;
+
             varying vec4 vColor;
+            varying vec2 vPos;
 
             void main() {
-                if(vColor.a == 0.0) {
+                vec4 color = vColor;
+
+                // 当前百分比
+                float percent = mod(u_time, u_duration) / u_duration;
+                // 当前最小半径
+                float radius = u_radius * percent;
+
+                // 当前点半径
+                float dis = distance(vPos, u_center);
+
+                if(dis > radius && dis < radius + u_width) {
+                    color *= (1.0 - abs(dis - radius) / u_width) * 2.0 + 1.0;
+                } else {
                     discard;
                 }
-                gl_FragColor = vColor;
+
+                gl_FragColor = color;
             }`,
         });
 
@@ -94,7 +114,7 @@ export default class GroundRippleLayer extends Layer {
     onChanged(options, dataArray) {
         const gl = this.gl;
         this.group = [];
-        this.currentScale = this.opacity = 1;
+
         if (gl) {
             for (let i = 0; i < dataArray.length; i++) {
                 const data = dataArray[i];
@@ -102,6 +122,7 @@ export default class GroundRippleLayer extends Layer {
                 // 尺寸 和 颜色
                 const segs = this.getValue("segs", data),
                     size = +this.getValue("size", data),
+                    width = +this.getValue("width", data),
                     color = this.normizedColor(this.getValue("color", data));
 
                 // 每份儿的角度
@@ -110,16 +131,19 @@ export default class GroundRippleLayer extends Layer {
                     indexData = [];
 
                 const coord = this.normizedPoint(data.geometry.coordinates);
+                // 内半径 和 环半径
                 const _size = this.normizedHeight(
                     size,
                     data.geometry.coordinates
                 );
+                const _width = this.normizedHeight(
+                    width,
+                    data.geometry.coordinates
+                );
 
                 // 中心点
-                const x = coord[0],
-                    y = coord[1];
                 bufferData.push(0, 0, 0);
-                bufferData.push(color[0], color[1], color[2], 0);
+                bufferData.push(color[0], color[1], color[2], color[3]);
 
                 // 周边点
                 for (
@@ -127,16 +151,15 @@ export default class GroundRippleLayer extends Layer {
                     v <= segs;
                     v++, angle += perSegAngle
                 ) {
+                    // point & color
                     bufferData.push(
-                        coord[0] -
-                            x +
-                            Math.cos((Math.PI / 180) * angle) * _size,
-                        coord[1] -
-                            y +
-                            Math.sin((Math.PI / 180) * angle) * _size,
+                        Math.cos((Math.PI / 180) * angle) * (_size + _width),
+                        Math.sin((Math.PI / 180) * angle) * (_size + _width),
                         0
                     );
-                    bufferData.push(color[0], color[1], color[2], this.opacity);
+                    bufferData.push(color[0], color[1], color[2], color[3]);
+
+                    // index
                     v === segs
                         ? indexData.push(0, 0 + v, 1)
                         : indexData.push(0, 0 + v, 0 + v + 1);
@@ -147,6 +170,11 @@ export default class GroundRippleLayer extends Layer {
                     position: coord,
                     indexData: new Uint16Array(indexData),
                     bufferData: new Float32Array(bufferData),
+                    uniforms: {
+                        // u_center: coord,
+                        u_radius: _size,
+                        u_width: _width,
+                    },
                 };
             }
         }
@@ -154,16 +182,15 @@ export default class GroundRippleLayer extends Layer {
 
     render(transferOptions) {
         const gl = transferOptions.gl,
-            projectionMatrix = transferOptions.projectionMatrix,
-            viewMatrix = transferOptions.viewMatrix;
+            matrix = transferOptions.matrix;
 
         if (!this.group.length) return;
 
         this.program.use(gl);
         this.program.setUniforms({
-            u_projectionMatrix: projectionMatrix,
-            u_modelViewMatrix: viewMatrix,
-            u_opacity: this.options.opacity || this.opacity,
+            u_matrix: matrix,
+            u_time: (new Date() - this.date) / 1e3,
+            u_duration: this.options.duration,
         });
 
         // blend
@@ -178,17 +205,15 @@ export default class GroundRippleLayer extends Layer {
             this.vertexArray.bind();
 
             const modelMatrix = mat4.create();
-            mat4.translate(modelMatrix, modelMatrix, [
-                viewMatrix[0],
-                viewMatrix[1],
-                obj.position,
-            ]);
-            mat4.scale(modelMatrix, modelMatrix, [
-                this.currentScale,
-                this.currentScale,
-                this.currentScale,
-            ]);
-            this.program.setUniform("u_modelMatrix", modelMatrix);
+            mat4.translate(modelMatrix, modelMatrix, obj.position);
+            this.program.setUniforms(
+                Object.assign(
+                    {
+                        u_modelMatrix: modelMatrix,
+                    },
+                    obj.uniforms
+                )
+            );
 
             gl.drawElements(
                 gl.TRIANGLES,
@@ -197,12 +222,5 @@ export default class GroundRippleLayer extends Layer {
                 0
             );
         }
-
-        // 更新scale
-        const scale = this.options.scale,
-            step = this.options.step;
-        this.currentScale += step;
-
-        this.currentScale >= scale && (this.currentScale = 1);
     }
 }
