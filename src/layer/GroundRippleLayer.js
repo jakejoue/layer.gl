@@ -48,9 +48,13 @@ export default class GroundRippleLayer extends Layer {
             fragmentShader: `
             precision highp float;
 
-            uniform vec2 u_center;
-            uniform float u_radius;
-            uniform float u_width;
+            struct Ripple {
+                vec2 center;
+                float radius;
+                float width;
+            };
+
+            uniform Ripple u_ripple[1];
             uniform float u_time;
             uniform float u_duration;
 
@@ -63,13 +67,13 @@ export default class GroundRippleLayer extends Layer {
                 // 当前百分比
                 float percent = mod(u_time, u_duration) / u_duration;
                 // 当前最小半径
-                float radius = u_radius * percent;
+                float radius = u_ripple[0].radius * percent;
 
                 // 当前点半径
-                float dis = distance(vPos, u_center);
+                float dis = distance(vPos, u_ripple[0].center);
 
-                if(dis > radius && dis < radius + u_width) {
-                    color *= (1.0 - abs(dis - radius) / u_width) * 2.0 + 1.0;
+                if(dis > radius && dis < radius + u_ripple[0].width) {
+                    color *= (1.0 - abs(dis - radius) / u_ripple[0].width) * 2.0 + 1.0;
                 } else {
                     discard;
                 }
@@ -171,7 +175,7 @@ export default class GroundRippleLayer extends Layer {
                     indexData: new Uint16Array(indexData),
                     bufferData: new Float32Array(bufferData),
                     uniforms: {
-                        // u_center: coord,
+                        u_center: coord,
                         u_radius: _size,
                         u_width: _width,
                     },
