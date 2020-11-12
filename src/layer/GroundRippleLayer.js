@@ -31,18 +31,13 @@ export default class GroundRippleLayer extends Layer {
             vertexShader: `
             uniform mat4 u_matrix;
             uniform mat4 u_modelMatrix;
-
             attribute vec3 aPos;
-            attribute vec4 aColor;
-
-            varying vec4 vColor;
             varying vec2 vPos;
             
             void main() {
                 vec4 pos = u_modelMatrix * vec4(aPos, 1.0);
                 gl_Position = u_matrix * pos;
 
-                vColor = aColor;
                 vPos = aPos.xy;
             }`,
             fragmentShader: `
@@ -52,28 +47,28 @@ export default class GroundRippleLayer extends Layer {
                 vec2 center;
                 float radius;
                 float width;
+                vec4 color;
             };
 
-            uniform Ripple u_ripple[1];
+            uniform Ripple u_ripple;
             uniform float u_time;
             uniform float u_duration;
 
-            varying vec4 vColor;
             varying vec2 vPos;
 
             void main() {
-                vec4 color = vColor;
+                vec4 color = u_ripple.color;
 
                 // 当前百分比
                 float percent = mod(u_time, u_duration) / u_duration;
                 // 当前最小半径
-                float radius = u_ripple[0].radius * percent;
+                float radius = u_ripple.radius * percent;
 
                 // 当前点半径
-                float dis = distance(vPos, u_ripple[0].center);
+                float dis = distance(vPos, u_ripple.center);
 
-                if(dis > radius && dis < radius + u_ripple[0].width) {
-                    color *= (1.0 - abs(dis - radius) / u_ripple[0].width) * 2.0 + 1.0;
+                if(dis > radius && dis < radius + u_ripple.width) {
+                    color *= (1.0 - abs(dis - radius) / u_ripple.width) * 2.0 + 1.0;
                 } else {
                     discard;
                 }
@@ -99,13 +94,6 @@ export default class GroundRippleLayer extends Layer {
                 size: 3,
                 type: "FLOAT",
                 offset: 0,
-            },
-            {
-                name: "aColor",
-                buffer: this.buffer,
-                size: 4,
-                type: "FLOAT",
-                offset: 12,
             },
         ];
         this.vertexArray = new VertexArray({
@@ -147,7 +135,6 @@ export default class GroundRippleLayer extends Layer {
 
                 // 中心点
                 bufferData.push(0, 0, 0);
-                bufferData.push(color[0], color[1], color[2], color[3]);
 
                 // 周边点
                 for (
@@ -161,7 +148,6 @@ export default class GroundRippleLayer extends Layer {
                         Math.sin((Math.PI / 180) * angle) * (_size + _width),
                         0
                     );
-                    bufferData.push(color[0], color[1], color[2], color[3]);
 
                     // index
                     v === segs
@@ -175,9 +161,12 @@ export default class GroundRippleLayer extends Layer {
                     indexData: new Uint16Array(indexData),
                     bufferData: new Float32Array(bufferData),
                     uniforms: {
-                        u_center: coord,
-                        u_radius: _size,
-                        u_width: _width,
+                        u_ripple: {
+                            center: coord,
+                            radius: _size,
+                            width: _width,
+                            color: color,
+                        },
                     },
                 };
             }

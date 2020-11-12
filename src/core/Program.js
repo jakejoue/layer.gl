@@ -1,6 +1,9 @@
 import preludeVert from "../shaders/_prelude.vertex.glsl";
 import preludeFrag from "../shaders/_prelude.fragment.glsl";
 
+import Uniforms from "./Uniforms";
+import Textures from "./Textures";
+
 export default class Program {
     constructor(gl, options, layer) {
         this.gl = gl;
@@ -70,27 +73,10 @@ export default class Program {
             );
         }
 
-        // 查询可用统一变量
-        const uniforms = {},
-            uniformType = {},
-            numUniforms = gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS);
-        for (let i = 0; i < numUniforms; i++) {
-            const uniform = gl.getActiveUniform(program, i);
-            uniforms[uniform.name] = gl.getUniformLocation(
-                program,
-                uniform.name
-            );
-            uniformType[uniform.name] = uniform.type;
-        }
-
-        this.parameter = {
-            attributes: attributes,
-            numAttributes: numAttributes,
-            uniformsType: uniformType,
-            uniforms: uniforms,
-        };
         this.attributes = attributes;
-        this.uniforms = uniforms;
+
+        this.textures = new Textures(gl);
+        this.uniforms = new Uniforms(gl, program);
     }
 
     getVertexShader(shaderStr) {
@@ -132,6 +118,9 @@ export default class Program {
         this.gl = gl;
         gl.useProgram(this.program);
 
+        // 重置纹理索引
+        this.textures.resetTextureUnits();
+
         // cesium支持
         if (this.map && "cesium" === this.map.type) {
             this.setUniforms({
@@ -142,81 +131,19 @@ export default class Program {
             });
         }
 
-        this.uniforms.MAPV_resolution &&
+        // 窗口坐标
+        if (this.uniforms.MAPV_resolution) {
             this.setUniforms({
                 MAPV_resolution: [gl.canvas.width, gl.canvas.height],
             });
+        }
     }
 
     setUniform(uniformName, data) {
-        const gl = this.gl,
-            uniformLocation = this.uniforms[uniformName];
-        if (uniformLocation)
-            switch (this.parameter.uniformsType[uniformName]) {
-                case gl.FLOAT:
-                    gl.uniform1f(uniformLocation, data);
-                    break;
-                case gl.FLOAT_VEC2:
-                    gl.uniform2f(uniformLocation, data[0], data[1]);
-                    break;
-                case gl.FLOAT_VEC3:
-                    gl.uniform3f(uniformLocation, data[0], data[1], data[2]);
-                    break;
-                case gl.FLOAT_VEC4:
-                    gl.uniform4f(
-                        uniformLocation,
-                        data[0],
-                        data[1],
-                        data[2],
-                        data[3]
-                    );
-                    break;
-                case gl.SAMPLER_2D:
-                case gl.SAMPLER_CUBE:
-                    gl.activeTexture(gl["TEXTURE" + this.textureIndex]);
-                    gl.bindTexture(gl.TEXTURE_2D, data);
-                    gl.uniform1i(uniformLocation, this.textureIndex);
-                    this.textureIndex++;
-                    break;
-                case gl.INT:
-                case gl.BOOL:
-                    gl.uniform1i(uniformLocation, data);
-                    break;
-                case gl.INT_VEC2:
-                case gl.BOOL_VEC2:
-                    gl.uniform2i(uniformLocation, data[0], data[1]);
-                    break;
-                case gl.INT_VEC3:
-                case gl.BOOL_VEC3:
-                    gl.uniform3i(uniformLocation, data[0], data[1], data[2]);
-                    break;
-                case gl.INT_VEC4:
-                case gl.BOOL_VEC4:
-                    gl.uniform4i(
-                        uniformLocation,
-                        data[0],
-                        data[1],
-                        data[2],
-                        data[3]
-                    );
-                    break;
-                case gl.FLOAT_MAT2:
-                    gl.uniformMatrix2fv(uniformLocation, false, data);
-                    break;
-                case gl.FLOAT_MAT3:
-                    gl.uniformMatrix3fv(uniformLocation, false, data);
-                    break;
-                case gl.FLOAT_MAT4:
-                    gl.uniformMatrix4fv(uniformLocation, false, data);
-                    break;
-                default:
-                    console.error("Unrecognized uniform type: " + uniformName);
-            }
-        else console.warn("Unrecognized uniform type: " + uniformName);
+        this.uniforms.setValue(this.gl, uniformName, data, this.textures);
     }
 
     setUniforms(uniformObjs) {
-        this.textureIndex = 0;
         for (const key in uniformObjs) this.setUniform(key, uniformObjs[key]);
     }
 }
