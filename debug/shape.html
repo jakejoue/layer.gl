@@ -31,8 +31,7 @@
             var map = (window.map = new mapboxgl.Map({
                 container: "map",
                 zoom: 14,
-                projection: "3857",
-                center: [11865367.980664369, 3425727.8138353787],
+                center: [-73.96252891126437, 40.78790687108298],
                 style: {
                     version: 8,
                     sources: {
@@ -58,35 +57,9 @@
             const view = new layergl.View({
                 map: layergl.map.getMapBoxGLMap(map),
             });
-            fetch("./static/chongqing.json")
+            fetch("./static/central_park.json")
                 .then((response) => response.json())
-                .then((result) => {
-                    var data = result;
-                    var polygons = [];
-                    var len = data.length;
-                    for (var i = 0; i < len; i++) {
-                        var line = data[i];
-                        var polygon = [];
-                        var pt = [line[1] * 512, line[2] * 512];
-                        for (var j = 3; j < line.length; j += 2) {
-                            pt[0] += line[j] / 100 / 2;
-                            pt[1] += line[j + 1] / 100 / 2;
-                            polygon.push([pt[0], pt[1]]);
-                        }
-
-                        if (Math.random() > 0.5) {
-                            polygons.push({
-                                geometry: {
-                                    type: "Polygon",
-                                    coordinates: [polygon],
-                                },
-                                properties: {
-                                    height: line[0] / 2,
-                                },
-                            });
-                        }
-                    }
-
+                .then((polygons) => {
                     var shapeLayer = new layergl.ShapeLayer({
                         color: "rgba(194, 147, 75, 1.0)",
                         // style: "window",
@@ -94,6 +67,9 @@
                         // isTextureFull: true,
                         // textureScale: 0.05,
                         useLight: true,
+                        preHeight: function (data) {
+                            return data.properties.preHeight;
+                        },
                         height: function (data) {
                             return data.properties.height;
                         },

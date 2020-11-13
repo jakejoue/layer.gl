@@ -107,7 +107,7 @@ export default class Layer extends CommonLayer {
         this.webglLayer.restoreFramebuffer();
         return {
             dataIndex: index,
-            dataItem: this.data[index],
+            dataItem: this.getData()[index],
         };
     }
 
