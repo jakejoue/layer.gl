@@ -140,6 +140,13 @@ export default class FanLayer extends Layer {
         if (this.group.length <= 0) return;
 
         this.program.use(gl);
+        this.program.setUniform("uMatrix", matrix);
+
+        // blend
+        gl.depthMask(false);
+        gl.enable(gl.BLEND);
+        gl.blendEquation(gl.FUNC_ADD);
+        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
         for (let i = 0; i < this.group.length; i++) {
             // 绑定顶点数据
@@ -153,16 +160,11 @@ export default class FanLayer extends Layer {
             mat4.rotateZ(m, m, 2 * Math.PI * this.time);
 
             const uniforms = {
-                uMatrix: matrix,
                 uObjMatrix: m,
                 glowColor: color,
             };
             this.program.setUniforms(uniforms);
 
-            gl.depthMask(false);
-            gl.enable(gl.BLEND);
-            gl.blendEquation(gl.FUNC_ADD);
-            gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
             gl.drawArrays(gl.TRIANGLES, 0, bufferData.length / 3);
         }
 

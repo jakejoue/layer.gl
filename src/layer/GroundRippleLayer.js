@@ -4,8 +4,6 @@ import Buffer from "../core/Buffer";
 import VertexArray from "../core/VertexArray";
 import Program from "../core/Program";
 
-import { mat4 } from "gl-matrix";
-
 export default class GroundRippleLayer extends Layer {
     constructor(options) {
         super(options);
@@ -30,15 +28,13 @@ export default class GroundRippleLayer extends Layer {
         this.program = new Program(this.gl, {
             vertexShader: `
             uniform mat4 u_matrix;
-            uniform mat4 u_modelMatrix;
             attribute vec3 aPos;
             varying vec2 vPos;
             
             void main() {
-                vec4 pos = u_modelMatrix * vec4(aPos, 1.0);
-                gl_Position = u_matrix * pos;
-
                 vPos = aPos.xy;
+                
+                gl_Position = u_matrix * vec4(aPos, 1.0);
             }`,
             fragmentShader: `
             precision highp float;
@@ -134,7 +130,7 @@ export default class GroundRippleLayer extends Layer {
                 );
 
                 // 中心点
-                bufferData.push(0, 0, 0);
+                bufferData.push(coord[0], coord[1], coord[2]);
 
                 // 周边点
                 for (
@@ -142,12 +138,13 @@ export default class GroundRippleLayer extends Layer {
                     v <= segs;
                     v++, angle += perSegAngle
                 ) {
-                    // point & color
-                    bufferData.push(
-                        Math.cos((Math.PI / 180) * angle) * (_size + _width),
-                        Math.sin((Math.PI / 180) * angle) * (_size + _width),
-                        0
-                    );
+                    // point
+                    const x =
+                        Math.cos((Math.PI / 180) * angle) * (_size + _width);
+                    const y =
+                        Math.sin((Math.PI / 180) * angle) * (_size + _width);
+
+                    bufferData.push(coord[0] + x, coord[1] + y, coord[2]);
 
                     // index
                     v === segs
@@ -157,7 +154,6 @@ export default class GroundRippleLayer extends Layer {
 
                 // 存入group
                 this.group[i] = {
-                    position: coord,
                     indexData: new Uint16Array(indexData),
                     bufferData: new Float32Array(bufferData),
                     uniforms: {
@@ -197,16 +193,7 @@ export default class GroundRippleLayer extends Layer {
             this.indexBuffer.updateData(obj.indexData);
             this.vertexArray.bind();
 
-            const modelMatrix = mat4.create();
-            mat4.translate(modelMatrix, modelMatrix, obj.position);
-            this.program.setUniforms(
-                Object.assign(
-                    {
-                        u_modelMatrix: modelMatrix,
-                    },
-                    obj.uniforms
-                )
-            );
+            this.program.setUniforms(obj.uniforms);
 
             gl.drawElements(
                 gl.TRIANGLES,
