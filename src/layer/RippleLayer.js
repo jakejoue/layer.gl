@@ -4,9 +4,6 @@ import Buffer from "../core/Buffer";
 import VertexArray from "../core/VertexArray";
 import Program from "../core/Program";
 
-import rippleVert from "../shaders/ripple.vertex.glsl";
-import rippleFrag from "../shaders/ripple.fragment.glsl";
-
 export default class RippleLayer extends Layer {
     constructor(options) {
         super(options);
@@ -31,8 +28,7 @@ export default class RippleLayer extends Layer {
         this.program = new Program(
             this.gl,
             {
-                vertexShader: rippleVert,
-                fragmentShader: rippleFrag,
+                shaderId: "ripple",
                 defines: this.getOptions().enablePicked ? ["PICK"] : [],
             },
             this

@@ -4,9 +4,6 @@ import Buffer from "../core/Buffer";
 import VertexArray from "../core/VertexArray";
 import Program from "../core/Program";
 
-import groundRipleVert from "../shaders/ground_ripple.vertex.glsl";
-import groundRipleFrag from "../shaders/ground_ripple.fragment.glsl";
-
 export default class GroundRippleLayer extends Layer {
     constructor(options) {
         super(options);
@@ -29,8 +26,7 @@ export default class GroundRippleLayer extends Layer {
     initialize(gl) {
         this.gl = gl;
         this.program = new Program(this.gl, {
-            vertexShader: groundRipleVert,
-            fragmentShader: groundRipleFrag,
+            shaderId: "ground_ripple",
         });
 
         this.indexBuffer = new Buffer({

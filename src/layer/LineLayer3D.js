@@ -4,9 +4,6 @@ import Buffer from "../core/Buffer";
 import VertexArray from "../core/VertexArray";
 import Program from "../core/Program";
 
-import line3DVert from "../shaders/line_3d.vertex.glsl";
-import line3DFrag from "../shaders/line_3d.fragment.glsl";
-
 import { road } from "../helper/cavans";
 
 import {
@@ -72,8 +69,7 @@ export default class LineLayer3D extends Layer {
         this.program = new Program(
             this.gl,
             {
-                vertexShader: line3DVert,
-                fragmentShader: line3DFrag,
+                shaderId: "line_3d",
                 defines: defines,
             },
             this

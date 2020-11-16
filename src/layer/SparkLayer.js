@@ -4,9 +4,6 @@ import Buffer from "../core/Buffer";
 import VertexArray from "../core/VertexArray";
 import Program from "../core/Program";
 
-import sparkVert from "../shaders/spark.vertex.glsl";
-import sparkFrag from "../shaders/spark.fragment.glsl";
-
 export default class SparkLayer extends Layer {
     constructor(options) {
         super(options);
@@ -32,8 +29,7 @@ export default class SparkLayer extends Layer {
     initialize(gl) {
         this.gl = gl;
         this.program = new Program(this.gl, {
-            vertexShader: sparkVert,
-            fragmentShader: sparkFrag,
+            shaderId: "spark",
         });
 
         // 顶点相关数据

@@ -4,9 +4,6 @@ import Buffer from "../core/Buffer";
 import VertexArray from "../core/VertexArray";
 import Program from "../core/Program";
 
-import simplelineVert from "../shaders/simple_line.vertex.glsl";
-import simplelineFrag from "../shaders/simple_line.fragment.glsl";
-
 export default class SimpleLineLayer extends Layer {
     constructor(options) {
         super(options);
@@ -18,8 +15,7 @@ export default class SimpleLineLayer extends Layer {
         this.program = new Program(
             this.gl,
             {
-                vertexShader: simplelineVert,
-                fragmentShader: simplelineFrag,
+                shaderId: "simple_line",
                 defines: this.getOptions().useDash ? ["DASH"] : "",
             },
             this

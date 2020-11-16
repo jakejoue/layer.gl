@@ -4,9 +4,6 @@ import Buffer from "../core/Buffer";
 import VertexArray from "../core/VertexArray";
 import Program from "../core/Program";
 
-import lineVert from "../shaders/line.vertex.glsl";
-import lineFrag from "../shaders/line.fragment.glsl";
-
 import LineMgr from "../data_mgr/LineMgr";
 import { loadTextureImage } from "../helper/texture";
 import { road, arrow } from "../helper/cavans";
@@ -66,8 +63,7 @@ export default class LineLayer extends Layer {
         this.program = new Program(
             this.gl,
             {
-                vertexShader: lineVert,
-                fragmentShader: lineFrag,
+                shaderId: "line",
                 defines: defines,
             },
             this

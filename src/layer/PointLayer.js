@@ -4,9 +4,6 @@ import Buffer from "../core/Buffer";
 import VertexArray from "../core/VertexArray";
 import Program from "../core/Program";
 
-import pointVert from "../shaders/point.vertex.glsl";
-import pointFrag from "../shaders/point.fragment.glsl";
-
 const PointShapeTypes = {
     circle: 1,
     square: 2,
@@ -33,8 +30,7 @@ export default class PointLayer extends Layer {
         this.program = new Program(
             this.gl,
             {
-                vertexShader: pointVert,
-                fragmentShader: pointFrag,
+                shaderId: "point",
                 defines: this.getOptions().enablePicked ? ["PICK"] : [],
             },
             this

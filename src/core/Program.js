@@ -1,5 +1,5 @@
-import preludeVert from "../shaders/_prelude.vertex.glsl";
-import preludeFrag from "../shaders/_prelude.fragment.glsl";
+import shaderChunk from "../shaders/shaderChunk";
+import shaderLib from "../shaders/shaderLib";
 
 import Uniforms from "./Uniforms";
 import Textures from "./Textures";
@@ -73,10 +73,13 @@ export default class Program {
 
         layer && (this.map = layer.map);
 
-        const vertexShaderStr = this.getVertexShader(options.vertexShader);
-        const fragmentShaderStr = this.getFragmentShader(
-            options.fragmentShader
-        );
+        // 取得着色器代码并进行预处理
+        const { vertexShader, fragmentShader } =
+            shaderLib[options.shaderId] || options;
+        const vertexShaderStr = this.getVertexShader(vertexShader);
+        const fragmentShaderStr = this.getFragmentShader(fragmentShader);
+
+        // 初始化program
         const program = (this.program = initShaders(
             gl,
             vertexShaderStr,
@@ -89,14 +92,14 @@ export default class Program {
     }
 
     getVertexShader(shaderStr) {
-        const definedStr = preludeVert + "\n";
+        const definedStr = shaderChunk._prelude_vert + "\n";
         shaderStr = this.getDefines() + definedStr + shaderStr;
         shaderStr = shaderStr.replace("void main", "void originMain");
         return shaderStr + "\nvoid main() {originMain(); afterMain();}";
     }
 
     getFragmentShader(shaderStr) {
-        const definedStr = preludeFrag + "\n";
+        const definedStr = shaderChunk._prelude_frag + "\n";
         shaderStr = this.getDefines() + definedStr + shaderStr;
         shaderStr = shaderStr.replace("void main", "void originMain");
         return shaderStr + "\nvoid main() {originMain(); afterMain();}";

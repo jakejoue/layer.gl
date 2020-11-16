@@ -4,9 +4,6 @@ import Buffer from "../core/Buffer";
 import VertexArray from "../core/VertexArray";
 import Program from "../core/Program";
 
-import shapeVert from "../shaders/shape.vertex.glsl";
-import shapeFrag from "../shaders/shape.fragment.glsl";
-
 import { loadTextureImage } from "../helper/texture";
 import ShapeMgr from "../data_mgr/ShapeMgr";
 
@@ -61,8 +58,7 @@ export default class ShapeLayer extends Layer {
         this.program = new Program(
             this.gl,
             {
-                vertexShader: shapeVert,
-                fragmentShader: shapeFrag,
+                shaderId: "shape",
                 defines: defines,
             },
             this

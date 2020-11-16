@@ -4,12 +4,6 @@ import Buffer from "../core/Buffer";
 import VertexArray from "../core/VertexArray";
 import Program from "../core/Program";
 
-import circleSimpleVert from "../shaders/circle_simple.vertex.glsl";
-import circleSimpleFrag from "../shaders/circle_simple.fragment.glsl";
-import circleAnimateVert from "../shaders/circle_animate.vertex.glsl";
-import circleWaveFrag from "../shaders/circle_wave.fragment.glsl";
-import circleBubbleFrag from "../shaders/circle_bubble.fragment.glsl";
-
 // 简单圆圈图层
 class SimpleCircleLayer extends Layer {
     constructor(options) {
@@ -31,8 +25,7 @@ class SimpleCircleLayer extends Layer {
         this.program = new Program(
             this.gl,
             {
-                vertexShader: circleSimpleVert,
-                fragmentShader: circleSimpleFrag,
+                shaderId: "circle_simple",
                 defines: this.getOptions().enablePicked ? ["PICK"] : [],
             },
             this
@@ -168,12 +161,6 @@ class SimpleCircleLayer extends Layer {
     }
 }
 
-// 动画圆圈的 shader
-const fragmentShaders = {
-    wave: circleWaveFrag,
-    bubble: circleBubbleFrag,
-};
-
 // 动画圆圈图层
 class AnimateCircleLayer extends Layer {
     constructor(options) {
@@ -202,10 +189,10 @@ class AnimateCircleLayer extends Layer {
         this.program = new Program(
             this.gl,
             {
-                vertexShader: circleAnimateVert,
-                fragmentShader:
-                    fragmentShaders[this.options.type] ||
-                    fragmentShaders["bubble"],
+                shaderId:
+                    this.options.type === "wave"
+                        ? "circle_wave"
+                        : "circle_bubble",
                 defines: this.options.enablePicked ? ["PICK"] : [],
             },
             this
@@ -374,7 +361,7 @@ class AnimateCircleLayer extends Layer {
 
 export default class CircleLayer {
     constructor(options) {
-        return fragmentShaders[options.type]
+        return ["wave", "bubble"].includes(options.type)
             ? new AnimateCircleLayer(options)
             : new SimpleCircleLayer(options);
     }

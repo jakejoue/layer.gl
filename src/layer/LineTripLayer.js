@@ -4,9 +4,6 @@ import Buffer from "../core/Buffer";
 import VertexArray from "../core/VertexArray";
 import Program from "../core/Program";
 
-import lineTripVert from "../shaders/line_trip.vertex.glsl";
-import lineTripFrag from "../shaders/line_trip.fragment.glsl";
-
 export default class LineTripLayer extends Layer {
     constructor(options) {
         super(options);
@@ -28,8 +25,7 @@ export default class LineTripLayer extends Layer {
         this.program = new Program(
             this.gl,
             {
-                vertexShader: lineTripVert,
-                fragmentShader: lineTripFrag,
+                shaderId: "line_trip",
             },
             this
         );
