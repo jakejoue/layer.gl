@@ -1,4 +1,3 @@
-precision highp float;
 attribute vec4 a_pos;
 attribute vec3 a_normal;
 attribute vec4 a_color;

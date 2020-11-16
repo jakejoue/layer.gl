@@ -1,14 +1,32 @@
+#ifdef GL_ES
+precision highp float;
+#else
+
+#if !defined(lowp)
+#define lowp
+#endif
+
+#if !defined(mediump)
+#define mediump
+#endif
+
+#if !defined(highp)
+#define highp
+#endif
+
+#endif
+
 // 相关后处理函数
 #if defined(LOG_DEPTH)
 #extension GL_EXT_frag_depth : enable
 #endif
 
-precision highp float;
 uniform vec2 MAPV_resolution;
 
 #if defined(PICK)
 uniform bool uIsPickRender;
 varying vec4 vPickColor;
+
 bool mapvIsPicked() {
     return vPickColor.a == 1.0;
 }
@@ -18,6 +36,7 @@ bool mapvIsPicked() {
 uniform float oneOverLog2FarDepthFromNearPlusOne;
 uniform float farDepthFromNearPlusOne;
 varying float v_depthFromNearPlusOne;
+
 void writeLogDepth(float depth) {
     if(depth <= 0.9999999 || depth > farDepthFromNearPlusOne) {
         discard;
@@ -33,6 +52,7 @@ void afterMain() {
         return;
     }
     #endif
+
     #if defined(LOG_DEPTH)
     writeLogDepth(v_depthFromNearPlusOne);
     #endif

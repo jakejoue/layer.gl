@@ -32,7 +32,6 @@ export default class ImageCircleLayer extends Layer {
             this.gl,
             {
                 vertexShader: `
-                precision highp float;
                 attribute vec3 aPos;
                 uniform mat4 uMatrix;
                 uniform mat4 uObjMatrix;

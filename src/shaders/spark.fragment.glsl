@@ -1,4 +1,3 @@
-precision mediump float;
 uniform vec3 uFragColor;
 varying float vTime;
 

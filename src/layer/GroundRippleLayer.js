@@ -37,8 +37,6 @@ export default class GroundRippleLayer extends Layer {
                 gl_Position = u_matrix * vec4(aPos, 1.0);
             }`,
             fragmentShader: `
-            precision highp float;
-
             struct Ripple {
                 vec2 center;
                 float radius;

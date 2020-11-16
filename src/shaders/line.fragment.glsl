@@ -1,4 +1,3 @@
-precision highp float;
 varying vec4 v_color;
 varying vec2 v_normal;
 varying vec2 v_uv;

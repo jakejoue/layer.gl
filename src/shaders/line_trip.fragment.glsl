@@ -1,4 +1,3 @@
-precision highp float;
 varying vec4 vColor;
 varying float vTime;
 

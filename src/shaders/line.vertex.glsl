@@ -1,4 +1,3 @@
-precision highp float;
 uniform vec4 uSelectedColor;
 uniform mat4 u_matrix;
 uniform vec2 u_dash_array;
