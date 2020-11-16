@@ -80,27 +80,17 @@ export default class Program {
     }
 
     getVertexShader(shaderStr) {
-        let definedStr = "";
-        // cesium
-        if (this.map && "cesium" === this.map.type) {
-            definedStr = "#define LOG_DEPTH\n";
-        }
-        definedStr += preludeVert + "\n";
+        const definedStr = preludeVert + "\n";
         shaderStr = this.getDefines() + definedStr + shaderStr;
         shaderStr = shaderStr.replace("void main", "void originMain");
-        return shaderStr + "void main() {originMain(); afterMain();}";
+        return shaderStr + "\nvoid main() {originMain(); afterMain();}";
     }
 
     getFragmentShader(shaderStr) {
-        let definedStr = "";
-        // cesium
-        if (this.map && "cesium" === this.map.type) {
-            definedStr = "#define LOG_DEPTH\n";
-        }
-        definedStr += preludeFrag + "\n";
+        const definedStr = preludeFrag + "\n";
         shaderStr = this.getDefines() + definedStr + shaderStr;
         shaderStr = shaderStr.replace("void main", "void originMain");
-        return shaderStr + "void main() {originMain(); afterMain();}";
+        return shaderStr + "\nvoid main() {originMain(); afterMain();}";
     }
 
     getDefines() {
