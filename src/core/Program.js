@@ -4,6 +4,68 @@ import preludeFrag from "../shaders/_prelude.fragment.glsl";
 import Uniforms from "./Uniforms";
 import Textures from "./Textures";
 
+// 初始化着色器
+function initShaders(gl, vertexShaderStr, fragmentShaderStr) {
+    let program = false;
+
+    // 顶点着色器
+    const vertexShader = gl.createShader(gl.VERTEX_SHADER);
+    gl.shaderSource(vertexShader, vertexShaderStr);
+    gl.compileShader(vertexShader);
+    // 顶点着色器编译完成
+    if (gl.getShaderParameter(vertexShader, gl.COMPILE_STATUS)) {
+        // 栅格着色器
+        const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
+        gl.shaderSource(fragmentShader, fragmentShaderStr);
+        gl.compileShader(fragmentShader);
+        // 栅格着色器编译完成
+        if (gl.getShaderParameter(fragmentShader, gl.COMPILE_STATUS)) {
+            // 创建webgl程序
+            program = gl.createProgram();
+            gl.attachShader(program, vertexShader);
+            gl.attachShader(program, fragmentShader);
+            gl.deleteShader(vertexShader);
+            gl.deleteShader(fragmentShader);
+            gl.linkProgram(program);
+
+            // 程序编译完成
+            if (gl.getProgramParameter(program, gl.LINK_STATUS)) {
+                return program;
+            } else {
+                const error =
+                    "Shader program failed to link.  The error log is:" +
+                    gl.getProgramInfoLog(program);
+                console.error(error);
+            }
+        } else {
+            const error =
+                "Fragment shader failed to compile.  The error log is:" +
+                gl.getShaderInfoLog(fragmentShader);
+            console.error(error, fragmentShader);
+        }
+    } else {
+        const error =
+            "Vertex shader failed to compile.  The error log is:" +
+            gl.getShaderInfoLog(vertexShader);
+        console.error(error, vertexShaderStr);
+    }
+}
+
+// 获取可用属性和属性地址
+function getAttributes(gl, program) {
+    // 查询可用属性
+    const attributes = {},
+        numAttributes = gl.getProgramParameter(program, gl.ACTIVE_ATTRIBUTES);
+    for (let i = 0; i < numAttributes; i++) {
+        const attribute = gl.getActiveAttrib(program, i);
+        attributes[attribute.name] = gl.getAttribLocation(
+            program,
+            attribute.name
+        );
+    }
+    return attributes;
+}
+
 export default class Program {
     constructor(gl, options, layer) {
         this.gl = gl;
@@ -11,71 +73,18 @@ export default class Program {
 
         layer && (this.map = layer.map);
 
-        let program = false;
         const vertexShaderStr = this.getVertexShader(options.vertexShader);
         const fragmentShaderStr = this.getFragmentShader(
             options.fragmentShader
         );
-
-        // 顶点着色器
-        const vertexShader = gl.createShader(gl.VERTEX_SHADER);
-        gl.shaderSource(vertexShader, vertexShaderStr);
-        gl.compileShader(vertexShader);
-        // 顶点着色器编译完成
-        if (gl.getShaderParameter(vertexShader, gl.COMPILE_STATUS)) {
-            // 栅格着色器
-            const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
-            gl.shaderSource(fragmentShader, fragmentShaderStr);
-            gl.compileShader(fragmentShader);
-            // 栅格着色器编译完成
-            if (gl.getShaderParameter(fragmentShader, gl.COMPILE_STATUS)) {
-                // 创建webgl程序
-                program = gl.createProgram();
-                gl.attachShader(program, vertexShader);
-                gl.attachShader(program, fragmentShader);
-                gl.deleteShader(vertexShader);
-                gl.deleteShader(fragmentShader);
-                gl.linkProgram(program);
-
-                // 程序编译完成
-                if (gl.getProgramParameter(program, gl.LINK_STATUS)) {
-                    this.program = program;
-                } else {
-                    const error =
-                        "Shader program failed to link.  The error log is:" +
-                        gl.getProgramInfoLog(program);
-                    console.error(error);
-                }
-            } else {
-                const error =
-                    "Fragment shader failed to compile.  The error log is:" +
-                    gl.getShaderInfoLog(fragmentShader);
-                console.error(error);
-            }
-        } else {
-            const error =
-                "Vertex shader failed to compile.  The error log is:" +
-                gl.getShaderInfoLog(vertexShader);
-            console.error(error);
-        }
-
-        // 查询可用属性
-        const attributes = {},
-            numAttributes = gl.getProgramParameter(
-                program,
-                gl.ACTIVE_ATTRIBUTES
-            );
-        for (let i = 0; i < numAttributes; i++) {
-            const attribute = gl.getActiveAttrib(program, i);
-            attributes[attribute.name] = gl.getAttribLocation(
-                program,
-                attribute.name
-            );
-        }
-
-        this.attributes = attributes;
+        const program = (this.program = initShaders(
+            gl,
+            vertexShaderStr,
+            fragmentShaderStr
+        ));
 
         this.textures = new Textures(gl);
+        this.attributes = getAttributes(gl, program);
         this.uniforms = new Uniforms(gl, program);
     }
 
@@ -111,22 +120,13 @@ export default class Program {
         // 重置纹理索引
         this.textures.resetTextureUnits();
 
-        // cesium支持
-        if (this.map && "cesium" === this.map.type) {
-            this.setUniforms({
-                oneOverLog2FarDepthFromNearPlusOne: this.map.map.scene.context
-                    ._us._oneOverLog2FarDepthFromNearPlusOne,
-                farDepthFromNearPlusOne: this.map.map.scene.context._us
-                    ._farDepthFromNearPlusOne,
-            });
-        }
-
-        // 窗口坐标
-        if (this.uniforms.MAPV_resolution) {
-            this.setUniforms({
-                MAPV_resolution: [gl.canvas.width, gl.canvas.height],
-            });
-        }
+        // 窗口大小信息
+        this.uniforms.setValue(
+            gl,
+            "MAPV_resolution",
+            [gl.canvas.width, gl.canvas.height],
+            this.textures
+        );
     }
 
     setUniform(uniformName, data) {

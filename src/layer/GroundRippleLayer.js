@@ -4,6 +4,9 @@ import Buffer from "../core/Buffer";
 import VertexArray from "../core/VertexArray";
 import Program from "../core/Program";
 
+import groundRipleVert from "../shaders/ground_ripple.vertex.glsl";
+import groundRipleFrag from "../shaders/ground_ripple.fragment.glsl";
+
 export default class GroundRippleLayer extends Layer {
     constructor(options) {
         super(options);
@@ -26,49 +29,8 @@ export default class GroundRippleLayer extends Layer {
     initialize(gl) {
         this.gl = gl;
         this.program = new Program(this.gl, {
-            vertexShader: `
-            uniform mat4 u_matrix;
-            attribute vec3 aPos;
-            varying vec2 vPos;
-            
-            void main() {
-                vPos = aPos.xy;
-                
-                gl_Position = u_matrix * vec4(aPos, 1.0);
-            }`,
-            fragmentShader: `
-            struct Ripple {
-                vec2 center;
-                float radius;
-                float width;
-                vec4 color;
-            };
-
-            uniform Ripple u_ripple;
-            uniform float u_time;
-            uniform float u_duration;
-
-            varying vec2 vPos;
-
-            void main() {
-                vec4 color = u_ripple.color;
-
-                // 当前百分比
-                float percent = mod(u_time, u_duration) / u_duration;
-                // 当前最小半径
-                float radius = u_ripple.radius * percent;
-
-                // 当前点半径
-                float dis = distance(vPos, u_ripple.center);
-
-                if(dis > radius && dis < radius + u_ripple.width) {
-                    color *= (1.0 - abs(dis - radius) / u_ripple.width) * 2.0 + 1.0;
-                } else {
-                    discard;
-                }
-
-                gl_FragColor = color;
-            }`,
+            vertexShader: groundRipleVert,
+            fragmentShader: groundRipleFrag,
         });
 
         this.indexBuffer = new Buffer({
