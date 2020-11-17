@@ -1,11 +1,11 @@
-struct Ripple {
+struct GroundRipple {
     vec2 center;
     float radius;
     float width;
     vec4 color;
 };
 
-uniform Ripple u_ripple;
+uniform GroundRipple u_ripple;
 uniform float u_time;
 uniform float u_duration;
 

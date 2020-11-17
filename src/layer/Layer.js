@@ -82,9 +82,7 @@ export default class Layer extends CommonLayer {
         // 选择渲染
         this.render(
             Object.assign(
-                {
-                    isPickRender: true,
-                },
+                { isPickRender: true },
                 translateTransferOptions(this.webglLayer.transferOptions, this)
             )
         );

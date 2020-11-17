@@ -1,5 +1,6 @@
 #include <prelude>
 #include <pick_pars_vert>
+#include <effects_pars>
 
 uniform vec2 MAPV_resolution;
 
@@ -7,5 +8,6 @@ uniform vec2 MAPV_resolution;
 
 void main() {
     originMain();
+    
     #include <pick_vert>
 }
