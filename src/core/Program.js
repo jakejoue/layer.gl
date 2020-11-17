@@ -150,16 +150,21 @@ export default class Program {
         const customDefines = generateDefines(options.defines);
 
         // 预编译相关代码
-        const vertexShaderStr =
-            customDefines + "\n" + this.getVertexShader(vertexShader);
-        const fragmentShaderStr =
-            customDefines + "\n" + this.getFragmentShader(fragmentShader);
+        const vertexGlsl = [
+            customDefines,
+            this.getShader(vertexShader, "vert"),
+        ].join("\n");
+
+        const fragmentGlsl = [
+            customDefines,
+            this.getShader(fragmentShader, "frag"),
+        ].join("\n");
 
         // 初始化program
         const program = (this.program = initShaders(
             gl,
-            vertexShaderStr,
-            fragmentShaderStr
+            vertexGlsl,
+            fragmentGlsl
         ));
 
         this.textures = new Textures(gl);
@@ -167,20 +172,17 @@ export default class Program {
         this.uniforms = new Uniforms(gl, program);
     }
 
-    getVertexShader(shaderStr) {
-        shaderStr = resolveIncludes(shaderStr);
-        shaderStr = shaderChunk._prelude_vert + "\n" + shaderStr;
+    getShader(shaderStr, type) {
         shaderStr = shaderStr.replace("void main", "void originMain");
 
-        return shaderStr + "\nvoid main() {originMain(); afterMain();}";
-    }
+        shaderStr = shaderChunk["_template_" + type].replace(
+            "#pragma ORIGIN_MAIN",
+            shaderStr
+        );
 
-    getFragmentShader(shaderStr) {
         shaderStr = resolveIncludes(shaderStr);
-        shaderStr = shaderChunk._prelude_frag + "\n" + shaderStr;
-        shaderStr = shaderStr.replace("void main", "void originMain");
 
-        return shaderStr + "\nvoid main() {originMain(); afterMain();}";
+        return shaderStr.replaceAll("#define GLSLIFY 1\n", "");
     }
 
     use(gl) {

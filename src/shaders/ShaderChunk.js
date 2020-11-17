@@ -1,5 +1,18 @@
-import _prelude_vert from "./shader_lib/_prelude.vertex.glsl";
-import _prelude_frag from "./shader_lib/_prelude.fragment.glsl";
+// shader chunk
+
+import prelude from "./shader_chunk/prelude.glsl";
+
+import pick_pars_vert from "./shader_chunk/pick_pars.vertex.glsl";
+import pick_pars_frag from "./shader_chunk/pick_pars.fragment.glsl";
+import pick_vert from "./shader_chunk/pick.vertex.glsl";
+import pick_frag from "./shader_chunk/pick.fragment.glsl";
+
+// template
+
+import _template_vert from "./shader_lib/_template.vertex.glsl";
+import _template_frag from "./shader_lib/_template.fragment.glsl";
+
+// sharder lib
 
 import point_vert from "./shader_lib/point.vertex.glsl";
 import point_frag from "./shader_lib/point.fragment.glsl";
@@ -35,8 +48,14 @@ import spark_vert from "./shader_lib/spark.vertex.glsl";
 import spark_frag from "./shader_lib/spark.fragment.glsl";
 
 const ShaderChunk = {
-    _prelude_vert,
-    _prelude_frag,
+    prelude,
+    pick_pars_vert,
+    pick_pars_frag,
+    pick_vert,
+    pick_frag,
+
+    _template_vert,
+    _template_frag,
 
     point_vert,
     point_frag,
