@@ -4,66 +4,135 @@ import shaderLib from "../shaders/shaderLib";
 import Uniforms from "./Uniforms";
 import Textures from "./Textures";
 
-// 初始化着色器
+function addLineNumbers(string) {
+    const lines = string.split("\n");
+
+    for (let i = 0; i < lines.length; i++) {
+        lines[i] = i + 1 + ": " + lines[i];
+    }
+
+    return lines.join("\n");
+}
+
+function generateDefines(defines) {
+    if (!defines) return "";
+
+    const chunks = [];
+
+    for (const name in defines) {
+        const value = defines[name];
+
+        if (value === false) continue;
+
+        // 如果是个数组类型
+        if (Array.isArray(defines)) {
+            chunks.push(`#define ${value}`);
+        }
+        // 如果是键值对
+        else {
+            chunks.push(`#define ${name} ${value}`);
+        }
+    }
+
+    return chunks.join("\n");
+}
+
+// Resolve Includes
+
+const includePattern = /^[ \t]*#include +<([\w\d./]+)>/gm;
+
+function resolveIncludes(string) {
+    return string.replace(includePattern, includeReplacer);
+}
+
+function includeReplacer(match, include) {
+    const string = shaderChunk[include];
+
+    if (string === undefined) {
+        throw new Error("Can not resolve #include <" + include + ">");
+    }
+
+    return resolveIncludes(string);
+}
+
+// fetch attribute
+
+function fetchAttributeLocations(gl, program) {
+    const attributes = {};
+
+    const n = gl.getProgramParameter(program, gl.ACTIVE_ATTRIBUTES);
+
+    for (let i = 0; i < n; i++) {
+        const info = gl.getActiveAttrib(program, i);
+        const name = info.name;
+
+        attributes[name] = gl.getAttribLocation(program, name);
+    }
+
+    return attributes;
+}
+
+// init shader
+
 function initShaders(gl, vertexShaderStr, fragmentShaderStr) {
     let program = false;
 
     // 顶点着色器
     const vertexShader = gl.createShader(gl.VERTEX_SHADER);
+
     gl.shaderSource(vertexShader, vertexShaderStr);
     gl.compileShader(vertexShader);
-    // 顶点着色器编译完成
-    if (gl.getShaderParameter(vertexShader, gl.COMPILE_STATUS)) {
-        // 栅格着色器
-        const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
-        gl.shaderSource(fragmentShader, fragmentShaderStr);
-        gl.compileShader(fragmentShader);
-        // 栅格着色器编译完成
-        if (gl.getShaderParameter(fragmentShader, gl.COMPILE_STATUS)) {
-            // 创建webgl程序
-            program = gl.createProgram();
-            gl.attachShader(program, vertexShader);
-            gl.attachShader(program, fragmentShader);
-            gl.deleteShader(vertexShader);
-            gl.deleteShader(fragmentShader);
-            gl.linkProgram(program);
 
-            // 程序编译完成
-            if (gl.getProgramParameter(program, gl.LINK_STATUS)) {
-                return program;
-            } else {
-                const error =
-                    "Shader program failed to link.  The error log is:" +
-                    gl.getProgramInfoLog(program);
-                console.error(error);
-            }
-        } else {
-            const error =
-                "Fragment shader failed to compile.  The error log is:" +
-                gl.getShaderInfoLog(fragmentShader);
-            console.error(error, fragmentShader);
-        }
-    } else {
+    if (!gl.getShaderParameter(vertexShader, gl.COMPILE_STATUS)) {
         const error =
             "Vertex shader failed to compile.  The error log is:" +
             gl.getShaderInfoLog(vertexShader);
-        console.error(error, vertexShaderStr);
-    }
-}
 
-// 获取可用属性和属性地址
-function getAttributes(gl, program) {
-    // 查询可用属性
-    const attributes = {},
-        numAttributes = gl.getProgramParameter(program, gl.ACTIVE_ATTRIBUTES);
-    for (let i = 0; i < numAttributes; i++) {
-        const attribute = gl.getActiveAttrib(program, i);
-        attributes[attribute.name] = gl.getAttribLocation(
-            program,
-            attribute.name
-        );
+        console.error(error, addLineNumbers(vertexShaderStr));
+
+        gl.deleteShader(vertexShader);
+        return null;
     }
-    return attributes;
+
+    // 栅格着色器
+    const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
+
+    gl.shaderSource(fragmentShader, fragmentShaderStr);
+    gl.compileShader(fragmentShader);
+
+    if (!gl.getShaderParameter(fragmentShader, gl.COMPILE_STATUS)) {
+        const error =
+            "Fragment shader failed to compile.  The error log is:" +
+            gl.getShaderInfoLog(fragmentShader);
+
+        console.error(error, addLineNumbers(fragmentShaderStr));
+
+        gl.deleteShader(fragmentShader);
+        return null;
+    }
+
+    // 创建webgl程序
+    program = gl.createProgram();
+
+    gl.attachShader(program, vertexShader);
+    gl.attachShader(program, fragmentShader);
+    gl.deleteShader(vertexShader);
+    gl.deleteShader(fragmentShader);
+    gl.linkProgram(program);
+
+    // 程序编译完成
+    if (gl.getProgramParameter(program, gl.LINK_STATUS)) {
+        return program;
+    } else {
+        const error =
+            "Shader program failed to link.  The error log is:" +
+            gl.getProgramInfoLog(program);
+
+        console.error(error);
+
+        gl.deleteProgram(program);
+        return null;
+    }
 }
 
 export default class Program {
@@ -76,8 +145,15 @@ export default class Program {
         // 取得着色器代码并进行预处理
         const { vertexShader, fragmentShader } =
             shaderLib[options.shaderId] || options;
-        const vertexShaderStr = this.getVertexShader(vertexShader);
-        const fragmentShaderStr = this.getFragmentShader(fragmentShader);
+
+        // 定义相关defines
+        const customDefines = generateDefines(options.defines);
+
+        // 预编译相关代码
+        const vertexShaderStr =
+            customDefines + "\n" + this.getVertexShader(vertexShader);
+        const fragmentShaderStr =
+            customDefines + "\n" + this.getFragmentShader(fragmentShader);
 
         // 初始化program
         const program = (this.program = initShaders(
@@ -87,33 +163,24 @@ export default class Program {
         ));
 
         this.textures = new Textures(gl);
-        this.attributes = getAttributes(gl, program);
+        this.attributes = fetchAttributeLocations(gl, program);
         this.uniforms = new Uniforms(gl, program);
     }
 
     getVertexShader(shaderStr) {
-        const definedStr = shaderChunk._prelude_vert + "\n";
-        shaderStr = this.getDefines() + definedStr + shaderStr;
+        shaderStr = resolveIncludes(shaderStr);
+        shaderStr = shaderChunk._prelude_vert + "\n" + shaderStr;
         shaderStr = shaderStr.replace("void main", "void originMain");
+
         return shaderStr + "\nvoid main() {originMain(); afterMain();}";
     }
 
     getFragmentShader(shaderStr) {
-        const definedStr = shaderChunk._prelude_frag + "\n";
-        shaderStr = this.getDefines() + definedStr + shaderStr;
+        shaderStr = resolveIncludes(shaderStr);
+        shaderStr = shaderChunk._prelude_frag + "\n" + shaderStr;
         shaderStr = shaderStr.replace("void main", "void originMain");
-        return shaderStr + "\nvoid main() {originMain(); afterMain();}";
-    }
 
-    getDefines() {
-        let str = "";
-        const defines = this.options.defines;
-        if (defines) {
-            for (let index = 0; index < defines.length; index++) {
-                str += `#define ${defines[index]} \n`;
-            }
-        }
-        return str;
+        return shaderStr + "\nvoid main() {originMain(); afterMain();}";
     }
 
     use(gl) {

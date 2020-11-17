@@ -20,7 +20,7 @@ export default {
     },
     external: ["mapboxgl", "maptalks", "openlayers", "leaflet", "three"],
     plugins: [
-        glslify(),
+        glslify({ compress: false }),
         commonResolve(),
         nodeResolve(),
         babel({ babelHelpers: "bundled" }),
