@@ -8,7 +8,13 @@ export default class GroundRippleLayer extends Layer {
     constructor(options) {
         super(options);
 
+        // 表示该图层是个effect图层
+        this.effectType = "NUM_GROUND_RIPPLES";
+        this.effectUniformName = "groundRipples";
+
         this.group = [];
+
+        this.percent = 0;
         this.date = new Date();
         this.autoUpdate = true;
     }
@@ -25,9 +31,13 @@ export default class GroundRippleLayer extends Layer {
 
     initialize(gl) {
         this.gl = gl;
-        this.program = new Program(this.gl, {
-            shaderId: "ground_ripple",
-        });
+        this.program = new Program(
+            this.gl,
+            {
+                shaderId: "ground_ripple",
+            },
+            this
+        );
 
         this.indexBuffer = new Buffer({
             gl: gl,
@@ -132,10 +142,14 @@ export default class GroundRippleLayer extends Layer {
         if (!this.group.length) return;
 
         this.program.use(gl);
+
+        const time = (new Date() - this.date) / 1e3,
+            duration = this.options.duration;
+        this.percent = (time % duration) / duration;
+
         this.program.setUniforms({
             u_matrix: matrix,
-            u_time: (new Date() - this.date) / 1e3,
-            u_duration: this.options.duration,
+            u_percent: this.percent,
         });
 
         // blend
@@ -158,5 +172,14 @@ export default class GroundRippleLayer extends Layer {
                 0
             );
         }
+    }
+
+    // 获取当前effect的对象
+    getEffectObjs() {
+        return this.group.map((obj) => {
+            const ripple = obj.uniforms.u_ripple;
+            const radius = this.percent * ripple.radius;
+            return Object.assign({}, ripple, { radius });
+        });
     }
 }

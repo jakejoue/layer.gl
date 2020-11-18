@@ -7,6 +7,9 @@ import pick_pars_frag from "./shader_chunk/pick_pars.fragment.glsl";
 import pick_vert from "./shader_chunk/pick.vertex.glsl";
 import pick_frag from "./shader_chunk/pick.fragment.glsl";
 
+import effects_pars from "./shader_chunk/effects_pars.glsl";
+import effects_frag_end from "./shader_chunk/effects_frag_end.glsl";
+
 // template
 
 import _template_vert from "./shader_lib/_template.vertex.glsl";
@@ -53,6 +56,8 @@ const ShaderChunk = {
     pick_pars_frag,
     pick_vert,
     pick_frag,
+    effects_pars,
+    effects_frag_end,
 
     _template_vert,
     _template_frag,

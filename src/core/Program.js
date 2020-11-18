@@ -4,6 +4,8 @@ import shaderLib from "../shaders/shaderLib";
 import Uniforms from "./Uniforms";
 import Textures from "./Textures";
 
+import Effects from "./Effects";
+
 function addLineNumbers(string) {
     const lines = string.split("\n");
 
@@ -12,6 +14,25 @@ function addLineNumbers(string) {
     }
 
     return lines.join("\n");
+}
+
+function getParameters(options, layer) {
+    const { shaderId, defines } = options;
+    let { vertexShader, fragmentShader } = options;
+
+    if (shaderId) {
+        const shader = shaderLib[shaderId];
+
+        vertexShader = shader.vertexShader;
+        fragmentShader = shader.fragmentShader;
+    }
+
+    return {
+        defines,
+        vertexShader,
+        fragmentShader,
+        effects: new Effects(layer ? layer.options.effects : []),
+    };
 }
 
 function generateDefines(defines) {
@@ -53,6 +74,48 @@ function includeReplacer(match, include) {
     }
 
     return resolveIncludes(string);
+}
+
+// effects
+
+function replaceEffectNums(string, parameters) {
+    const effectMap = parameters.effects.map;
+
+    for (const key in effectMap) {
+        string = string.replaceAll(key, effectMap[key].size);
+    }
+
+    return string.replace(/NUM_([A-Z]|_)*S/g, 0);
+}
+
+// Unroll Loops
+
+const deprecatedUnrollLoopPattern = /#pragma unroll_loop[\s]+?for \( int i \= (\d+)\; i < (\d+)\; i \+\+ \) \{([\s\S]+?)(?=\})\}/g;
+const unrollLoopPattern = /#pragma unroll_loop_start\s+for\s*\(\s*int\s+i\s*=\s*(\d+)\s*;\s*i\s*<\s*(\d+)\s*;\s*i\s*\+\+\s*\)\s*{([\s\S]+?)}\s+#pragma unroll_loop_end/g;
+
+function unrollLoops(string) {
+    return string
+        .replace(unrollLoopPattern, loopReplacer)
+        .replace(deprecatedUnrollLoopPattern, deprecatedLoopReplacer);
+}
+
+function deprecatedLoopReplacer(match, start, end, snippet) {
+    console.warn(
+        "WebGLProgram: #pragma unroll_loop shader syntax is deprecated. Please use #pragma unroll_loop_start syntax instead."
+    );
+    return loopReplacer(match, start, end, snippet);
+}
+
+function loopReplacer(match, start, end, snippet) {
+    let string = "";
+
+    for (let i = parseInt(start); i < parseInt(end); i++) {
+        string += snippet
+            .replace(/\[\s*i\s*\]/g, "[ " + i + " ]")
+            .replace(/UNROLLED_LOOP_INDEX/g, i);
+    }
+
+    return string;
 }
 
 // fetch attribute
@@ -138,16 +201,19 @@ function initShaders(gl, vertexShaderStr, fragmentShaderStr) {
 export default class Program {
     constructor(gl, options, layer) {
         this.gl = gl;
-        this.options = options;
 
-        layer && (this.map = layer.map);
+        this.parameters = getParameters(options, layer);
+        this.effects = this.parameters.effects;
+
+        if (layer) {
+            this.map = layer.map;
+        }
 
         // 取得着色器代码并进行预处理
-        const { vertexShader, fragmentShader } =
-            shaderLib[options.shaderId] || options;
+        const { vertexShader, fragmentShader } = this.parameters;
 
         // 定义相关defines
-        const customDefines = generateDefines(options.defines);
+        const customDefines = generateDefines(this.parameters.defines);
 
         // 预编译相关代码
         const vertexGlsl = [
@@ -181,6 +247,8 @@ export default class Program {
         );
 
         shaderStr = resolveIncludes(shaderStr);
+        shaderStr = replaceEffectNums(shaderStr, this.parameters);
+        shaderStr = unrollLoops(shaderStr);
 
         return shaderStr.replaceAll("#define GLSLIFY 1\n", "");
     }
@@ -199,6 +267,9 @@ export default class Program {
             [gl.canvas.width, gl.canvas.height],
             this.textures
         );
+
+        // 更新effect信息
+        this.effects.update(this);
     }
 
     setUniform(uniformName, data) {

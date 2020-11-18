@@ -28,9 +28,13 @@ export default class SparkLayer extends Layer {
 
     initialize(gl) {
         this.gl = gl;
-        this.program = new Program(this.gl, {
-            shaderId: "spark",
-        });
+        this.program = new Program(
+            this.gl,
+            {
+                shaderId: "spark",
+            },
+            this
+        );
 
         // 顶点相关数据
         this.buffer = new Buffer({

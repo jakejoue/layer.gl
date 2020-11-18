@@ -6,18 +6,15 @@ struct GroundRipple {
 };
 
 uniform GroundRipple u_ripple;
-uniform float u_time;
-uniform float u_duration;
+uniform float u_percent;
 
 varying vec2 vPos;
 
 void main() {
     vec4 color = u_ripple.color;
 
-    // 当前百分比
-    float percent = mod(u_time, u_duration) / u_duration;
     // 当前最小半径
-    float radius = u_ripple.radius * percent;
+    float radius = u_ripple.radius * u_percent;
 
     // 当前点半径
     float dis = distance(vPos, u_ripple.center);

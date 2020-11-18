@@ -122,4 +122,8 @@ void main() {
     }
     // 加入外部整体透明度
     v_color *= u_alpha;
+
+    // 传递 effect 需要的值
+    vGeometryPosition = pos.xyz;
+    vGeometryNormal = a_normal;
 }

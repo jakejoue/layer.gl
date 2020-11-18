@@ -57,10 +57,27 @@
             const view = new layergl.View({
                 map: layergl.map.getMapBoxGLMap(map),
             });
+
+            var groundRippleLayer = new layergl.GroundRippleLayer({
+                size: 1000,
+                width: 200,
+                color: "rgba(255, 0, 0, 0.3)",
+            });
+            view.addLayer(groundRippleLayer);
+            groundRippleLayer.setData([
+                {
+                    geometry: {
+                        type: "Point",
+                        coordinates: [-73.96252891126437, 40.78790687108298],
+                    },
+                },
+            ]);
+
             fetch("./static/central_park.json")
                 .then((response) => response.json())
                 .then((polygons) => {
                     var shapeLayer = new layergl.ShapeLayer({
+                        effects: [groundRippleLayer],
                         color: "rgba(194, 147, 75, 1.0)",
                         // style: "window",
                         // texture: './static/wall2.png',

@@ -4,8 +4,9 @@ struct GeometricContext {
 	vec3 normal;
 };
 
-// 传递到片源着色器的变量
-varying GeometricContext geometry;
+// 必须的变量
+varying vec3 vGeometryPosition;
+varying vec3 vGeometryNormal;
 
 // ground—ripple的相关参数定义和方法
 #if NUM_GROUND_RIPPLES > 0
