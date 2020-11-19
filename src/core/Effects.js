@@ -1,3 +1,5 @@
+import { vec2, vec3 } from "gl-matrix";
+
 class LayerEffect {
     constructor(id, uniformName) {
         this.id = id;
@@ -13,7 +15,25 @@ class LayerEffect {
     }
 
     update(program) {
-        const objs = [].concat(...this.seq.map((l) => l.getEffectObjs()));
+        const objs = [].concat(
+            ...this.seq.map((l) => {
+                // 图层之间的相对偏移
+                const pointOffset = vec3.sub(
+                    [],
+                    program.layer.getPointOffset(),
+                    l.getPointOffset()
+                );
+
+                // 获取所有的 effect OBJ
+                return l.getEffectObjs(function (coord) {
+                    if (coord.length === 0) {
+                        return vec2.sub([], coord, pointOffset);
+                    } else {
+                        return vec3.sub([], coord, pointOffset);
+                    }
+                });
+            })
+        );
         program.setUniform(this.uniformName, objs);
     }
 }

@@ -114,7 +114,6 @@ export default class Layer extends CommonLayer {
     }
 
     getPointOffset() {
-        return [0, 0, 0];
         if (!this.pointOffset) {
             // 如果参数中存在 pointOffset
             if (this.options.pointOffset) {
@@ -140,9 +139,9 @@ export default class Layer extends CommonLayer {
             }
         }
         if (this.pointOffset) {
-            return this.pointOffset;
+            return this.pointOffset.slice();
         } else {
-            return [0, 0];
+            return [0, 0, 0];
         }
     }
 

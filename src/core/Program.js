@@ -206,6 +206,7 @@ export default class Program {
         this.effects = this.parameters.effects;
 
         if (layer) {
+            this.layer = layer;
             this.map = layer.map;
         }
 
