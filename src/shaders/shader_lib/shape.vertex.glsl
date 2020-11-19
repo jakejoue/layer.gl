@@ -6,10 +6,11 @@ attribute float a_height;
 attribute float a_pre_height;
 
 #if defined(USE_TEXTURE)
-attribute vec2 a_texture_coord;
+
+    attribute vec2 a_texture_coord;
+    
 #endif
 
-uniform vec4 uSelectedColor;
 uniform mat4 u_matrix;
 uniform vec3 u_side_light_dir;
 uniform bool u_use_lighting;
@@ -59,21 +60,23 @@ void main() {
     v_height = a_pos.z + a_height;
 
     #if defined(USE_TEXTURE)
-    if(u_use_texture) {
-        v_texture_coord = a_texture_coord;
-    }
+        if(u_use_texture) {
+            v_texture_coord = a_texture_coord;
+        }
     #endif
 
     // 后面开始颜色计算
     vec4 icolor = a_color;
+
     #if defined(PICK)
-    if(mapvIsPicked()) {
-        icolor = uSelectedColor;
-    }
+        if(mapvIsPicked()) {
+            icolor = uSelectedColor;
+        }
     #endif
     
     // 如果使用光照
     if(u_use_lighting) {
+
         vec3 N = normalize(a_normal);
 
         // 自上而下的点光源
@@ -85,7 +88,7 @@ void main() {
         float lambert = max(0.0, dot(N, -L));
 
         float H = pos.z / u_zoom_unit;
-        if(H < 5.0) {
+        if ( H < 5.0 ) {
             float deepGradientColor = (5.0 - H) / 8.0;
             lambert = lambert - deepGradientColor;
         }
@@ -117,9 +120,13 @@ void main() {
             float directionalLightWeighting = max(dot(N, normalize(vec3(0.0, -1.0, 2.0))), 0.0);
             v_color = vec4(uAmbientColor + uDirectionalColor * directionalLightWeighting, 1.0);
         }
+
     } else {
+
         v_color = icolor;
+
     }
+
     // 加入外部整体透明度
     v_color *= u_alpha;
 

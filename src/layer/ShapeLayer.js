@@ -12,7 +12,6 @@ const LayerStyles = {
     window: 1,
     windowAnimation: 2,
     gradual: 3,
-    ripple: 4,
     water: 6,
 };
 
@@ -21,11 +20,7 @@ export default class ShapeLayer extends Layer {
         super(options);
 
         options = this.getOptions();
-        if (
-            "windowAnimation" === options.style ||
-            "ripple" === options.style ||
-            0 < options.riseTime
-        ) {
+        if ("windowAnimation" === options.style || 0 < options.riseTime) {
             this.autoUpdate = true;
         }
         this.selectedColor = [-1, -1, -1];
@@ -209,23 +204,6 @@ export default class ShapeLayer extends Layer {
                 // 顶部颜色
                 const topColor = this.normizedColor(options.topColor);
 
-                // 波纹图层
-                if (
-                    "ripple" === options.style &&
-                    options.rippleLayer &&
-                    options.rippleLayer.data &&
-                    options.rippleLayer.data[0]
-                ) {
-                    const center = this.normizedPoint(
-                        options.rippleLayer.data[0].geometry.coordinates
-                    );
-                    program.setUniforms({
-                        u_ripple_center: [center[0], center[1], 0],
-                        u_radius:
-                            options.rippleLayer.options.size *
-                            options.rippleLayer.currentScale,
-                    });
-                }
                 // 光照
                 let light_dir = [0, -1, 2];
                 if (options.lightDir) {
@@ -250,8 +228,8 @@ export default class ShapeLayer extends Layer {
                         u_use_texture: this.isUseTexture,
                         u_sampler: this.texture,
 
-                        // 顶部颜色，ripple模式下的使用
-                        u_top_color: topColor,
+                        // 顶部相关
+                        // u_top_color: topColor,
 
                         // 时间相关
                         u_time: new Date() - this.initializeTime,

@@ -10,7 +10,6 @@ varying float vSize;
 
 uniform mat4 uMatrix;
 uniform float uZoomUnits;
-uniform vec4 uSelectedColor;
 
 void main() {
     vColor = aColor;

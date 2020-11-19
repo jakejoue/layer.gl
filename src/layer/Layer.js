@@ -62,10 +62,10 @@ export default class Layer extends CommonLayer {
 
             uniforms = Object.assign(uniforms, {
                 uSelectedColor: this.normizedColor(options.selectedColor),
-                uEnablePicked: options.enablePicked,
                 uPickedColor: pickedColor.map(function (a) {
                     return a / 255;
                 }),
+                uEnablePicked: options.enablePicked,
                 uIsPickRender: !!isPickRender,
             });
         }

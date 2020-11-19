@@ -1,4 +1,3 @@
-uniform vec4 uSelectedColor;
 uniform mat4 uMatrix;
 uniform bool uFlat;
 uniform vec2 uDashArray;

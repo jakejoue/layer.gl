@@ -16,7 +16,6 @@ varying float vRadius;
 uniform mat4 uMatrix;
 uniform float uZoomUnits;
 uniform float lineWidth;
-uniform vec4 uSelectedColor;
 
 void main() {
     vColor = aColor;

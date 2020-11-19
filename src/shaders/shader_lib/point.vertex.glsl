@@ -3,7 +3,6 @@ attribute vec4 aColor;
 attribute float aSize;
 uniform mat4 uMatrix;
 varying vec4 vColor;
-uniform vec4 uSelectedColor;
 
 void main() {
     if(aColor.w >= 0.0 && aColor.w <= 1.0) {

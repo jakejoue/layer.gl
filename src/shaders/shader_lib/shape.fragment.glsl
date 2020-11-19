@@ -5,9 +5,6 @@ varying vec2 v_texture_coord;
 
 uniform float u_style;
 
-uniform vec3 u_ripple_center;
-uniform float u_radius;
-
 uniform bool u_use_texture;
 uniform vec4 u_top_color;
 uniform sampler2D u_sampler;
@@ -63,33 +60,6 @@ void main() {
     else if(u_style == 3.0) {
         color.a = 1.0 - pow(v_position.z / v_height, 0.3);
     }
-    // 波纹
-    else if(u_style == 4.0) {
-        float dis = distance(u_ripple_center, v_position);
-        float rSize = 400.0;
-        if(v_position.z >= v_height) {
-            color = u_top_color;
-        }
-        if(dis > u_radius - rSize && dis < u_radius + rSize) {
-            color *= (1.0 - abs(dis - u_radius) / rSize) * 2.0 + 1.0;
-        }
-    }
-    // 未知
-    else if(u_style == 5.0) {
-        float t = u_time / 1000.0;
-        float diffDistance = 10.0;
-        float modZ = mod(v_position.z - t * 40.0, diffDistance * 2.0);
-        color.a = 1.0 - pow(v_position.z / v_height, 0.5);
-        if(v_position.z / v_height < 0.3) {
-            color.r += 0.2;
-            color.g += 0.2;
-            color.b += 0.2;
-        }
-        if(modZ < diffDistance * 2.0 - 4.0) {
-            discard;
-        }
-    } else if(u_style == 6.0) {
-
-    }
+    
     gl_FragColor = color;
 }

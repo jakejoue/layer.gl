@@ -3,7 +3,6 @@ attribute vec4 aColor;
 attribute float aSize;
 
 uniform mat4 uMatrix;
-uniform vec4 uSelectedColor;
 uniform float uTime;
 uniform float duration;
 uniform float zoomUnits;
