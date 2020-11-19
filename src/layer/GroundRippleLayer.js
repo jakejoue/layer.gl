@@ -22,7 +22,7 @@ export default class GroundRippleLayer extends Layer {
     getDefaultOptions() {
         return {
             color: [0.1, 0.1, 0.9, 1],
-            size: 5,
+            size: 1000,
             segs: 90,
             duration: 2,
             width: 400,

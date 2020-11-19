@@ -28,9 +28,17 @@ varying vec3 vGeometryNormal;
         // 目标点距离Ripple
         float dis = distance(geometry.position.xy, groundRipple.center);
 
-        if(dis > radius && dis < radius + groundRipple.width) {
+        if (dis > radius && dis < radius + groundRipple.width) {
 
-            color *= groundRipple.color * (1.0 - abs(dis - radius) / groundRipple.width) * 2.0 + 1.0;
+            vec4 blend = groundRipple.color;
+            float percent = (1.0 - abs(dis - radius) / groundRipple.width);
+
+            blend.rgb *= percent * 2.0 + 1.0;
+            blend.a *= 1.0 - pow(1.0 - percent, 0.3);
+
+            vec4 base = color;
+
+            color = base * base.a + blend * blend.a;
 
         } else {
 

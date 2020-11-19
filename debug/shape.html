@@ -59,19 +59,41 @@
             });
 
             var groundRippleLayer = new layergl.GroundRippleLayer({
-                size: 1000,
-                width: 200,
-                color: "rgba(255, 0, 0, 0.3)",
+                size: function (data) {
+                    return data.properties.size;
+                },
+                width: function (data) {
+                    return data.properties.width;
+                },
+                color: function (data) {
+                    return data.properties.color;
+                },
             });
-            view.addLayer(groundRippleLayer);
             groundRippleLayer.setData([
                 {
+                    properties: {
+                        size: 200,
+                        width: 50,
+                        color: "rgba(255, 255, 255, 1.0)",
+                    },
                     geometry: {
                         type: "Point",
-                        coordinates: [-73.96252891126437, 40.78790687108298],
+                        coordinates: [-73.97083632157563, 40.79324495625795],
+                    },
+                },
+                {
+                    properties: {
+                        size: 300,
+                        width: 100,
+                        color: "rgba(255, 0, 0, 1.0)",
+                    },
+                    geometry: {
+                        type: "Point",
+                        coordinates: [-73.94953261486705, 40.78597536772364],
                     },
                 },
             ]);
+            view.addLayer(groundRippleLayer);
 
             fetch("./static/central_park.json")
                 .then((response) => response.json())
@@ -93,8 +115,8 @@
                         },
                         autoSelect: true,
                     });
-                    view.addLayer(shapeLayer);
                     shapeLayer.setData(polygons);
+                    view.addLayer(shapeLayer);
                 });
         </script>
     </body>
