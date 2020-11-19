@@ -1,8 +1,6 @@
-#include <prelude>
+#include <common>
 #include <pick_pars_vert>
 #include <effects_pars>
-
-uniform vec2 MAPV_resolution;
 
 #pragma ORIGIN_MAIN
 

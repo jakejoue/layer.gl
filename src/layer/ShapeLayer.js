@@ -49,7 +49,6 @@ export default class ShapeLayer extends Layer {
 
         const defines = [];
         options.enablePicked && defines.push("PICK");
-        options.texture && defines.push("USE_TEXTURE");
         this.program = new Program(
             this.gl,
             {
@@ -84,7 +83,8 @@ export default class ShapeLayer extends Layer {
             target: "ELEMENT_ARRAY_BUFFER",
             usage: "STATIC_DRAW",
         });
-        let attributes = [
+
+        const attributes = [
             {
                 name: "a_pos",
                 buffer: this.vertexBuffer,
@@ -133,23 +133,21 @@ export default class ShapeLayer extends Layer {
                 type: "FLOAT",
                 offset: 4,
             },
-        ];
-        if (options.texture) {
-            attributes.push({
+            {
                 name: "a_texture_coord",
                 buffer: this.textureBuffer,
                 size: 2,
                 stride: 8,
                 type: "FLOAT",
                 offset: 0,
-            });
-        }
-        attributes = attributes.concat(this.getCommonAttributes());
+            },
+        ];
         this.vertexArray = new VertexArray({
             gl: gl,
             program: this.program,
-            attributes: attributes,
+            attributes: attributes.concat(this.getCommonAttributes()),
         });
+
         this.initializeTime = new Date();
     }
 
@@ -179,32 +177,13 @@ export default class ShapeLayer extends Layer {
             program.use(gl);
 
             if (!this.isUseTexture || this.texture) {
-                gl.disable(gl.CULL_FACE);
-
-                if (options.blend) {
-                    gl.enable(gl.BLEND);
-                    gl.blendFunc(gl.ONE, gl.ONE);
-                    gl.blendEquation(gl.FUNC_ADD);
-                }
-
-                if (0 === options.height) {
-                    gl.enable(gl.BLEND);
-                    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-                }
-
+                // 渲染类型
                 const style = LayerStyles[options.style] || 0;
-                if ("gradual" === options.style) {
-                    gl.depthMask(false);
-                    gl.enable(gl.BLEND);
-                    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-                } else {
-                    gl.depthMask(true);
-                }
 
                 // 顶部颜色
                 const topColor = this.normizedColor(options.topColor);
 
-                // 光照
+                // 光照相关参数
                 let light_dir = [0, -1, 2];
                 if (options.lightDir) {
                     light_dir = [
@@ -214,6 +193,32 @@ export default class ShapeLayer extends Layer {
                     ];
                 }
 
+                // 禁用背面切除
+                gl.disable(gl.CULL_FACE);
+
+                // 混合模式
+                if (options.blend) {
+                    gl.enable(gl.BLEND);
+                    gl.blendFunc(gl.ONE, gl.ONE);
+                    gl.blendEquation(gl.FUNC_ADD);
+                }
+
+                // 如果高度为 0
+                if (0 === options.height) {
+                    gl.enable(gl.BLEND);
+                    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+                }
+
+                // 如果是渐变墙体模式
+                if (3 === style) {
+                    gl.depthMask(false);
+                    gl.enable(gl.BLEND);
+                    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+                } else {
+                    gl.depthMask(true);
+                }
+
+                // 设置uniforms
                 program.setUniforms(
                     Object.assign(this.getCommonUniforms(transferOptions), {
                         u_matrix: matrix,
@@ -227,19 +232,20 @@ export default class ShapeLayer extends Layer {
                         // 纹理相关
                         u_use_texture: this.isUseTexture,
                         u_sampler: this.texture,
-
-                        // 顶部相关
+                        // 顶部相关（贴图模式下生效）
                         // u_top_color: topColor,
+
+                        // 光照相关
+                        u_use_lighting: options.useLight,
+                        u_side_light_dir: light_dir,
 
                         // 时间相关
                         u_time: new Date() - this.initializeTime,
                         u_dataTime: new Date() - this.dataTime,
                         u_riseTime: options.riseTime,
-                        // 光照相关
-                        u_use_lighting: options.useLight,
-                        u_side_light_dir: light_dir,
                     })
                 );
+
                 const dataMgrData = this.dataMgr.getData();
                 if (dataMgrData.vertex.length > 0) {
                     this.vertexArray.bind();

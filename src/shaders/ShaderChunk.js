@@ -1,6 +1,6 @@
 // shader chunk
 
-import prelude from "./shader_chunk/prelude.glsl";
+import common from "./shader_chunk/common.glsl";
 
 import pick_pars_vert from "./shader_chunk/pick_pars.vertex.glsl";
 import pick_pars_frag from "./shader_chunk/pick_pars.fragment.glsl";
@@ -51,7 +51,7 @@ import spark_vert from "./shader_lib/spark.vertex.glsl";
 import spark_frag from "./shader_lib/spark.fragment.glsl";
 
 const ShaderChunk = {
-    prelude,
+    common,
     pick_pars_vert,
     pick_pars_frag,
     pick_vert,

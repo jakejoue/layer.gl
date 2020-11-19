@@ -4,21 +4,20 @@ attribute vec4 a_color;
 attribute vec4 a_pre_color;
 attribute float a_height;
 attribute float a_pre_height;
-
-#if defined(USE_TEXTURE)
-
-    attribute vec2 a_texture_coord;
+attribute vec2 a_texture_coord;
     
-#endif
-
+// 基础参数
 uniform mat4 u_matrix;
+uniform float u_alpha;
+uniform float u_zoom_unit;
+// 光照
 uniform vec3 u_side_light_dir;
 uniform bool u_use_lighting;
+// 贴图
 uniform bool u_use_texture;
-uniform float u_alpha;
+// 时间
 uniform float u_dataTime;
 uniform float u_riseTime;
-uniform float u_zoom_unit;
 
 varying float v_height;
 varying vec4 v_color;
@@ -38,6 +37,7 @@ const vec3 uDirectionalColor = vec3(1.0, 1.0, 1.0);
 // 根据时间计算目标高度
 float getTransitionValue(float pre_value, float to_value) {
     float result = 0.0;
+    
     if(pre_value == to_value) {
         result = to_value;
     } else {
@@ -59,11 +59,9 @@ void main() {
     v_position = pos.xyz;
     v_height = a_pos.z + a_height;
 
-    #if defined(USE_TEXTURE)
-        if(u_use_texture) {
-            v_texture_coord = a_texture_coord;
-        }
-    #endif
+    if(u_use_texture) {
+        v_texture_coord = a_texture_coord;
+    }
 
     // 后面开始颜色计算
     vec4 icolor = a_color;
@@ -101,11 +99,13 @@ void main() {
         if(a_pre_color.r == a_color.r && a_pre_color.g == a_color.g && a_pre_color.b == a_color.b) {
 
         } else {
-            if(u_riseTime > 0.0 && u_dataTime < u_riseTime) {
-                icolor.r = a_pre_color.r + (a_color.r - a_pre_color.r) * (u_dataTime / u_riseTime);
-                icolor.g = a_pre_color.g + (a_color.g - a_pre_color.g) * (u_dataTime / u_riseTime);
-                icolor.b = a_pre_color.b + (a_color.b - a_pre_color.b) * (u_dataTime / u_riseTime);
+
+            if (u_riseTime > 0.0 && u_dataTime < u_riseTime) {
+
+                icolor.rgb = a_pre_color.rgb + (a_color.rgb - a_pre_color.rgb) * (u_dataTime / u_riseTime);
+                
             }
+
         }
 
         // 计算加入光照后的颜色
@@ -117,8 +117,11 @@ void main() {
 
         // 如果是贴图模式
         if(u_use_texture) {
+
             float directionalLightWeighting = max(dot(N, normalize(vec3(0.0, -1.0, 2.0))), 0.0);
+
             v_color = vec4(uAmbientColor + uDirectionalColor * directionalLightWeighting, 1.0);
+
         }
 
     } else {

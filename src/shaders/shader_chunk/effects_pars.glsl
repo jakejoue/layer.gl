@@ -1,9 +1,3 @@
-// 统一的变量类型
-struct GeometricContext {
-	vec3 position;
-	vec3 normal;
-};
-
 // 必须的变量
 varying vec3 vGeometryPosition;
 varying vec3 vGeometryNormal;

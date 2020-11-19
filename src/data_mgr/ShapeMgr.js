@@ -150,6 +150,7 @@ export default class ShapeMgr {
         preColor = preColor !== undefined ? preColor : color;
 
         const options = this.shapeLayer.getOptions(),
+            isUseTexture = this.shapeLayer.isUseTexture,
             vertexArray = h.vertex,
             textureArray = h.texture,
             colorArray = h.color,
@@ -188,7 +189,7 @@ export default class ShapeMgr {
             );
 
             let bound;
-            if (options.texture) {
+            if (isUseTexture) {
                 bound = this.getBounds(xy_s);
             }
 
@@ -218,7 +219,7 @@ export default class ShapeMgr {
                 );
                 heightArray.push(height, preHeight);
 
-                if (options.texture) {
+                if (isUseTexture) {
                     if (isTextureFull) {
                         textureArray.push((xy_s[i] - bound.minX) / bound.width);
                         textureArray.push(
@@ -332,7 +333,7 @@ export default class ShapeMgr {
                 heightArray.push(preHeight);
 
                 // 纹理
-                if (options.texture) {
+                if (isUseTexture) {
                     if (isTextureFull) {
                         textureArray.push(0, 0);
                         textureArray.push(0, 1);

@@ -15,3 +15,12 @@ precision highp float;
 #endif
 
 #endif
+
+// 定义geometry结构体
+struct GeometricContext {
+	vec3 position;
+	vec3 normal;
+};
+
+// 定义通用变量
+uniform vec2 MAPV_resolution;
