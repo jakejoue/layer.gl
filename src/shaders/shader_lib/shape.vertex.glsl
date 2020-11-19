@@ -86,9 +86,12 @@ void main() {
         float lambert = max(0.0, dot(N, -L));
 
         float H = pos.z / u_zoom_unit;
+
         if ( H < 5.0 ) {
+
             float deepGradientColor = (5.0 - H) / 8.0;
             lambert = lambert - deepGradientColor;
+            
         }
 
         // 自下而上的光源
