@@ -72,9 +72,9 @@
             groundRippleLayer.setData([
                 {
                     properties: {
-                        size: 200,
+                        size: 400,
                         width: 50,
-                        color: "rgba(255, 255, 255, 1.0)",
+                        color: "rgba(255, 255, 255, 0.3)",
                     },
                     geometry: {
                         type: "Point",
@@ -83,9 +83,9 @@
                 },
                 {
                     properties: {
-                        size: 300,
+                        size: 350,
                         width: 100,
-                        color: "rgba(255, 0, 0, 1.0)",
+                        color: "rgba(255, 0, 0, 0.8)",
                     },
                     geometry: {
                         type: "Point",
@@ -101,9 +101,9 @@
                     var shapeLayer = new layergl.ShapeLayer({
                         effects: [groundRippleLayer],
                         color: "rgba(194, 147, 75, 1.0)",
-                        // style: "window",
-                        // texture: './static/wall2.png',
-                        // isTextureFull: true,
+                        style: "window",
+                        texture: './static/wall2.png',
+                        isTextureFull: true,
                         // textureScale: 0.05,
                         useLight: true,
                         height: function (data) {
