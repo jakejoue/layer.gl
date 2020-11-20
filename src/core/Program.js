@@ -137,7 +137,7 @@ function fetchAttributeLocations(gl, program) {
 
 // init shader
 
-function initShaders(gl, vertexShaderStr, fragmentShaderStr) {
+function createAndLinkProgram(gl, vertexShaderStr, fragmentShaderStr) {
     let program = false;
 
     // 顶点着色器
@@ -228,7 +228,7 @@ export default class Program {
         ].join("\n");
 
         // 初始化program
-        const program = (this.program = initShaders(
+        const program = (this.program = createAndLinkProgram(
             gl,
             vertexGlsl,
             fragmentGlsl
