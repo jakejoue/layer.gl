@@ -6,7 +6,7 @@ varying vec3 vGeometryNormal;
 #if NUM_GROUND_RIPPLES > 0
 
     struct GroundRipple {
-        vec2 center;
+        vec3 center;
         float radius;
         float width;
         vec4 color;
@@ -16,11 +16,16 @@ varying vec3 vGeometryNormal;
 
 	void getGroundRippleEffectColor( const in GroundRipple groundRipple, const in GeometricContext geometry, out vec4 color ) {
 
+        // 在建筑物之上
+        if (groundRipple.center.z > geometry.position.z) {
+            return;
+        }
+
         // 当前点实际半径
         float radius = groundRipple.radius;
 
         // 目标点距离Ripple
-        float dis = distance(geometry.position.xy, groundRipple.center);
+        float dis = distance(geometry.position.xy, groundRipple.center.xy);
 
         if (dis > radius && dis < radius + groundRipple.width) {
 

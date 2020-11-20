@@ -1,5 +1,5 @@
 struct GroundRipple {
-    vec2 center;
+    vec3 center;
     float radius;
     float width;
     vec4 color;
@@ -17,7 +17,7 @@ void main() {
     float radius = u_ripple.radius * u_percent;
 
     // 当前点半径
-    float dis = distance(vPos, u_ripple.center);
+    float dis = distance(vPos, u_ripple.center.xy);
 
     if ( dis > radius && dis < radius + u_ripple.width ) {
 
