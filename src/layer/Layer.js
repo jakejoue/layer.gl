@@ -25,10 +25,8 @@ export default class Layer extends CommonLayer {
     commonInitialize(gl) {
         this.gl = gl;
         if (this.getOptions().enablePicked) {
-            this.pickBuffer = new Buffer({
+            this.pickBuffer = Buffer.createVertexBuffer({
                 gl: gl,
-                target: "ARRAY_BUFFER",
-                usage: "STATIC_DRAW",
             });
         }
     }

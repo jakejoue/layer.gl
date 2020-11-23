@@ -8,7 +8,6 @@ import Program from "../core/Program";
 class SimpleCircleLayer extends Layer {
     constructor(options) {
         super(options);
-        this.bufferData = [];
     }
 
     getDefaultOptions() {
@@ -31,49 +30,33 @@ class SimpleCircleLayer extends Layer {
             this
         );
 
-        this.buffer = new Buffer({
+        this.buffer = Buffer.createVertexBuffer({
             gl: gl,
-            target: "ARRAY_BUFFER",
-            usage: "STATIC_DRAW",
         });
-        this.indexBuffer = new Buffer({
+        this.indexBuffer = Buffer.createIndexBuffer({
             gl: gl,
-            target: "ELEMENT_ARRAY_BUFFER",
-            usage: "STATIC_DRAW",
         });
 
         let attributes = [
             {
-                stride: 36,
                 name: "aPos",
                 buffer: this.buffer,
                 size: 3,
-                type: "FLOAT",
-                offset: 0,
             },
             {
-                stride: 36,
                 name: "aSize",
                 buffer: this.buffer,
                 size: 1,
-                type: "FLOAT",
-                offset: 12,
             },
             {
-                stride: 36,
                 name: "aIndex",
                 buffer: this.buffer,
                 size: 1,
-                type: "FLOAT",
-                offset: 16,
             },
             {
-                stride: 36,
                 name: "aColor",
                 buffer: this.buffer,
                 size: 4,
-                type: "FLOAT",
-                offset: 20,
             },
         ];
         attributes = attributes.concat(this.getCommonAttributes());
@@ -81,6 +64,7 @@ class SimpleCircleLayer extends Layer {
             gl: gl,
             program: this.program,
             attributes: attributes,
+            indexBuffer: this.indexBuffer,
         });
     }
 
@@ -109,10 +93,8 @@ class SimpleCircleLayer extends Layer {
             0 < index && indexData.push(index - 1, index);
             indexData.push(index, index + 1, index + 2, index + 3);
         });
-        this.bufferData = bufferData;
-        this.indexData = indexData;
-        this.buffer.updateData(new Float32Array(bufferData));
-        this.indexBuffer.updateData(new Uint32Array(indexData));
+        this.buffer.updateData(bufferData);
+        this.indexBuffer.updateData(indexData);
     }
 
     parsePickData(data) {
@@ -125,7 +107,7 @@ class SimpleCircleLayer extends Layer {
                 pickData.push(g[0] / 255, g[1] / 255, g[2] / 255);
                 pickData.push(g[0] / 255, g[1] / 255, g[2] / 255);
             }
-            this.pickBuffer.updateData(new Float32Array(pickData));
+            this.pickBuffer.updateData(pickData);
         }
     }
 
@@ -134,11 +116,10 @@ class SimpleCircleLayer extends Layer {
             gl = transferOptions.gl,
             matrix = transferOptions.matrix;
 
-        if (this.bufferData.length === 0) return;
+        if (this.indexBuffer.numberOfIndices === 0) return;
 
         program.use(gl);
         this.vertexArray.bind();
-        this.indexBuffer.bind();
 
         const uniforms = Object.assign(
             this.getCommonUniforms(transferOptions),
@@ -154,8 +135,8 @@ class SimpleCircleLayer extends Layer {
 
         gl.drawElements(
             gl.TRIANGLE_STRIP,
-            this.indexData.length,
-            gl.UNSIGNED_INT,
+            this.indexBuffer.numberOfIndices,
+            this.indexBuffer.indexDatatype,
             0
         );
     }
@@ -166,7 +147,6 @@ class AnimateCircleLayer extends Layer {
     constructor(options) {
         super(options);
         this.autoUpdate = true;
-        this.bufferData = [];
         this.initializeTime = new Date();
     }
 
@@ -198,64 +178,42 @@ class AnimateCircleLayer extends Layer {
             this
         );
 
-        this.buffer = new Buffer({
+        this.buffer = Buffer.createVertexBuffer({
             gl: gl,
-            target: "ARRAY_BUFFER",
-            usage: "STATIC_DRAW",
         });
-        this.indexBuffer = new Buffer({
+        this.indexBuffer = Buffer.createIndexBuffer({
             gl: gl,
-            target: "ELEMENT_ARRAY_BUFFER",
-            usage: "STATIC_DRAW",
         });
         let attributes = [
             {
-                stride: 44,
                 name: "aPos",
                 buffer: this.buffer,
                 size: 3,
-                type: "FLOAT",
-                offset: 0,
             },
             {
-                stride: 44,
                 name: "aSize",
                 buffer: this.buffer,
                 size: 1,
-                type: "FLOAT",
-                offset: 12,
             },
             {
-                stride: 44,
                 name: "aIndex",
                 buffer: this.buffer,
                 size: 1,
-                type: "FLOAT",
-                offset: 16,
             },
             {
-                stride: 44,
                 name: "aColor",
                 buffer: this.buffer,
                 size: 4,
-                type: "FLOAT",
-                offset: 20,
             },
             {
-                stride: 44,
                 name: "aRadius",
                 buffer: this.buffer,
                 size: 1,
-                type: "FLOAT",
-                offset: 36,
             },
             {
-                stride: 44,
                 name: "aStartTime",
                 buffer: this.buffer,
                 size: 1,
-                type: "FLOAT",
-                offset: 40,
             },
         ];
         attributes = attributes.concat(this.getCommonAttributes());
@@ -263,6 +221,7 @@ class AnimateCircleLayer extends Layer {
             gl: gl,
             program: this.program,
             attributes: attributes,
+            indexBuffer: this.indexBuffer,
         });
     }
 
@@ -303,10 +262,8 @@ class AnimateCircleLayer extends Layer {
             0 < index && indexData.push(index - 1, index);
             indexData.push(index, index + 1, index + 2, index + 3);
         });
-        this.bufferData = bufferData;
-        this.indexData = indexData;
-        this.buffer.updateData(new Float32Array(bufferData));
-        this.indexBuffer.updateData(new Uint32Array(indexData));
+        this.buffer.updateData(bufferData);
+        this.indexBuffer.updateData(indexData);
     }
 
     parsePickData(data) {
@@ -319,7 +276,7 @@ class AnimateCircleLayer extends Layer {
                 pickData.push(g[0] / 255, g[1] / 255, g[2] / 255);
                 pickData.push(g[0] / 255, g[1] / 255, g[2] / 255);
             }
-            this.pickBuffer.updateData(new Float32Array(pickData));
+            this.pickBuffer.updateData(pickData);
         }
     }
 
@@ -328,11 +285,10 @@ class AnimateCircleLayer extends Layer {
             gl = transferOptions.gl,
             matrix = transferOptions.matrix;
 
-        if (this.bufferData.length === 0) return;
+        if (this.indexBuffer.numberOfIndices === 0) return;
 
         program.use(gl);
         this.vertexArray.bind();
-        this.indexBuffer.bind();
 
         const zoomUnit = this.map.getZoomUnits();
         Object.assign(this.uniforms, this.getCommonUniforms(transferOptions), {
@@ -352,8 +308,8 @@ class AnimateCircleLayer extends Layer {
 
         gl.drawElements(
             gl.TRIANGLE_STRIP,
-            this.indexData.length,
-            gl.UNSIGNED_INT,
+            this.indexBuffer.numberOfIndices,
+            this.indexBuffer.indexDatatype,
             0
         );
     }

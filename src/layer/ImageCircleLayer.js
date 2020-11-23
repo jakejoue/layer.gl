@@ -57,18 +57,14 @@ export default class ImageCircleLayer extends Layer {
             this
         );
         // 顶点相关数据
-        this.buffer = new Buffer({
+        this.buffer = Buffer.createVertexBuffer({
             gl: gl,
-            target: "ARRAY_BUFFER",
-            usage: "STATIC_DRAW",
         });
         const attributes = [
             {
                 name: "aPos",
                 buffer: this.buffer,
                 size: 3,
-                type: "FLOAT",
-                offset: 0,
             },
         ];
         this.vertexArray = new VertexArray({
@@ -150,7 +146,7 @@ export default class ImageCircleLayer extends Layer {
             const { bufferData, point, scale, texture, color } = this.group[i];
             if (!this.textureMap.has(texture)) continue;
 
-            this.buffer.updateData(new Float32Array(bufferData));
+            this.buffer.updateData(bufferData);
             this.vertexArray.bind();
 
             const m = mat4.create();
@@ -170,7 +166,7 @@ export default class ImageCircleLayer extends Layer {
             gl.enable(gl.BLEND);
             gl.blendEquation(gl.FUNC_ADD);
             gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-            gl.drawArrays(gl.TRIANGLES, 0, bufferData.length / 3);
+            gl.drawArrays(gl.TRIANGLES, 0, this.buffer.numberOfVertices);
         }
 
         this.time += this.options.step / 10;

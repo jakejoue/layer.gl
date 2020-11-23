@@ -58,94 +58,64 @@ export default class ShapeLayer extends Layer {
             this
         );
 
-        this.vertexBuffer = new Buffer({
+        this.vertexBuffer = Buffer.createVertexBuffer({
             gl: gl,
-            target: "ARRAY_BUFFER",
-            usage: "STATIC_DRAW",
         });
-        this.colorBuffer = new Buffer({
+        this.colorBuffer = Buffer.createVertexBuffer({
             gl: gl,
-            target: "ARRAY_BUFFER",
-            usage: "STATIC_DRAW",
         });
-        this.heightBuffer = new Buffer({
+        this.heightBuffer = Buffer.createVertexBuffer({
             gl: gl,
-            target: "ARRAY_BUFFER",
-            usage: "STATIC_DRAW",
         });
-        this.textureBuffer = new Buffer({
+        this.textureBuffer = Buffer.createVertexBuffer({
             gl: gl,
-            target: "ARRAY_BUFFER",
-            usage: "STATIC_DRAW",
         });
-        this.indexBuffer = new Buffer({
+        this.indexBuffer = Buffer.createIndexBuffer({
             gl: gl,
-            target: "ELEMENT_ARRAY_BUFFER",
-            usage: "STATIC_DRAW",
         });
 
         const attributes = [
             {
                 name: "a_pos",
                 buffer: this.vertexBuffer,
-                stride: 28,
                 size: 4,
-                type: "FLOAT",
-                offset: 0,
             },
             {
                 name: "a_normal",
                 buffer: this.vertexBuffer,
                 size: 3,
-                stride: 28,
-                type: "FLOAT",
-                offset: 16,
             },
             {
                 name: "a_color",
                 buffer: this.colorBuffer,
                 size: 4,
-                stride: 32,
-                type: "FLOAT",
-                offset: 0,
             },
             {
                 name: "a_pre_color",
                 buffer: this.colorBuffer,
                 size: 4,
-                stride: 32,
-                type: "FLOAT",
-                offset: 16,
             },
             {
                 name: "a_height",
                 buffer: this.heightBuffer,
                 size: 1,
-                stride: 8,
-                type: "FLOAT",
-                offset: 0,
             },
             {
                 name: "a_pre_height",
                 buffer: this.heightBuffer,
                 size: 1,
-                stride: 8,
-                type: "FLOAT",
-                offset: 4,
             },
             {
                 name: "a_texture_coord",
                 buffer: this.textureBuffer,
                 size: 2,
-                stride: 8,
-                type: "FLOAT",
-                offset: 0,
             },
         ];
         this.vertexArray = new VertexArray({
             gl: gl,
             program: this.program,
             attributes: attributes.concat(this.getCommonAttributes()),
+            indexBuffer: this.indexBuffer,
         });
 
         this.initializeTime = new Date();
@@ -249,12 +219,11 @@ export default class ShapeLayer extends Layer {
                 const dataMgrData = this.dataMgr.getData();
                 if (dataMgrData.vertex.length > 0) {
                     this.vertexArray.bind();
-                    this.indexBuffer.bind();
 
                     gl.drawElements(
                         gl.TRIANGLES,
-                        dataMgrData.index.length,
-                        gl.UNSIGNED_INT,
+                        this.indexBuffer.numberOfIndices,
+                        this.indexBuffer.indexDatatype,
                         0
                     );
                 }

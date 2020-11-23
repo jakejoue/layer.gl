@@ -75,115 +75,75 @@ export default class LineLayer3D extends Layer {
             this
         );
 
-        this.prevBuffer = new Buffer({
+        this.prevBuffer = Buffer.createVertexBuffer({
             gl: gl,
-            target: "ARRAY_BUFFER",
-            usage: "STATIC_DRAW",
         });
-        this.currentBuffer = new Buffer({
+        this.currentBuffer = Buffer.createVertexBuffer({
             gl: gl,
-            target: "ARRAY_BUFFER",
-            usage: "STATIC_DRAW",
         });
-        this.nextBuffer = new Buffer({
+        this.nextBuffer = Buffer.createVertexBuffer({
             gl: gl,
-            target: "ARRAY_BUFFER",
-            usage: "STATIC_DRAW",
         });
-        this.directionBuffer = new Buffer({
+        this.directionBuffer = Buffer.createVertexBuffer({
             gl: gl,
-            target: "ARRAY_BUFFER",
-            usage: "STATIC_DRAW",
         });
-        this.colorBuffer = new Buffer({
+        this.colorBuffer = Buffer.createVertexBuffer({
             gl: gl,
-            target: "ARRAY_BUFFER",
-            usage: "STATIC_DRAW",
         });
-        this.counterBuffer = new Buffer({
+        this.counterBuffer = Buffer.createVertexBuffer({
             gl: gl,
-            target: "ARRAY_BUFFER",
-            usage: "STATIC_DRAW",
         });
-        this.uvBuffer = new Buffer({
+        this.uvBuffer = Buffer.createVertexBuffer({
             gl: gl,
-            target: "ARRAY_BUFFER",
-            usage: "STATIC_DRAW",
         });
-        this.indexBuffer = new Buffer({
+        this.indexBuffer = Buffer.createIndexBuffer({
             gl: gl,
-            target: "ELEMENT_ARRAY_BUFFER",
-            usage: "STATIC_DRAW",
         });
 
         let attributes = [
             {
-                stride: 12,
                 name: "previous",
                 buffer: this.prevBuffer,
                 size: 3,
-                type: "FLOAT",
-                offset: 0,
             },
             {
-                stride: 12,
                 name: "position",
                 buffer: this.currentBuffer,
                 size: 3,
-                type: "FLOAT",
-                offset: 0,
             },
             {
-                stride: 12,
                 name: "next",
                 buffer: this.nextBuffer,
                 size: 3,
-                type: "FLOAT",
-                offset: 0,
             },
             {
-                stride: 4,
                 name: "direction",
                 buffer: this.directionBuffer,
                 size: 1,
-                type: "FLOAT",
-                offset: 0,
             },
             {
-                stride: 16,
                 name: "aColor",
                 buffer: this.colorBuffer,
                 size: 4,
-                type: "FLOAT",
-                offset: 0,
             },
             {
-                stride: 8,
                 name: "aDistance",
                 buffer: this.counterBuffer,
                 size: 1,
-                type: "FLOAT",
-                offset: 0,
             },
             {
-                stride: 8,
                 name: "aTotalDistance",
                 buffer: this.counterBuffer,
                 size: 1,
-                type: "FLOAT",
-                offset: 4,
             },
         ];
         attributes = attributes.concat(this.getCommonAttributes());
 
         if (LineStyle[options.style]) {
             attributes.push({
-                stride: 8,
                 name: "uv",
                 buffer: this.uvBuffer,
                 size: 2,
-                type: "FLOAT",
-                offset: 0,
             });
             this.setOptions({
                 texture: LineStyle[options.style],
@@ -195,6 +155,7 @@ export default class LineLayer3D extends Layer {
             gl: gl,
             program: this.program,
             attributes: attributes,
+            indexBuffer: this.indexBuffer,
         });
     }
 
@@ -254,25 +215,16 @@ export default class LineLayer3D extends Layer {
                 }
             }
 
-            this.counterBuffer.updateData(
-                new Float32Array(this.dataMgr.counter)
-            );
-            this.currentBuffer.updateData(
-                new Float32Array(this.dataMgr.position)
-            );
-            this.prevBuffer.updateData(new Float32Array(this.dataMgr.prev));
-            this.nextBuffer.updateData(new Float32Array(this.dataMgr.next));
-            this.directionBuffer.updateData(
-                new Float32Array(this.dataMgr.direction)
-            );
-            this.colorBuffer.updateData(new Float32Array(this.dataMgr.color));
-            this.indexBuffer.updateData(new Uint32Array(this.dataMgr.index));
+            this.counterBuffer.updateData(this.dataMgr.counter);
+            this.currentBuffer.updateData(this.dataMgr.position);
+            this.prevBuffer.updateData(this.dataMgr.prev);
+            this.nextBuffer.updateData(this.dataMgr.next);
+            this.directionBuffer.updateData(this.dataMgr.direction);
+            this.colorBuffer.updateData(this.dataMgr.color);
+            this.indexBuffer.updateData(this.dataMgr.index);
 
-            this.isUseTexture &&
-                this.uvBuffer.updateData(new Float32Array(this.dataMgr.uv));
-
-            options.enablePicked &&
-                this.pickBuffer.updateData(new Float32Array(colorDataArray));
+            this.isUseTexture && this.uvBuffer.updateData(this.dataMgr.uv);
+            options.enablePicked && this.pickBuffer.updateData(colorDataArray);
         }
     }
 
@@ -319,60 +271,55 @@ export default class LineLayer3D extends Layer {
     render(transferOptions) {
         const gl = transferOptions.gl,
             matrix = transferOptions.matrix,
-            isPickRender = transferOptions.isPickRender,
-            dataMgr = this.dataMgr;
+            isPickRender = transferOptions.isPickRender;
 
-        if (dataMgr && !(0 >= dataMgr.index.length) && this.map) {
-            const options = this.getOptions(),
-                program = this.program;
+        if (this.indexBuffer.numberOfIndices === 0) return;
 
-            program.use(gl);
+        const options = this.getOptions(),
+            program = this.program;
 
-            let uniforms = Object.assign(
-                this.getCommonUniforms(transferOptions),
-                {
-                    uMatrix: matrix,
-                    uFlat: options.isFlat,
-                    zoomUnits: this.map.getZoomUnits(),
-                    devicePixelRatio: window.devicePixelRatio,
-                    miter: +(options.lineJoin === "miter"),
-                    thickness: options.width,
-                    uDashArray: options.dashArray,
-                    uDashOffset: options.dashOffset,
-                    uAntialias: options.antialias,
-                }
-            );
-            if (this.isUseTexture) {
-                uniforms = Object.assign(uniforms, {
-                    uTextureMargin: 140,
-                    textureImage: this.texture,
-                });
-            }
+        program.use(gl);
 
-            program.setUniforms(uniforms);
-
-            this.indexBuffer.bind();
-            this.vertexArray.bind();
-
-            if (isPickRender) {
-                gl.disable(gl.BLEND);
-            } else {
-                gl.enable(gl.BLEND);
-                gl.blendEquation(gl.FUNC_ADD);
-
-                if (options.blend && "lighter" === options.blend) {
-                    gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
-                } else {
-                    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-                }
-            }
-            gl.drawElements(
-                gl.TRIANGLES,
-                dataMgr.index.length,
-                gl.UNSIGNED_INT,
-                0
-            );
+        let uniforms = Object.assign(this.getCommonUniforms(transferOptions), {
+            uMatrix: matrix,
+            uFlat: options.isFlat,
+            zoomUnits: this.map.getZoomUnits(),
+            devicePixelRatio: window.devicePixelRatio,
+            miter: +(options.lineJoin === "miter"),
+            thickness: options.width,
+            uDashArray: options.dashArray,
+            uDashOffset: options.dashOffset,
+            uAntialias: options.antialias,
+        });
+        if (this.isUseTexture) {
+            uniforms = Object.assign(uniforms, {
+                uTextureMargin: 140,
+                textureImage: this.texture,
+            });
         }
+
+        program.setUniforms(uniforms);
+        this.vertexArray.bind();
+
+        if (isPickRender) {
+            gl.disable(gl.BLEND);
+        } else {
+            gl.enable(gl.BLEND);
+            gl.blendEquation(gl.FUNC_ADD);
+
+            if (options.blend && "lighter" === options.blend) {
+                gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
+            } else {
+                gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+            }
+        }
+
+        gl.drawElements(
+            gl.TRIANGLES,
+            this.indexBuffer.numberOfIndices,
+            this.indexBuffer.indexDatatype,
+            0
+        );
     }
 
     loadTexture(callback) {

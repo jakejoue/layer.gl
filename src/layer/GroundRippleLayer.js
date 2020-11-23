@@ -39,29 +39,25 @@ export default class GroundRippleLayer extends Layer {
             this
         );
 
-        this.indexBuffer = new Buffer({
+        this.buffer = Buffer.createVertexBuffer({
             gl: gl,
-            target: "ELEMENT_ARRAY_BUFFER",
-            usage: "STATIC_DRAW",
         });
-        this.buffer = new Buffer({
+        this.indexBuffer = Buffer.createIndexBuffer({
             gl: gl,
-            target: "ARRAY_BUFFER",
-            usage: "STATIC_DRAW",
         });
+
         const attributes = [
             {
                 name: "aPos",
                 buffer: this.buffer,
                 size: 3,
-                type: "FLOAT",
-                offset: 0,
             },
         ];
         this.vertexArray = new VertexArray({
             gl: gl,
             program: this.program,
             attributes: attributes,
+            indexBuffer: this.indexBuffer,
         });
     }
 
@@ -120,8 +116,8 @@ export default class GroundRippleLayer extends Layer {
 
                 // 存入group
                 this.group[i] = {
-                    indexData: new Uint16Array(indexData),
-                    bufferData: new Float32Array(bufferData),
+                    indexData: indexData,
+                    bufferData: bufferData,
                     uniforms: {
                         u_ripple: {
                             center: coord,
@@ -139,7 +135,7 @@ export default class GroundRippleLayer extends Layer {
         const gl = transferOptions.gl,
             matrix = transferOptions.matrix;
 
-        if (!this.group.length) return;
+        if (this.group.length === 0) return;
 
         this.program.use(gl);
 
@@ -167,8 +163,8 @@ export default class GroundRippleLayer extends Layer {
 
             gl.drawElements(
                 gl.TRIANGLES,
-                obj.indexData.length,
-                gl.UNSIGNED_SHORT,
+                this.indexBuffer.numberOfIndices,
+                this.indexBuffer.indexDatatype,
                 0
             );
         }

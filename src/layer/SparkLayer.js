@@ -9,7 +9,6 @@ export default class SparkLayer extends Layer {
         super(options);
 
         this.autoUpdate = true;
-        this.bufferData = [];
     }
 
     getDefaultOptions() {
@@ -37,20 +36,17 @@ export default class SparkLayer extends Layer {
         );
 
         // 顶点相关数据
-        this.buffer = new Buffer({
+        this.buffer = Buffer.createVertexBuffer({
             gl: gl,
-            target: "ARRAY_BUFFER",
-            usage: "STATIC_DRAW",
         });
         const attributes = [
             {
                 name: "aPos",
                 buffer: this.buffer,
                 size: 4,
-                type: "FLOAT",
-                offset: 0,
             },
         ];
+
         this.vertexArray = new VertexArray({
             gl: gl,
             program: this.program,
@@ -94,20 +90,19 @@ export default class SparkLayer extends Layer {
             this.endTime = +options.endTime || 10;
             this.time = this.startTime;
 
-            this.bufferData = arrayData;
-            this.buffer.updateData(new Float32Array(arrayData));
+            this.buffer.updateData(arrayData);
         }
     }
 
     onDestroy() {
-        this.gl = this.program = this.buffer = this.vertexArray = this.bufferData = null;
+        this.gl = this.program = this.buffer = this.vertexArray = null;
     }
 
     render(transferOptions) {
         const gl = transferOptions.gl,
             matrix = transferOptions.matrix;
 
-        if (this.bufferData.length <= 0) return;
+        if (this.buffer.numberOfVertices === 0) return;
 
         this.program.use(gl);
         this.vertexArray.bind();
@@ -124,7 +119,7 @@ export default class SparkLayer extends Layer {
         gl.polygonOffset(2, 1);
         gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
         gl.blendEquation(gl.FUNC_ADD);
-        gl.drawArrays(gl.LINES, 0, this.bufferData.length / 4);
+        gl.drawArrays(gl.LINES, 0, this.buffer.numberOfVertices);
 
         this.time += +this.options.step;
         this.time > 1.5 * this.endTime && (this.time = this.startTime);

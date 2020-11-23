@@ -7,7 +7,6 @@ import Program from "../core/Program";
 export default class SimpleLineLayer extends Layer {
     constructor(options) {
         super(options);
-        this.bufferData = [];
     }
 
     initialize(gl) {
@@ -21,30 +20,23 @@ export default class SimpleLineLayer extends Layer {
             this
         );
 
-        this.buffer = new Buffer({
+        this.buffer = Buffer.createVertexBuffer({
             gl: gl,
-            target: "ARRAY_BUFFER",
-            usage: "STATIC_DRAW",
         });
+
         this.vertexArray = new VertexArray({
             gl: gl,
             program: this.program,
             attributes: [
                 {
-                    stride: 28,
                     name: "aPos",
                     buffer: this.buffer,
                     size: 3,
-                    type: "FLOAT",
-                    offset: 0,
                 },
                 {
-                    stride: 28,
                     name: "aColor",
                     buffer: this.buffer,
                     size: 4,
-                    type: "FLOAT",
-                    offset: 12,
                 },
             ],
         });
@@ -105,8 +97,7 @@ export default class SimpleLineLayer extends Layer {
                 } else func(coords, color);
             }
 
-            this.bufferData = arrayData;
-            this.buffer.updateData(new Float32Array(arrayData));
+            this.buffer.updateData(arrayData);
         }
     }
 
@@ -114,27 +105,27 @@ export default class SimpleLineLayer extends Layer {
         const gl = transferOptions.gl,
             matrix = transferOptions.matrix;
 
-        if (this.bufferData && !(0 >= this.bufferData.length)) {
-            const program = this.program;
-            program.use(gl);
+        if (this.buffer.numberOfVertices === 0) return;
 
-            this.vertexArray.bind();
-            program.setUniforms({
-                u_matrix: matrix,
-            });
+        const program = this.program;
+        program.use(gl);
 
-            gl.enable(gl.BLEND);
-            gl.blendEquation(gl.FUNC_ADD);
+        this.vertexArray.bind();
+        program.setUniforms({
+            u_matrix: matrix,
+        });
 
-            const blend = this.getOptions().blend;
-            if (blend && "lighter" === blend) {
-                gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
-            } else {
-                gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-            }
+        gl.enable(gl.BLEND);
+        gl.blendEquation(gl.FUNC_ADD);
 
-            gl.drawArrays(gl.LINES, 0, this.bufferData.length / 7);
-            gl.disable(gl.BLEND);
+        const blend = this.getOptions().blend;
+        if (blend && "lighter" === blend) {
+            gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
+        } else {
+            gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
         }
+
+        gl.drawArrays(gl.LINES, 0, this.buffer.numberOfVertices);
+        gl.disable(gl.BLEND);
     }
 }

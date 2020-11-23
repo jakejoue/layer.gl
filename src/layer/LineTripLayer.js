@@ -7,8 +7,6 @@ import Program from "../core/Program";
 export default class LineTripLayer extends Layer {
     constructor(options) {
         super(options);
-
-        this.bufferData = [];
         this.autoUpdate = true;
     }
 
@@ -30,27 +28,19 @@ export default class LineTripLayer extends Layer {
             this
         );
 
-        this.buffer = new Buffer({
+        this.buffer = Buffer.createVertexBuffer({
             gl: gl,
-            target: "ARRAY_BUFFER",
-            usage: "STATIC_DRAW",
         });
         const attributes = [
             {
-                stride: 32,
                 name: "aPos",
                 buffer: this.buffer,
                 size: 4,
-                type: "FLOAT",
-                offset: 0,
             },
             {
-                stride: 32,
                 name: "aColor",
                 buffer: this.buffer,
                 size: 4,
-                type: "FLOAT",
-                offset: 16,
             },
         ];
         this.vertexArray = new VertexArray({
@@ -117,8 +107,7 @@ export default class LineTripLayer extends Layer {
             this.endTime = +options.endTime || endTime;
             this.time = this.startTime;
 
-            this.bufferData = bufferData;
-            this.buffer.updateData(new Float32Array(bufferData));
+            this.buffer.updateData(bufferData);
         }
     }
 
@@ -126,7 +115,7 @@ export default class LineTripLayer extends Layer {
         const gl = transferOptions.gl,
             matrix = transferOptions.matrix;
 
-        if (this.bufferData.length <= 0) return;
+        if (this.buffer.numberOfVertices === 0) return;
 
         this.program.use(gl);
         this.vertexArray.bind();
@@ -144,7 +133,8 @@ export default class LineTripLayer extends Layer {
             ? gl.blendFunc(gl.ONE, gl.ONE)
             : gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
         gl.blendEquation(gl.FUNC_ADD);
-        gl.drawArrays(gl.LINES, 0, this.bufferData.length / 8);
+
+        gl.drawArrays(gl.LINES, 0, this.buffer.numberOfVertices);
 
         this.time += this.options.step;
         this.time > this.endTime && (this.time = this.startTime);

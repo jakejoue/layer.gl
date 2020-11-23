@@ -93,24 +93,14 @@ export default class ShapeMgr {
             }
         }
 
-        this.shapeLayer.vertexBuffer.updateData(
-            new Float32Array(this.outBuilding3d.vertex)
-        );
-        this.shapeLayer.colorBuffer.updateData(
-            new Float32Array(this.outBuilding3d.color)
-        );
-        this.shapeLayer.heightBuffer.updateData(
-            new Float32Array(this.outBuilding3d.height)
-        );
-        this.shapeLayer.textureBuffer.updateData(
-            new Float32Array(this.outBuilding3d.texture)
-        );
-        this.shapeLayer.indexBuffer.updateData(
-            new Uint32Array(this.outBuilding3d.index)
-        );
+        this.shapeLayer.vertexBuffer.updateData(this.outBuilding3d.vertex);
+        this.shapeLayer.colorBuffer.updateData(this.outBuilding3d.color);
+        this.shapeLayer.heightBuffer.updateData(this.outBuilding3d.height);
+        this.shapeLayer.textureBuffer.updateData(this.outBuilding3d.texture);
+        this.shapeLayer.indexBuffer.updateData(this.outBuilding3d.index);
         if (options.enablePicked) {
             this.shapeLayer.pickBuffer.updateData(
-                new Float32Array(this.outBuilding3d.pickColorVertex)
+                this.outBuilding3d.pickColorVertex
             );
         }
     }

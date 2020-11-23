@@ -9,7 +9,7 @@ export default class Textures {
 
         if (textureUnits >= this.maxTextures) {
             console.warn(
-                "THREE.WebGLTextures: Trying to use " +
+                "WebGLTextures: Trying to use " +
                     textureUnits +
                     " texture units while this GPU supports only " +
                     this.maxTextures

@@ -12,7 +12,6 @@ const PointShapeTypes = {
 export default class PointLayer extends Layer {
     constructor(options) {
         super(options);
-        this.bufferData = [];
     }
 
     getDefaultOptions() {
@@ -36,35 +35,24 @@ export default class PointLayer extends Layer {
             this
         );
         // 顶点相关数据
-        this.buffer = new Buffer({
+        this.buffer = Buffer.createVertexBuffer({
             gl: gl,
-            target: "ARRAY_BUFFER",
-            usage: "STATIC_DRAW",
         });
         const attributes = [
             {
-                stride: 32,
                 name: "aPos",
                 buffer: this.buffer,
                 size: 3,
-                type: "FLOAT",
-                offset: 0,
             },
             {
-                stride: 32,
                 name: "aColor",
                 buffer: this.buffer,
                 size: 4,
-                type: "FLOAT",
-                offset: 12,
             },
             {
-                stride: 32,
                 name: "aSize",
                 buffer: this.buffer,
                 size: 1,
-                type: "FLOAT",
-                offset: 28,
             },
         ];
         this.vertexArray = new VertexArray({
@@ -94,7 +82,6 @@ export default class PointLayer extends Layer {
                     arrayData.push(size * window.devicePixelRatio);
                 }
             }
-            this.bufferData = arrayData;
             this.buffer.updateData(new Float32Array(arrayData));
 
             options.enablePicked && this.parsePickData(dataArray);
@@ -116,12 +103,12 @@ export default class PointLayer extends Layer {
             }
         }
         if (options.enablePicked) {
-            this.pickBuffer.updateData(new Float32Array(dataArray));
+            this.pickBuffer.updateData(dataArray);
         }
     }
 
     onDestroy() {
-        this.gl = this.program = this.buffer = this.vertexArray = this.bufferData = null;
+        this.gl = this.program = this.buffer = this.vertexArray = null;
     }
 
     render(transferOptions) {
@@ -129,7 +116,7 @@ export default class PointLayer extends Layer {
             matrix = transferOptions.matrix,
             isPickRender = transferOptions.isPickRender;
 
-        if (this.bufferData.length <= 0) return;
+        if (this.buffer.numberOfVertices === 0) return;
 
         this.program.use(gl);
         this.vertexArray.bind();
@@ -156,6 +143,6 @@ export default class PointLayer extends Layer {
                 gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
             }
         }
-        gl.drawArrays(gl.POINTS, 0, this.bufferData.length / 8);
+        gl.drawArrays(gl.POINTS, 0, this.buffer.numberOfVertices);
     }
 }

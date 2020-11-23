@@ -22,6 +22,7 @@ export default class ShieldLayer extends Layer {
 
     initialize(gl) {
         this.gl = gl;
+
         // 构造program
         this.program = new Program(
             this.gl,
@@ -46,25 +47,20 @@ export default class ShieldLayer extends Layer {
             },
             this
         );
+
         // 顶点相关数据
-        this.buffer = new Buffer({
+        this.buffer = Buffer.createVertexBuffer({
             gl: gl,
-            target: "ARRAY_BUFFER",
-            usage: "STATIC_DRAW",
         });
         // 顶点索引
-        this.indexBuffer = new Buffer({
+        this.indexBuffer = Buffer.createIndexBuffer({
             gl: gl,
-            target: "ELEMENT_ARRAY_BUFFER",
-            usage: "STATIC_DRAW",
         });
         const attributes = [
             {
                 name: "aPos",
                 buffer: this.buffer,
                 size: 3,
-                type: "FLOAT",
-                offset: 0,
             },
         ];
 
@@ -72,6 +68,7 @@ export default class ShieldLayer extends Layer {
             gl: gl,
             program: this.program,
             attributes: attributes,
+            indexBuffer: this.indexBuffer,
         });
     }
 
@@ -116,7 +113,7 @@ export default class ShieldLayer extends Layer {
         const gl = transferOptions.gl,
             matrix = transferOptions.matrix;
 
-        if (this.group.length <= 0) return;
+        if (this.group.length === 0) return;
 
         this.program.use(gl);
 
@@ -125,9 +122,9 @@ export default class ShieldLayer extends Layer {
             const { indexData, bufferData, point, scale, color } = this.group[
                 i
             ];
-            this.buffer.updateData(new Float32Array(bufferData));
-            this.vertexArray.bind();
+            this.buffer.updateData(bufferData);
             this.indexBuffer.updateData(indexData);
+            this.vertexArray.bind();
 
             const m = mat4.create();
             mat4.translate(m, m, point);
@@ -146,10 +143,8 @@ export default class ShieldLayer extends Layer {
 
             gl.drawElements(
                 gl.TRIANGLES,
-                indexData.length,
-                indexData instanceof Uint16Array
-                    ? gl.UNSIGNED_SHORT
-                    : gl.UNSIGNED_INT,
+                this.indexBuffer.numberOfIndices,
+                this.indexBuffer.indexDatatype,
                 0
             );
         }

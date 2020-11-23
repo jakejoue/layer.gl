@@ -7,7 +7,7 @@ import Program from "../core/Program";
 export default class RippleLayer extends Layer {
     constructor(options) {
         super(options);
-        this.bufferData = [];
+
         this.date = new Date();
         this.autoUpdate = true;
     }
@@ -34,35 +34,24 @@ export default class RippleLayer extends Layer {
             this
         );
 
-        this.buffer = new Buffer({
+        this.buffer = Buffer.createVertexBuffer({
             gl: gl,
-            target: "ARRAY_BUFFER",
-            usage: "STATIC_DRAW",
         });
         let attributes = [
             {
-                stride: 32,
                 name: "aPos",
                 buffer: this.buffer,
                 size: 3,
-                type: "FLOAT",
-                offset: 0,
             },
             {
-                stride: 32,
                 name: "aColor",
                 buffer: this.buffer,
                 size: 4,
-                type: "FLOAT",
-                offset: 12,
             },
             {
-                stride: 32,
                 name: "aSize",
                 buffer: this.buffer,
                 size: 1,
-                type: "FLOAT",
-                offset: 28,
             },
         ];
         attributes = attributes.concat(this.getCommonAttributes());
@@ -94,8 +83,7 @@ export default class RippleLayer extends Layer {
                     bufferData.push(this.normizedHeight(size, coords));
                 }
             }
-            this.bufferData = bufferData;
-            this.buffer.updateData(new Float32Array(bufferData));
+            this.buffer.updateData(bufferData);
             options.enablePicked && this.parsePickData(data);
         }
     }
@@ -103,17 +91,17 @@ export default class RippleLayer extends Layer {
     parsePickData(data) {
         const options = this.getOptions(),
             pickData = [];
+
         if (options.enablePicked)
             for (let g = 0; g < data.length; g++) {
                 const h = this.indexToRgb(g);
                 pickData.push(h[0] / 255, h[1] / 255, h[2] / 255);
             }
-        options.enablePicked &&
-            this.pickBuffer.updateData(new Float32Array(pickData));
+        options.enablePicked && this.pickBuffer.updateData(pickData);
     }
 
     onDestroy() {
-        this.buffer = this.program = this.bufferData = null;
+        this.buffer = this.program = null;
     }
 
     render(transferOptions) {
@@ -121,33 +109,32 @@ export default class RippleLayer extends Layer {
             matrix = transferOptions.matrix,
             isPickRender = transferOptions.isPickRender;
 
-        if (this.bufferData.length > 0) {
-            const program = this.program;
+        if (this.buffer.numberOfVertices === 0) return;
 
-            program.use(gl);
-            this.vertexArray.bind();
+        const program = this.program;
 
-            let uniforms = this.getCommonUniforms(transferOptions);
-            uniforms = Object.assign(uniforms, {
-                zoomUnits:
-                    "px" === this.options.unit ? 1 : this.map.getZoomUnits(),
-                uTime: (new Date() - this.date) / 1e3,
-                duration: this.options.duration,
-                uMatrix: matrix,
-            });
-            program.setUniforms(uniforms);
+        program.use(gl);
+        this.vertexArray.bind();
 
-            if (isPickRender) {
-                gl.disable(gl.BLEND);
-            } else {
-                gl.enable(gl.BLEND);
-                gl.blendEquation(gl.FUNC_ADD);
-                "lighter" === this.options.blend
-                    ? gl.blendFunc(gl.SRC_ALPHA, gl.ONE)
-                    : gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-            }
+        let uniforms = this.getCommonUniforms(transferOptions);
+        uniforms = Object.assign(uniforms, {
+            zoomUnits: "px" === this.options.unit ? 1 : this.map.getZoomUnits(),
+            uTime: (new Date() - this.date) / 1e3,
+            duration: this.options.duration,
+            uMatrix: matrix,
+        });
+        program.setUniforms(uniforms);
 
-            gl.drawArrays(gl.POINTS, 0, this.bufferData.length / 8);
+        if (isPickRender) {
+            gl.disable(gl.BLEND);
+        } else {
+            gl.enable(gl.BLEND);
+            gl.blendEquation(gl.FUNC_ADD);
+            "lighter" === this.options.blend
+                ? gl.blendFunc(gl.SRC_ALPHA, gl.ONE)
+                : gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
         }
+
+        gl.drawArrays(gl.POINTS, 0, this.buffer.numberOfVertices);
     }
 }

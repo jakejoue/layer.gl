@@ -1,24 +1,38 @@
-const BufferTypeLength = {
-    BYTE: 1,
-    UNSIGNED_BYTE: 1,
-    SHORT: 2,
-    UNSIGNED_SHORT: 2,
-    FLOAT: 4,
-};
+function addAttribute(attributes, attribute) {
+    const { name, buffer, size = 1 } = attribute;
+
+    if (!name || !buffer) throw new Error("attribute needs name & buffer");
+
+    if (buffer.stride === undefined) {
+        buffer.stride = 0;
+    }
+
+    // 构建新的属性
+    const attr = {
+        name: name,
+        buffer: buffer,
+        size: size,
+        offset: buffer.stride,
+    };
+    // 总长度
+    buffer.stride += size * buffer.bytesPerIndex;
+
+    attributes.push(attr);
+}
 
 export default class VertexArray {
     constructor(options) {
-        this.options = options;
-        this.attributes = options.attributes;
-
         this.gl = options.gl;
         this.program = options.program;
+        this.indexBuffer = options.indexBuffer;
 
-        this.stride = 0;
-        for (let i = 0; i < this.attributes.length; i++)
-            this.stride +=
-                BufferTypeLength[this.attributes[i].type] *
-                this.attributes[i].size;
+        this.attributes = [];
+
+        // 构建新的属性
+        for (let i = 0; i < options.attributes.length; i++) {
+            const attribute = options.attributes[i];
+            addAttribute(this.attributes, attribute);
+        }
     }
 
     setVertexAttribPointers() {
@@ -35,13 +49,16 @@ export default class VertexArray {
                 gl.vertexAttribPointer(
                     attribIndex,
                     attribute.size,
-                    gl[attribute.type],
+                    attribute.buffer.componentDatatype,
                     attribute.normalize || false,
-                    attribute.stride ? attribute.stride : this.stride,
+                    attribute.buffer.stride,
                     attribute.offset
                 );
                 gl.enableVertexAttribArray(attribIndex);
             }
+        }
+        if (this.indexBuffer) {
+            this.indexBuffer.bind(this.gl);
         }
     }
 
