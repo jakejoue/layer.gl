@@ -40,17 +40,18 @@ export default class ShapeLayer extends Layer {
     }
 
     initialize(gl) {
-        this.gl = gl;
         const options = this.getOptions();
 
-        this.dataMgr = new ShapeMgr(this, this.gl);
+        this.dataMgr = new ShapeMgr(this, gl);
         this.texture = null;
         this.isUseTexture = false;
 
+        // defines
         const defines = [];
         options.enablePicked && defines.push("PICK");
+
         this.program = new Program(
-            this.gl,
+            gl,
             {
                 shaderId: "shape",
                 defines: defines,
@@ -58,20 +59,62 @@ export default class ShapeLayer extends Layer {
             this
         );
 
+        this.initializeTime = new Date();
+    }
+
+    updateVao(dataMgr, dataDirty) {
+        const gl = this.gl;
+
+        const {
+            vertex,
+            color,
+            height,
+            texture,
+            index,
+            pickColorVertex,
+        } = dataMgr.outBuilding3d;
+
+        // 如果数据没有更新，且已经存在vao
+        if (!dataDirty && this.vao) {
+            this.vertexBuffer.updateData(vertex);
+            this.colorBuffer.updateData(color);
+            this.heightBuffer.updateData(height);
+            this.textureBuffer.updateData(texture);
+            this.indexBuffer.updateData(index);
+
+            if (this.options.enablePicked) {
+                this.pickBuffer.updateData(pickColorVertex);
+            }
+
+            return;
+        }
+
+        // 销毁旧的vao
+        if (this.vao) {
+            this.vao.destroy();
+            this.vao = null;
+        }
+
+        // 生成新的缓冲区和vao
         this.vertexBuffer = Buffer.createVertexBuffer({
             gl: gl,
+            data: vertex,
         });
         this.colorBuffer = Buffer.createVertexBuffer({
             gl: gl,
+            data: color,
         });
         this.heightBuffer = Buffer.createVertexBuffer({
             gl: gl,
+            data: height,
         });
         this.textureBuffer = Buffer.createVertexBuffer({
             gl: gl,
+            data: texture,
         });
         this.indexBuffer = Buffer.createIndexBuffer({
             gl: gl,
+            data: index,
         });
 
         const attributes = [
@@ -111,23 +154,30 @@ export default class ShapeLayer extends Layer {
                 size: 2,
             },
         ];
-        this.vertexArray = new VertexArray({
+
+        this.vao = new VertexArray({
             gl: gl,
             program: this.program,
-            attributes: attributes.concat(this.getCommonAttributes()),
+            attributes: attributes.concat(
+                this.getCommonAttributes({
+                    pickData: pickColorVertex,
+                })
+            ),
             indexBuffer: this.indexBuffer,
         });
-
-        this.initializeTime = new Date();
     }
 
     onChanged(options, dataArray) {
         if (this.gl) {
             this.loadTextureTime && clearTimeout(this.loadTextureTime);
 
+            const dataDirty = this._dataDirty;
+
             this.loadTextureTime = setTimeout(() => {
                 this.loadTexture(() => {
                     this.dataMgr.parseData(dataArray);
+                    this.updateVao(this.dataMgr, dataDirty);
+
                     this.dataTime = new Date();
                     this.webglLayer.render();
                 });
@@ -139,8 +189,7 @@ export default class ShapeLayer extends Layer {
         const gl = transferOptions.gl,
             matrix = transferOptions.matrix;
 
-        const data = this.getData();
-        if (data && !(0 >= data.length)) {
+        if (this.vao && this.vao.numberOfIndices > 0) {
             const options = this.getOptions();
 
             const program = this.program;
@@ -216,17 +265,14 @@ export default class ShapeLayer extends Layer {
                     })
                 );
 
-                const dataMgrData = this.dataMgr.getData();
-                if (dataMgrData.vertex.length > 0) {
-                    this.vertexArray.bind();
+                this.vao.bind();
 
-                    gl.drawElements(
-                        gl.TRIANGLES,
-                        this.indexBuffer.numberOfIndices,
-                        this.indexBuffer.indexDatatype,
-                        0
-                    );
-                }
+                gl.drawElements(
+                    gl.TRIANGLES,
+                    this.vao.numberOfIndices,
+                    this.vao.indexDatatype,
+                    0
+                );
             }
         }
     }

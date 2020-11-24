@@ -24,17 +24,18 @@ export default class Layer extends CommonLayer {
     // 通用初始化
     commonInitialize(gl) {
         this.gl = gl;
-        if (this.getOptions().enablePicked) {
-            this.pickBuffer = Buffer.createVertexBuffer({
-                gl: gl,
-            });
-        }
     }
 
-    // pick相关顶点属性
-    getCommonAttributes() {
+    // 获取公共attribute配置项
+    getCommonAttributes(options) {
         const commonAttris = [];
+
+        // 初始化pick相关信息
         if (this.getOptions().enablePicked) {
+            this.pickBuffer = Buffer.createVertexBuffer({
+                gl: this.gl,
+                data: options.pickData,
+            });
             commonAttris.push({
                 name: "aPickColor",
                 buffer: this.pickBuffer,

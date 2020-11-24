@@ -8,6 +8,10 @@ export default class CommonLayer {
 
         this.autoUpdate = false;
 
+        // 状态管理器
+        this._dataDirty = false;
+        this._optionsDirty = false;
+
         if (this.options.data) {
             this.data = this.options.data;
             delete this.options.data;
@@ -32,10 +36,15 @@ export default class CommonLayer {
     render() {}
 
     setData(data, options = {}) {
+        this._dataDirty = true;
+
         delete this.pointOffset;
+
         this.data = data;
         this.onDataChanged(this.getData());
         this.onChanged(this.getOptions(), this.getData());
+
+        this._dataDirty = false;
 
         if (false !== options.autoRender && this.webglLayer) {
             this.webglLayer.render();
@@ -47,11 +56,16 @@ export default class CommonLayer {
     }
 
     setOptions(options = {}) {
+        this._optionsDirty = true;
+
         delete this.pointOffset;
+
         const preOptions = Object.assign({}, this.getOptions());
         Object.assign(this.options, options);
         this.onOptionsChanged(this.getOptions(), preOptions);
         this.onChanged(this.getOptions(), this.getData());
+
+        this._optionsDirty = false;
 
         if (options.data) {
             this.setData(options.data);

@@ -30,34 +30,36 @@ export default class GroundRippleLayer extends Layer {
     }
 
     initialize(gl) {
-        this.gl = gl;
         this.program = new Program(
-            this.gl,
+            gl,
             {
                 shaderId: "ground_ripple",
             },
             this
         );
+    }
 
-        this.buffer = Buffer.createVertexBuffer({
-            gl: gl,
-        });
-        this.indexBuffer = Buffer.createIndexBuffer({
-            gl: gl,
-        });
+    newVao(indexData, bufferData) {
+        const gl = this.gl;
 
         const attributes = [
             {
                 name: "aPos",
-                buffer: this.buffer,
+                buffer: Buffer.createVertexBuffer({
+                    gl: gl,
+                    data: bufferData,
+                }),
                 size: 3,
             },
         ];
-        this.vertexArray = new VertexArray({
+        return new VertexArray({
             gl: gl,
             program: this.program,
             attributes: attributes,
-            indexBuffer: this.indexBuffer,
+            indexBuffer: Buffer.createIndexBuffer({
+                gl: gl,
+                data: indexData,
+            }),
         });
     }
 
@@ -116,8 +118,7 @@ export default class GroundRippleLayer extends Layer {
 
                 // 存入group
                 this.group[i] = {
-                    indexData: indexData,
-                    bufferData: bufferData,
+                    vao: this.newVao(indexData, bufferData),
                     uniforms: {
                         u_ripple: {
                             center: coord,
@@ -154,17 +155,15 @@ export default class GroundRippleLayer extends Layer {
         gl.blendEquation(gl.FUNC_ADD);
 
         for (let i = 0; i < this.group.length; i++) {
-            const obj = this.group[i];
-            this.buffer.updateData(obj.bufferData);
-            this.indexBuffer.updateData(obj.indexData);
-            this.vertexArray.bind();
+            const { vao, uniforms } = this.group[i];
 
-            this.program.setUniforms(obj.uniforms);
+            vao.bind();
+            this.program.setUniforms(uniforms);
 
             gl.drawElements(
                 gl.TRIANGLES,
-                this.indexBuffer.numberOfIndices,
-                this.indexBuffer.indexDatatype,
+                vao.numberOfIndices,
+                vao.indexDatatype,
                 0
             );
         }

@@ -4,21 +4,44 @@ import IndexDatatype from "./IndexDatatype";
 
 class Buffer {
     constructor(options) {
-        this.sizeInBytes = 0;
-
         this.gl = options.gl;
         this.target = options.target;
         this.usage = options.usage;
 
         this.buffer = this.gl.createBuffer();
-        options.typedArray && this.updateData(options.typedArray);
+
+        // 缓冲区数组大小
+        this.sizeInBytes = options.sizeInBytes || 0;
     }
 
-    _updateData(typedArray) {
-        this.bind();
-        this.gl.bufferData(this.target, typedArray, this.usage);
+    _setData(data) {
+        // 如果存在data
+        let typeArray;
+        if (data) {
+            typeArray = this.getTypeArray(data);
+            this.sizeInBytes = typeArray.byteLength;
+        }
 
-        this.sizeInBytes = typedArray ? typedArray.byteLength : 0;
+        this.gl._context.unbindVAO();
+
+        // 初次绑定
+        this.bind();
+        this.gl.bufferData(
+            this.target,
+            typeArray ? typeArray : this.sizeInBytes,
+            this.usage
+        );
+        this.unBind();
+    }
+
+    updateData(typedArray) {
+        typedArray = this.getTypeArray(typedArray);
+
+        this.gl._context.unbindVAO();
+
+        this.bind();
+        this.gl.bufferSubData(this.target, 0, typedArray);
+        this.unBind();
     }
 
     bind(gl) {
@@ -43,6 +66,7 @@ Buffer.createVertexBuffer = function (options) {
         gl: options.gl,
         target: WebGLConstants.ARRAY_BUFFER,
         usage: options.usage || WebGLConstants.STATIC_DRAW,
+        sizeInBytes: options.sizeInBytes,
     });
 
     const componentDatatype =
@@ -72,14 +96,12 @@ Buffer.createVertexBuffer = function (options) {
             },
         },
     });
-    // 定义数据分析方法
-    buffer.updateData = function (data) {
-        this._updateData(
-            data
-                ? ComponentDatatype.createTypedArray(componentDatatype, data)
-                : data
-        );
+    buffer.getTypeArray = function (data) {
+        return ComponentDatatype.createTypedArray(componentDatatype, data);
     };
+
+    // 初始化buffer
+    buffer._setData(options.data);
 
     return buffer;
 };
@@ -89,6 +111,7 @@ Buffer.createIndexBuffer = function (options) {
         gl: options.gl,
         target: WebGLConstants.ELEMENT_ARRAY_BUFFER,
         usage: options.usage || WebGLConstants.STATIC_DRAW,
+        sizeInBytes: options.sizeInBytes,
     });
 
     const indexDatatype = options.indexDatatype || IndexDatatype.UNSIGNED_INT;
@@ -111,11 +134,12 @@ Buffer.createIndexBuffer = function (options) {
             },
         },
     });
-    buffer.updateData = function (data) {
-        this._updateData(
-            data ? IndexDatatype.createTypedArray(indexDatatype, data) : data
-        );
+    buffer.getTypeArray = function (data) {
+        return IndexDatatype.createTypedArray(indexDatatype, data);
     };
+
+    // 初始化buffer
+    buffer._setData(options.data);
 
     return buffer;
 };
