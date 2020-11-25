@@ -106,6 +106,7 @@ export default class LayerManager {
         this.webglLayer.stateManager.setDefaultState();
 
         const gl = transferOptions.gl;
+
         for (let i = 0; i < this.layers.length; i++) {
             const layer = this.layers[i];
             if (
@@ -122,6 +123,7 @@ export default class LayerManager {
             }
         }
 
+        gl.context.unbindVAO();
         this.webglLayer.stateManager.restore();
     }
 

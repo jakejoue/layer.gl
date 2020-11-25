@@ -85,14 +85,18 @@ export class IndexBuffer {
         );
     }
 
-    updateData(data) {
+    updateData(data, offset = 0) {
         const gl = this.gl;
 
         if (!this.dynamicDraw) throw new Error();
 
         gl.context.unbindVAO();
         this.bind();
-        gl.bufferSubData(gl.ELEMENT_ARRAY_BUFFER, 0, this.getTypeArray(data));
+        gl.bufferSubData(
+            gl.ELEMENT_ARRAY_BUFFER,
+            offset,
+            this.getTypeArray(data)
+        );
     }
 
     destroy() {
@@ -177,11 +181,11 @@ export class VertexBuffer {
         );
     }
 
-    updateData(data) {
+    updateData(data, offset = 0) {
         const gl = this.gl;
 
         this.bind();
-        gl.bufferSubData(gl.ARRAY_BUFFER, 0, this.getTypeArray(data));
+        gl.bufferSubData(gl.ARRAY_BUFFER, offset, this.getTypeArray(data));
     }
 
     enableAttributes(gl, program) {
