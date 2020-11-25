@@ -247,7 +247,6 @@ export default class LineLayer3D extends Layer {
                     attributes: [
                         {
                             name: "uv",
-                            buffer: this.uvBuffer,
                             size: 2,
                         },
                     ],

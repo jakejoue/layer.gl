@@ -84,12 +84,10 @@ export default class ShapeLayer extends Layer {
                 attributes: [
                     {
                         name: "a_pos",
-                        buffer: this.vertexBuffer,
                         size: 4,
                     },
                     {
                         name: "a_normal",
-                        buffer: this.vertexBuffer,
                         size: 3,
                     },
                 ],
@@ -101,12 +99,10 @@ export default class ShapeLayer extends Layer {
                 attributes: [
                     {
                         name: "a_color",
-                        buffer: this.colorBuffer,
                         size: 4,
                     },
                     {
                         name: "a_pre_color",
-                        buffer: this.colorBuffer,
                         size: 4,
                     },
                 ],
@@ -118,12 +114,10 @@ export default class ShapeLayer extends Layer {
                 attributes: [
                     {
                         name: "a_height",
-                        buffer: this.heightBuffer,
                         size: 1,
                     },
                     {
                         name: "a_pre_height",
-                        buffer: this.heightBuffer,
                         size: 1,
                     },
                 ],
@@ -135,13 +129,12 @@ export default class ShapeLayer extends Layer {
                 attributes: [
                     {
                         name: "a_texture_coord",
-                        buffer: this.textureBuffer,
                         size: 2,
                     },
                 ],
             }),
             // pick
-            ...this.getCommonBuffers(pickColorVertex),
+            ...this.getCommonBuffers({ pickData: pickColorVertex }),
         ];
 
         this.indexBuffer = new IndexBuffer({
