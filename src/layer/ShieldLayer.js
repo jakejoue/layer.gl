@@ -1,7 +1,7 @@
 import Layer from "./Layer";
 
-import Buffer from "../core/Buffer";
-import VertexArray from "../core/VertexArray";
+import { IndexBuffer, VertexBuffer } from "../core/Buffer";
+import VertexArrayObject from "../core/VertexArrayObject";
 import Program from "../core/Program";
 import tesselateSphere from "../geometry/sphere";
 
@@ -21,11 +21,9 @@ export default class ShieldLayer extends Layer {
     }
 
     initialize(gl) {
-        this.gl = gl;
-
         // 构造program
         this.program = new Program(
-            this.gl,
+            gl,
             {
                 vertexShader: `
                 attribute vec3 aPos;
@@ -49,27 +47,24 @@ export default class ShieldLayer extends Layer {
         );
 
         // 顶点相关数据
-        this.buffer = Buffer.createVertexBuffer({
+        this.vertexBuffer = new VertexBuffer({
             gl: gl,
+            dynamicDraw: true,
+            attributes: [
+                {
+                    name: "aPos",
+                    size: 3,
+                },
+            ],
         });
-        // 顶点索引
-        this.indexBuffer = Buffer.createIndexBuffer({
-            gl: gl,
-        });
-        const attributes = [
-            {
-                name: "aPos",
-                buffer: this.buffer,
-                size: 3,
-            },
-        ];
 
-        this.vertexArray = new VertexArray({
+        // 顶点索引
+        this.indexBuffer = new IndexBuffer({
             gl: gl,
-            program: this.program,
-            attributes: attributes,
-            indexBuffer: this.indexBuffer,
+            dynamicDraw: true,
         });
+
+        this.vao = new VertexArrayObject();
     }
 
     onChanged(options, dataArray) {
@@ -105,10 +100,6 @@ export default class ShieldLayer extends Layer {
         }
     }
 
-    onDestroy() {
-        this.gl = this.program = this.buffer = this.vertexArray = this.group = null;
-    }
-
     render(transferOptions) {
         const gl = transferOptions.gl,
             matrix = transferOptions.matrix;
@@ -122,9 +113,16 @@ export default class ShieldLayer extends Layer {
             const { indexData, bufferData, point, scale, color } = this.group[
                 i
             ];
-            this.buffer.updateData(bufferData);
-            this.indexBuffer.updateData(indexData);
-            this.vertexArray.bind();
+
+            this.vertexBuffer.setData(bufferData);
+            this.indexBuffer.setData(indexData);
+
+            this.vao.bind({
+                gl,
+                program: this.program,
+                vertexBuffer: this.vertexBuffer,
+                indexBuffer: this.indexBuffer,
+            });
 
             const m = mat4.create();
             mat4.translate(m, m, point);

@@ -1,7 +1,7 @@
 import Layer from "./Layer";
 
-import Buffer from "../core/Buffer";
-import VertexArray from "../core/VertexArray";
+import { IndexBuffer, VertexBuffer } from "../core/Buffer";
+import VertexArrayObject from "../core/VertexArrayObject";
 import Program from "../core/Program";
 import { loadTextureImage } from "../helper/texture";
 
@@ -26,10 +26,9 @@ export default class ImageCircleLayer extends Layer {
     }
 
     initialize(gl) {
-        this.gl = gl;
         // 构造program
         this.program = new Program(
-            this.gl,
+            gl,
             {
                 vertexShader: `
                 attribute vec3 aPos;
@@ -56,22 +55,20 @@ export default class ImageCircleLayer extends Layer {
             },
             this
         );
+
         // 顶点相关数据
-        this.buffer = Buffer.createVertexBuffer({
+        this.vertexBuffer = new VertexBuffer({
             gl: gl,
+            dynamicDraw: true,
+            attributes: [
+                {
+                    name: "aPos",
+                    size: 3,
+                },
+            ],
         });
-        const attributes = [
-            {
-                name: "aPos",
-                buffer: this.buffer,
-                size: 3,
-            },
-        ];
-        this.vertexArray = new VertexArray({
-            gl: gl,
-            program: this.program,
-            attributes: attributes,
-        });
+
+        this.vao = new VertexArrayObject();
     }
 
     onChanged(options, dataArray) {
@@ -129,10 +126,6 @@ export default class ImageCircleLayer extends Layer {
         return arrayData;
     }
 
-    onDestroy() {
-        this.gl = this.program = this.buffer = this.vertexArray = this.group = this.textureMap = null;
-    }
-
     render(transferOptions) {
         const gl = transferOptions.gl,
             matrix = transferOptions.matrix;
@@ -146,8 +139,12 @@ export default class ImageCircleLayer extends Layer {
             const { bufferData, point, scale, texture, color } = this.group[i];
             if (!this.textureMap.has(texture)) continue;
 
-            this.buffer.updateData(bufferData);
-            this.vertexArray.bind();
+            this.vertexBuffer.setData(bufferData);
+            this.vao.bind({
+                gl,
+                program: this.program,
+                vertexBuffer: this.vertexBuffer,
+            });
 
             const m = mat4.create();
             mat4.translate(m, m, point);
@@ -166,7 +163,7 @@ export default class ImageCircleLayer extends Layer {
             gl.enable(gl.BLEND);
             gl.blendEquation(gl.FUNC_ADD);
             gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-            gl.drawArrays(gl.TRIANGLES, 0, this.buffer.numberOfVertices);
+            gl.drawArrays(gl.TRIANGLES, 0, this.vertexBuffer.numberOfVertices);
         }
 
         this.time += this.options.step / 10;

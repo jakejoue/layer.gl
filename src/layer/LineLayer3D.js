@@ -1,7 +1,7 @@
 import Layer from "./Layer";
 
-import Buffer from "../core/Buffer";
-import VertexArray from "../core/VertexArray";
+import { IndexBuffer, VertexBuffer } from "../core/Buffer";
+import VertexArrayObject from "../core/VertexArrayObject";
 import Program from "../core/Program";
 
 import { road } from "../helper/cavans";
@@ -55,19 +55,23 @@ export default class LineLayer3D extends Layer {
     }
 
     initialize(gl) {
-        this.gl = gl;
-
         const options = this.getOptions(),
             defines = [];
 
         options.enablePicked && defines.push("PICK");
+
         if (LineStyle[options.style]) {
             this.isUseTexture = true;
             defines.push("USE_TEXTURE");
+
+            this.setOptions({
+                texture: LineStyle[options.style],
+            });
+            this.loadTexture();
         }
 
         this.program = new Program(
-            this.gl,
+            gl,
             {
                 shaderId: "line_3d",
                 defines: defines,
@@ -75,94 +79,13 @@ export default class LineLayer3D extends Layer {
             this
         );
 
-        this.prevBuffer = Buffer.createVertexBuffer({
-            gl: gl,
-        });
-        this.currentBuffer = Buffer.createVertexBuffer({
-            gl: gl,
-        });
-        this.nextBuffer = Buffer.createVertexBuffer({
-            gl: gl,
-        });
-        this.directionBuffer = Buffer.createVertexBuffer({
-            gl: gl,
-        });
-        this.colorBuffer = Buffer.createVertexBuffer({
-            gl: gl,
-        });
-        this.counterBuffer = Buffer.createVertexBuffer({
-            gl: gl,
-        });
-        this.uvBuffer = Buffer.createVertexBuffer({
-            gl: gl,
-        });
-        this.indexBuffer = Buffer.createIndexBuffer({
-            gl: gl,
-        });
-
-        let attributes = [
-            {
-                name: "previous",
-                buffer: this.prevBuffer,
-                size: 3,
-            },
-            {
-                name: "position",
-                buffer: this.currentBuffer,
-                size: 3,
-            },
-            {
-                name: "next",
-                buffer: this.nextBuffer,
-                size: 3,
-            },
-            {
-                name: "direction",
-                buffer: this.directionBuffer,
-                size: 1,
-            },
-            {
-                name: "aColor",
-                buffer: this.colorBuffer,
-                size: 4,
-            },
-            {
-                name: "aDistance",
-                buffer: this.counterBuffer,
-                size: 1,
-            },
-            {
-                name: "aTotalDistance",
-                buffer: this.counterBuffer,
-                size: 1,
-            },
-        ];
-        attributes = attributes.concat(this.getCommonAttributes());
-
-        if (LineStyle[options.style]) {
-            attributes.push({
-                name: "uv",
-                buffer: this.uvBuffer,
-                size: 2,
-            });
-            this.setOptions({
-                texture: LineStyle[options.style],
-            });
-            this.loadTexture();
-        }
-
-        this.vertexArray = new VertexArray({
-            gl: gl,
-            program: this.program,
-            attributes: attributes,
-            indexBuffer: this.indexBuffer,
-        });
+        this.vao = new VertexArrayObject();
     }
 
     onChanged(options, data) {
         if (this.gl) {
             this.initData();
-            const colorDataArray = [];
+            const pickData = [];
 
             for (let i = 0; i < data.length; i++) {
                 // 坐标转换
@@ -187,44 +110,19 @@ export default class LineLayer3D extends Layer {
                 if (options.enablePicked) {
                     const k = this.indexToRgb(i);
                     for (let p = 0; p < line.length; p++) {
-                        colorDataArray.push(k[0] / 255, k[1] / 255, k[2] / 255);
-                        colorDataArray.push(k[0] / 255, k[1] / 255, k[2] / 255);
+                        pickData.push(k[0] / 255, k[1] / 255, k[2] / 255);
+                        pickData.push(k[0] / 255, k[1] / 255, k[2] / 255);
                         if (options.repeat) {
-                            colorDataArray.push(
-                                k[0] / 255,
-                                k[1] / 255,
-                                k[2] / 255
-                            );
-                            colorDataArray.push(
-                                k[0] / 255,
-                                k[1] / 255,
-                                k[2] / 255
-                            );
-                            colorDataArray.push(
-                                k[0] / 255,
-                                k[1] / 255,
-                                k[2] / 255
-                            );
-                            colorDataArray.push(
-                                k[0] / 255,
-                                k[1] / 255,
-                                k[2] / 255
-                            );
+                            pickData.push(k[0] / 255, k[1] / 255, k[2] / 255);
+                            pickData.push(k[0] / 255, k[1] / 255, k[2] / 255);
+                            pickData.push(k[0] / 255, k[1] / 255, k[2] / 255);
+                            pickData.push(k[0] / 255, k[1] / 255, k[2] / 255);
                         }
                     }
                 }
             }
 
-            this.counterBuffer.updateData(this.dataMgr.counter);
-            this.currentBuffer.updateData(this.dataMgr.position);
-            this.prevBuffer.updateData(this.dataMgr.prev);
-            this.nextBuffer.updateData(this.dataMgr.next);
-            this.directionBuffer.updateData(this.dataMgr.direction);
-            this.colorBuffer.updateData(this.dataMgr.color);
-            this.indexBuffer.updateData(this.dataMgr.index);
-
-            this.isUseTexture && this.uvBuffer.updateData(this.dataMgr.uv);
-            options.enablePicked && this.pickBuffer.updateData(colorDataArray);
+            this.updateBuffer(this.dataMgr, pickData);
         }
     }
 
@@ -264,8 +162,103 @@ export default class LineLayer3D extends Layer {
         dataMgr.index.push(...indexArr);
     }
 
-    onDestroy() {
-        this.gl = this.program = this.dataMgr = this.prevBuffer = this.currentBuffer = this.nextBuffer = this.directionBuffer = this.colorBuffer = this.counterBuffer = this.uvBuffer = this.indexBuffer = null;
+    updateBuffer(dataMgr, pickData) {
+        const gl = this.gl;
+
+        const {
+            counter,
+            position,
+            prev,
+            next,
+            direction,
+            color,
+            uv,
+            index,
+        } = dataMgr;
+
+        this.vertexBuffers = [
+            new VertexBuffer({
+                gl: gl,
+                data: counter,
+                attributes: [
+                    {
+                        name: "aDistance",
+                        size: 1,
+                    },
+                    {
+                        name: "aTotalDistance",
+                        size: 1,
+                    },
+                ],
+            }),
+            new VertexBuffer({
+                gl: gl,
+                data: position,
+                attributes: [
+                    {
+                        name: "position",
+                        size: 3,
+                    },
+                ],
+            }),
+            new VertexBuffer({
+                gl: gl,
+                data: prev,
+                attributes: [
+                    {
+                        name: "previous",
+                        size: 3,
+                    },
+                ],
+            }),
+            new VertexBuffer({
+                gl: gl,
+                data: next,
+                attributes: [
+                    {
+                        name: "next",
+                        size: 3,
+                    },
+                ],
+            }),
+            new VertexBuffer({
+                gl: gl,
+                data: direction,
+                attributes: [
+                    {
+                        name: "direction",
+                        size: 1,
+                    },
+                ],
+            }),
+            new VertexBuffer({
+                gl: gl,
+                data: color,
+                attributes: [{ name: "aColor", size: 4 }],
+            }),
+            ...this.getCommonBuffers({ pickData }),
+        ];
+
+        if (this.isUseTexture) {
+            this.vertexBuffers.push(
+                new VertexBuffer({
+                    gl,
+                    data: uv,
+                    attributes: [
+                        {
+                            name: "uv",
+                            buffer: this.uvBuffer,
+                            size: 2,
+                        },
+                    ],
+                })
+            );
+        }
+
+        this.indexBuffer = new IndexBuffer({
+            gl: gl,
+            data: index,
+        });
     }
 
     render(transferOptions) {
@@ -273,7 +266,7 @@ export default class LineLayer3D extends Layer {
             matrix = transferOptions.matrix,
             isPickRender = transferOptions.isPickRender;
 
-        if (this.indexBuffer.numberOfIndices === 0) return;
+        if (!this.indexBuffer || this.indexBuffer.numberOfIndices === 0) return;
 
         const options = this.getOptions(),
             program = this.program;
@@ -299,7 +292,12 @@ export default class LineLayer3D extends Layer {
         }
 
         program.setUniforms(uniforms);
-        this.vertexArray.bind();
+        this.vao.bind({
+            gl,
+            program,
+            vertexBuffers: this.vertexBuffers,
+            indexBuffer: this.indexBuffer,
+        });
 
         if (isPickRender) {
             gl.disable(gl.BLEND);

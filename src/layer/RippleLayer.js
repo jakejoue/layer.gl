@@ -1,7 +1,7 @@
 import Layer from "./Layer";
 
-import Buffer from "../core/Buffer";
-import VertexArray from "../core/VertexArray";
+import { VertexBuffer } from "../core/Buffer";
+import VertexArrayObject from "../core/VertexArrayObject";
 import Program from "../core/Program";
 
 export default class RippleLayer extends Layer {
@@ -23,10 +23,8 @@ export default class RippleLayer extends Layer {
     }
 
     initialize(gl) {
-        this.gl = gl;
-
         this.program = new Program(
-            this.gl,
+            gl,
             {
                 shaderId: "ripple",
                 defines: this.getOptions().enablePicked ? ["PICK"] : [],
@@ -34,32 +32,25 @@ export default class RippleLayer extends Layer {
             this
         );
 
-        this.buffer = Buffer.createVertexBuffer({
+        this.vertexBuffer = new VertexBuffer({
             gl: gl,
+            attributes: [
+                {
+                    name: "aPos",
+                    size: 3,
+                },
+                {
+                    name: "aColor",
+                    size: 4,
+                },
+                {
+                    name: "aSize",
+                    size: 1,
+                },
+            ],
         });
-        let attributes = [
-            {
-                name: "aPos",
-                buffer: this.buffer,
-                size: 3,
-            },
-            {
-                name: "aColor",
-                buffer: this.buffer,
-                size: 4,
-            },
-            {
-                name: "aSize",
-                buffer: this.buffer,
-                size: 1,
-            },
-        ];
-        attributes = attributes.concat(this.getCommonAttributes());
-        this.vertexArray = new VertexArray({
-            gl: gl,
-            program: this.program,
-            attributes: attributes,
-        });
+
+        this.vao = new VertexArrayObject();
     }
 
     onChanged(options, data) {
@@ -83,8 +74,11 @@ export default class RippleLayer extends Layer {
                     bufferData.push(this.normizedHeight(size, coords));
                 }
             }
-            this.buffer.updateData(bufferData);
-            options.enablePicked && this.parsePickData(data);
+
+            this.vertexBuffer.setData(bufferData);
+            this.vertexBuffers = this.getCommonBuffers({
+                pickData: this.parsePickData(data),
+            });
         }
     }
 
@@ -92,16 +86,14 @@ export default class RippleLayer extends Layer {
         const options = this.getOptions(),
             pickData = [];
 
-        if (options.enablePicked)
+        if (options.enablePicked) {
             for (let g = 0; g < data.length; g++) {
                 const h = this.indexToRgb(g);
                 pickData.push(h[0] / 255, h[1] / 255, h[2] / 255);
             }
-        options.enablePicked && this.pickBuffer.updateData(pickData);
-    }
+        }
 
-    onDestroy() {
-        this.buffer = this.program = null;
+        return pickData;
     }
 
     render(transferOptions) {
@@ -109,12 +101,18 @@ export default class RippleLayer extends Layer {
             matrix = transferOptions.matrix,
             isPickRender = transferOptions.isPickRender;
 
-        if (this.buffer.numberOfVertices === 0) return;
+        if (this.vertexBuffer.numberOfVertices === 0) return;
 
         const program = this.program;
 
         program.use(gl);
-        this.vertexArray.bind();
+
+        this.vao.bind({
+            gl,
+            program,
+            vertexBuffer: this.vertexBuffer,
+            vertexBuffers: this.vertexBuffers,
+        });
 
         let uniforms = this.getCommonUniforms(transferOptions);
         uniforms = Object.assign(uniforms, {
@@ -135,6 +133,6 @@ export default class RippleLayer extends Layer {
                 : gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
         }
 
-        gl.drawArrays(gl.POINTS, 0, this.buffer.numberOfVertices);
+        gl.drawArrays(gl.POINTS, 0, this.vertexBuffer.numberOfVertices);
     }
 }

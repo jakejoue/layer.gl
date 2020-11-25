@@ -1,7 +1,7 @@
 import Layer from "./Layer";
 
-import Buffer from "../core/Buffer";
-import VertexArray from "../core/VertexArray";
+import { VertexBuffer } from "../core/Buffer";
+import VertexArrayObject from "../core/VertexArrayObject";
 import Program from "../core/Program";
 
 export default class LineTripLayer extends Layer {
@@ -19,7 +19,6 @@ export default class LineTripLayer extends Layer {
     }
 
     initialize(gl) {
-        this.gl = gl;
         this.program = new Program(
             this.gl,
             {
@@ -28,26 +27,21 @@ export default class LineTripLayer extends Layer {
             this
         );
 
-        this.buffer = Buffer.createVertexBuffer({
+        this.vertexBuffer = new VertexBuffer({
             gl: gl,
+            attributes: [
+                {
+                    name: "aPos",
+                    size: 4,
+                },
+                {
+                    name: "aColor",
+                    size: 4,
+                },
+            ],
         });
-        const attributes = [
-            {
-                name: "aPos",
-                buffer: this.buffer,
-                size: 4,
-            },
-            {
-                name: "aColor",
-                buffer: this.buffer,
-                size: 4,
-            },
-        ];
-        this.vertexArray = new VertexArray({
-            gl: gl,
-            program: this.program,
-            attributes: attributes,
-        });
+
+        this.vao = new VertexArrayObject();
     }
 
     setTime(time) {
@@ -107,7 +101,7 @@ export default class LineTripLayer extends Layer {
             this.endTime = +options.endTime || endTime;
             this.time = this.startTime;
 
-            this.buffer.updateData(bufferData);
+            this.vertexBuffer.setData(bufferData);
         }
     }
 
@@ -115,10 +109,15 @@ export default class LineTripLayer extends Layer {
         const gl = transferOptions.gl,
             matrix = transferOptions.matrix;
 
-        if (this.buffer.numberOfVertices === 0) return;
+        if (this.vertexBuffer.numberOfVertices === 0) return;
 
         this.program.use(gl);
-        this.vertexArray.bind();
+
+        this.vao.bind({
+            gl,
+            program: this.program,
+            vertexBuffer: this.vertexBuffer,
+        });
 
         const uniforms = {
             u_matrix: matrix,
@@ -134,7 +133,7 @@ export default class LineTripLayer extends Layer {
             : gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
         gl.blendEquation(gl.FUNC_ADD);
 
-        gl.drawArrays(gl.LINES, 0, this.buffer.numberOfVertices);
+        gl.drawArrays(gl.LINES, 0, this.vertexBuffer.numberOfVertices);
 
         this.time += this.options.step;
         this.time > this.endTime && (this.time = this.startTime);

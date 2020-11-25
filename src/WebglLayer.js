@@ -18,7 +18,7 @@ export default class WebglLayer {
             : document.createElement("canvas");
         this.canvas = canvas;
         this.gl = options.gl ? options.gl : canvas.getContext("webgl");
-        this.gl._context = new Context(this.gl, false);
+        this.gl.context = new Context(this.gl, false);
         // 修改画布样式
         this.changeSize();
 
@@ -154,7 +154,7 @@ export default class WebglLayer {
         if (this.canvas.parentNode) {
             this.canvas.parentNode.removeChild(this.canvas);
         }
-        this.gl._context = this.gl = this.canvas = null;
+        this.gl.context = this.gl = this.canvas = null;
         this.map.destroy && this.map.destroy();
         this.map = null;
     }

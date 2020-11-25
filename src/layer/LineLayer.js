@@ -1,7 +1,7 @@
 import Layer from "./Layer";
 
-import Buffer from "../core/Buffer";
-import VertexArray from "../core/VertexArray";
+import { IndexBuffer, VertexBuffer } from "../core/Buffer";
+import VertexArrayObject from "../core/VertexArrayObject";
 import Program from "../core/Program";
 
 import LineMgr from "../data_mgr/LineMgr";
@@ -42,16 +42,22 @@ export default class LineLayer extends Layer {
     }
 
     initialize(gl) {
-        this.gl = gl;
         const options = this.getOptions(),
             defines = [];
 
         // pick
-        options.enablePicked && defines.push("PICK");
+        if (options.enablePicked) {
+            defines.push("PICK");
+        }
+
         // texture
         if (LineStyles[options.style]) {
             this.isUseTexture = true;
             defines.push("USE_TEXTURE");
+
+            const texture = LineStyles[options.style](options.styleOptions);
+            this.setOptions({ texture: texture });
+            this.loadTexture();
         }
 
         // animate
@@ -63,7 +69,7 @@ export default class LineLayer extends Layer {
         }
 
         this.program = new Program(
-            this.gl,
+            gl,
             {
                 shaderId: "line",
                 defines: defines,
@@ -71,72 +77,7 @@ export default class LineLayer extends Layer {
             this
         );
 
-        this.positionBuffer = Buffer.createVertexBuffer({
-            gl: gl,
-        });
-        this.colorBuffer = Buffer.createVertexBuffer({
-            gl: gl,
-        });
-        this.normalBuffer = Buffer.createVertexBuffer({
-            gl: gl,
-        });
-        this.indexBuffer = Buffer.createIndexBuffer({
-            gl: gl,
-        });
-        let attributes = [
-            {
-                name: "a_position",
-                buffer: this.positionBuffer,
-                size: 3,
-            },
-            {
-                name: "a_distance",
-                buffer: this.positionBuffer,
-                size: 1,
-            },
-            {
-                name: "a_width",
-                buffer: this.positionBuffer,
-                size: 1,
-            },
-            {
-                name: "a_total_distance",
-                buffer: this.positionBuffer,
-                size: 1,
-            },
-            {
-                name: "a_normal",
-                buffer: this.normalBuffer,
-                size: 3,
-            },
-            {
-                name: "a_color",
-                buffer: this.colorBuffer,
-                size: 4,
-            },
-        ];
-        attributes = attributes.concat(this.getCommonAttributes());
-
-        if (this.isUseTexture) {
-            this.uvBuffer = Buffer.createVertexBuffer({
-                gl: gl,
-            });
-            attributes.push({
-                name: "uv",
-                buffer: this.uvBuffer,
-                type: "FLOAT",
-            });
-            const texture = LineStyles[options.style](options.styleOptions);
-            this.setOptions({ texture: texture });
-            this.loadTexture();
-        }
-
-        this.vertexArray = new VertexArray({
-            gl: gl,
-            program: this.program,
-            attributes: attributes,
-            indexBuffer: this.indexBuffer,
-        });
+        this.vao = new VertexArrayObject();
     }
 
     onChanged(options, data) {
@@ -218,13 +159,85 @@ export default class LineLayer extends Layer {
                 }
             }
 
-            this.positionBuffer.updateData(complexData.positions);
-            this.normalBuffer.updateData(complexData.normals);
-            this.colorBuffer.updateData(complexData.colors);
-            this.indexBuffer.updateData(complexData.indices);
-            this.isUseTexture && this.uvBuffer.updateData(complexData.uvs);
-            options.enablePicked && this.pickBuffer.updateData(pickColors);
+            this.updateBuffer(complexData, pickColors);
         }
+    }
+
+    updateBuffer(complexData, pickColors) {
+        const gl = this.gl;
+
+        const { positions, normals, colors, uvs, indices } = complexData;
+
+        this.vertexBuffers = [
+            // positions
+            new VertexBuffer({
+                gl: gl,
+                data: positions,
+                attributes: [
+                    {
+                        name: "a_position",
+                        size: 3,
+                    },
+                    {
+                        name: "a_distance",
+                        size: 1,
+                    },
+                    {
+                        name: "a_width",
+                        size: 1,
+                    },
+                    {
+                        name: "a_total_distance",
+                        size: 1,
+                    },
+                ],
+            }),
+            // normals
+            new VertexBuffer({
+                gl: gl,
+                data: normals,
+                attributes: [
+                    {
+                        name: "a_normal",
+                        size: 3,
+                    },
+                ],
+            }),
+            // colors
+            new VertexBuffer({
+                gl: gl,
+                data: colors,
+                attributes: [
+                    {
+                        name: "a_color",
+                        size: 4,
+                    },
+                ],
+            }),
+            // pick
+            ...this.getCommonBuffers({ pickData: pickColors }),
+        ];
+
+        // uva
+        if (this.isUseTexture) {
+            this.vertexBuffers.push(
+                new VertexBuffer({
+                    gl: gl,
+                    data: uvs,
+                    attributes: [
+                        {
+                            name: "uv",
+                            size: 2,
+                        },
+                    ],
+                })
+            );
+        }
+
+        this.indexBuffer = new IndexBuffer({
+            gl: gl,
+            data: indices,
+        });
     }
 
     render(transferOptions) {
@@ -246,6 +259,7 @@ export default class LineLayer extends Layer {
             u_antialias: options.antialias,
             u_offset: options.offset,
         });
+
         // 纹理模式
         if (this.isUseTexture) {
             uniforms = Object.assign(uniforms, {
@@ -254,6 +268,7 @@ export default class LineLayer extends Layer {
                 u_sampler: this.texture,
             });
         }
+
         // 动画模式
         if (this.isAnimateLine) {
             const zoom = this.map.getZoom();
@@ -282,7 +297,12 @@ export default class LineLayer extends Layer {
         }
 
         // 绑定顶点并绘制
-        this.vertexArray.bind();
+        this.vao.bind({
+            gl,
+            program,
+            vertexBuffers: this.vertexBuffers,
+            indexBuffer: this.indexBuffer,
+        });
 
         gl.drawElements(
             gl.TRIANGLES,

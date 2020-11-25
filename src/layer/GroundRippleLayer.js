@@ -1,7 +1,7 @@
 import Layer from "./Layer";
 
-import Buffer from "../core/Buffer";
-import VertexArray from "../core/VertexArray";
+import { IndexBuffer, VertexBuffer } from "../core/Buffer";
+import VertexArrayObject from "../core/VertexArrayObject";
 import Program from "../core/Program";
 
 export default class GroundRippleLayer extends Layer {
@@ -37,30 +37,22 @@ export default class GroundRippleLayer extends Layer {
             },
             this
         );
-    }
 
-    newVao(indexData, bufferData) {
-        const gl = this.gl;
-
-        const attributes = [
-            {
-                name: "aPos",
-                buffer: Buffer.createVertexBuffer({
-                    gl: gl,
-                    data: bufferData,
-                }),
-                size: 3,
-            },
-        ];
-        return new VertexArray({
-            gl: gl,
-            program: this.program,
-            attributes: attributes,
-            indexBuffer: Buffer.createIndexBuffer({
-                gl: gl,
-                data: indexData,
-            }),
+        this.vertexBuffer = new VertexBuffer({
+            gl,
+            dynamicDraw: true,
+            attributes: [
+                {
+                    name: "aPos",
+                    size: 3,
+                },
+            ],
         });
+        this.indexBuffer = new IndexBuffer({
+            gl,
+            dynamicDraw: true,
+        });
+        this.vao = new VertexArrayObject();
     }
 
     onChanged(options, dataArray) {
@@ -118,7 +110,8 @@ export default class GroundRippleLayer extends Layer {
 
                 // 存入group
                 this.group[i] = {
-                    vao: this.newVao(indexData, bufferData),
+                    indexData,
+                    bufferData,
                     uniforms: {
                         u_ripple: {
                             center: coord,
@@ -138,13 +131,14 @@ export default class GroundRippleLayer extends Layer {
 
         if (this.group.length === 0) return;
 
-        this.program.use(gl);
+        const program = this.program;
+        program.use(gl);
 
+        // time uniforms
         const time = (new Date() - this.date) / 1e3,
             duration = this.options.duration;
         this.percent = (time % duration) / duration;
-
-        this.program.setUniforms({
+        program.setUniforms({
             u_matrix: matrix,
             u_percent: this.percent,
         });
@@ -155,15 +149,23 @@ export default class GroundRippleLayer extends Layer {
         gl.blendEquation(gl.FUNC_ADD);
 
         for (let i = 0; i < this.group.length; i++) {
-            const { vao, uniforms } = this.group[i];
-
-            vao.bind();
+            const { indexData, bufferData, uniforms } = this.group[i];
             this.program.setUniforms(uniforms);
+
+            this.indexBuffer.setData(indexData);
+            this.vertexBuffer.setData(bufferData);
+
+            this.vao.bind({
+                gl,
+                program,
+                vertexBuffer: this.vertexBuffer,
+                indexBuffer: this.indexBuffer,
+            });
 
             gl.drawElements(
                 gl.TRIANGLES,
-                vao.numberOfIndices,
-                vao.indexDatatype,
+                this.indexBuffer.numberOfIndices,
+                this.indexBuffer.indexDatatype,
                 0
             );
         }

@@ -1,7 +1,7 @@
 import Layer from "./Layer";
 
-import Buffer from "../core/Buffer";
-import VertexArray from "../core/VertexArray";
+import { IndexBuffer, VertexBuffer } from "../core/Buffer";
+import VertexArrayObject from "../core/VertexArrayObject";
 import Program from "../core/Program";
 
 // 简单圆圈图层
@@ -19,10 +19,8 @@ class SimpleCircleLayer extends Layer {
     }
 
     initialize(gl) {
-        this.gl = gl;
-
         this.program = new Program(
-            this.gl,
+            gl,
             {
                 shaderId: "circle_simple",
                 defines: this.getOptions().enablePicked ? ["PICK"] : [],
@@ -30,48 +28,12 @@ class SimpleCircleLayer extends Layer {
             this
         );
 
-        this.buffer = Buffer.createVertexBuffer({
-            gl: gl,
-        });
-        this.indexBuffer = Buffer.createIndexBuffer({
-            gl: gl,
-        });
-
-        let attributes = [
-            {
-                name: "aPos",
-                buffer: this.buffer,
-                size: 3,
-            },
-            {
-                name: "aSize",
-                buffer: this.buffer,
-                size: 1,
-            },
-            {
-                name: "aIndex",
-                buffer: this.buffer,
-                size: 1,
-            },
-            {
-                name: "aColor",
-                buffer: this.buffer,
-                size: 4,
-            },
-        ];
-        attributes = attributes.concat(this.getCommonAttributes());
-        this.vertexArray = new VertexArray({
-            gl: gl,
-            program: this.program,
-            attributes: attributes,
-            indexBuffer: this.indexBuffer,
-        });
+        this.vao = new VertexArrayObject();
     }
 
     onChanged(options, data) {
         if (this.gl) {
             this.processData(data);
-            options.enablePicked && this.parsePickData(data);
         }
     }
 
@@ -93,12 +55,13 @@ class SimpleCircleLayer extends Layer {
             0 < index && indexData.push(index - 1, index);
             indexData.push(index, index + 1, index + 2, index + 3);
         });
-        this.buffer.updateData(bufferData);
-        this.indexBuffer.updateData(indexData);
+
+        this.updateBuffer(bufferData, indexData);
     }
 
     parsePickData(data) {
         const pickData = [];
+
         if (this.getOptions().enablePicked) {
             for (let c = 0; c < data.length; c++) {
                 const g = this.indexToRgb(c);
@@ -107,8 +70,48 @@ class SimpleCircleLayer extends Layer {
                 pickData.push(g[0] / 255, g[1] / 255, g[2] / 255);
                 pickData.push(g[0] / 255, g[1] / 255, g[2] / 255);
             }
-            this.pickBuffer.updateData(pickData);
         }
+
+        return pickData;
+    }
+
+    updateBuffer(bufferData, indexData) {
+        const gl = this.gl;
+
+        this.vertexBuffers = [
+            // 顶点相关
+            new VertexBuffer({
+                gl: gl,
+                data: bufferData,
+                attributes: [
+                    {
+                        name: "aPos",
+                        size: 3,
+                    },
+                    {
+                        name: "aSize",
+                        size: 1,
+                    },
+                    {
+                        name: "aIndex",
+                        size: 1,
+                    },
+                    {
+                        name: "aColor",
+                        size: 4,
+                    },
+                ],
+            }),
+            // pick
+            ...this.getCommonBuffers({
+                pickData: this.parsePickData(this.getData()),
+            }),
+        ];
+
+        this.indexBuffer = new IndexBuffer({
+            gl: gl,
+            data: indexData,
+        });
     }
 
     render(transferOptions) {
@@ -116,10 +119,9 @@ class SimpleCircleLayer extends Layer {
             gl = transferOptions.gl,
             matrix = transferOptions.matrix;
 
-        if (this.indexBuffer.numberOfIndices === 0) return;
+        if (!this.indexBuffer || this.indexBuffer.numberOfIndices === 0) return;
 
         program.use(gl);
-        this.vertexArray.bind();
 
         const uniforms = Object.assign(
             this.getCommonUniforms(transferOptions),
@@ -131,7 +133,15 @@ class SimpleCircleLayer extends Layer {
                 uMatrix: matrix,
             }
         );
+
         program.setUniforms(uniforms);
+
+        this.vao.bind({
+            gl,
+            program,
+            vertexBuffers: this.vertexBuffers,
+            indexBuffer: this.indexBuffer,
+        });
 
         gl.drawElements(
             gl.TRIANGLE_STRIP,
@@ -164,10 +174,8 @@ class AnimateCircleLayer extends Layer {
     }
 
     initialize(gl) {
-        this.gl = gl;
-
         this.program = new Program(
-            this.gl,
+            gl,
             {
                 shaderId:
                     this.options.type === "wave"
@@ -178,51 +186,7 @@ class AnimateCircleLayer extends Layer {
             this
         );
 
-        this.buffer = Buffer.createVertexBuffer({
-            gl: gl,
-        });
-        this.indexBuffer = Buffer.createIndexBuffer({
-            gl: gl,
-        });
-        let attributes = [
-            {
-                name: "aPos",
-                buffer: this.buffer,
-                size: 3,
-            },
-            {
-                name: "aSize",
-                buffer: this.buffer,
-                size: 1,
-            },
-            {
-                name: "aIndex",
-                buffer: this.buffer,
-                size: 1,
-            },
-            {
-                name: "aColor",
-                buffer: this.buffer,
-                size: 4,
-            },
-            {
-                name: "aRadius",
-                buffer: this.buffer,
-                size: 1,
-            },
-            {
-                name: "aStartTime",
-                buffer: this.buffer,
-                size: 1,
-            },
-        ];
-        attributes = attributes.concat(this.getCommonAttributes());
-        this.vertexArray = new VertexArray({
-            gl: gl,
-            program: this.program,
-            attributes: attributes,
-            indexBuffer: this.indexBuffer,
-        });
+        this.vao = new VertexArrayObject();
     }
 
     onChanged(options, data) {
@@ -262,12 +226,13 @@ class AnimateCircleLayer extends Layer {
             0 < index && indexData.push(index - 1, index);
             indexData.push(index, index + 1, index + 2, index + 3);
         });
-        this.buffer.updateData(bufferData);
-        this.indexBuffer.updateData(indexData);
+
+        this.updateBuffer(bufferData, indexData);
     }
 
     parsePickData(data) {
         const pickData = [];
+
         if (this.getOptions().enablePicked) {
             for (let c = 0; c < data.length; c++) {
                 const g = this.indexToRgb(c);
@@ -276,8 +241,56 @@ class AnimateCircleLayer extends Layer {
                 pickData.push(g[0] / 255, g[1] / 255, g[2] / 255);
                 pickData.push(g[0] / 255, g[1] / 255, g[2] / 255);
             }
-            this.pickBuffer.updateData(pickData);
         }
+
+        return pickData;
+    }
+
+    updateBuffer(bufferData, indexData) {
+        const gl = this.gl;
+
+        this.vertexBuffers = [
+            // 顶点相关
+            new VertexBuffer({
+                gl: gl,
+                data: bufferData,
+                attributes: [
+                    {
+                        name: "aPos",
+                        size: 3,
+                    },
+                    {
+                        name: "aSize",
+                        size: 1,
+                    },
+                    {
+                        name: "aIndex",
+                        size: 1,
+                    },
+                    {
+                        name: "aColor",
+                        size: 4,
+                    },
+                    {
+                        name: "aRadius",
+                        size: 1,
+                    },
+                    {
+                        name: "aStartTime",
+                        size: 1,
+                    },
+                ],
+            }),
+            // pick
+            ...this.getCommonBuffers({
+                pickData: this.parsePickData(this.getData()),
+            }),
+        ];
+
+        this.indexBuffer = new IndexBuffer({
+            gl: gl,
+            data: indexData,
+        });
     }
 
     render(transferOptions) {
@@ -285,10 +298,9 @@ class AnimateCircleLayer extends Layer {
             gl = transferOptions.gl,
             matrix = transferOptions.matrix;
 
-        if (this.indexBuffer.numberOfIndices === 0) return;
+        if (!this.indexBuffer || this.indexBuffer.numberOfIndices === 0) return;
 
         program.use(gl);
-        this.vertexArray.bind();
 
         const zoomUnit = this.map.getZoomUnits();
         Object.assign(this.uniforms, this.getCommonUniforms(transferOptions), {
@@ -301,6 +313,13 @@ class AnimateCircleLayer extends Layer {
             uMatrix: matrix,
         });
         program.setUniforms(this.uniforms);
+
+        this.vao.bind({
+            gl,
+            program,
+            vertexBuffers: this.vertexBuffers,
+            indexBuffer: this.indexBuffer,
+        });
 
         gl.enable(gl.BLEND);
         gl.blendEquation(gl.FUNC_ADD);

@@ -1,5 +1,5 @@
 import CommonLayer from "./CommonLayer";
-import Buffer from "../core/Buffer";
+import { VertexBuffer } from "../core/Buffer";
 import Color from "color";
 
 import { translateTransferOptions } from "../helper/offset";
@@ -26,26 +26,22 @@ export default class Layer extends CommonLayer {
         this.gl = gl;
     }
 
-    // 获取公共attribute配置项
-    getCommonAttributes(options) {
-        const commonAttris = [];
+    // 公共buffer
+    getCommonBuffers(options) {
+        const commonBuffers = [];
 
         // 初始化pick相关信息
         if (this.getOptions().enablePicked) {
-            this.pickBuffer = Buffer.createVertexBuffer({
-                gl: this.gl,
-                data: options.pickData,
-            });
-            commonAttris.push({
-                name: "aPickColor",
-                buffer: this.pickBuffer,
-                size: 3,
-                type: "FLOAT",
-                stride: 12,
-                offset: 0,
-            });
+            commonBuffers.push(
+                new VertexBuffer({
+                    gl: this.gl,
+                    data: options.pickData,
+                    attributes: [{ name: "aPickColor", size: 3 }],
+                })
+            );
         }
-        return commonAttris;
+
+        return commonBuffers;
     }
 
     // pick相关顶点属性

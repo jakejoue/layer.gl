@@ -1,7 +1,7 @@
 import Layer from "./Layer";
 
-import Buffer from "../core/Buffer";
-import VertexArray from "../core/VertexArray";
+import { VertexBuffer } from "../core/Buffer";
+import VertexArrayObject from "../core/VertexArrayObject";
 import Program from "../core/Program";
 
 const PointShapeTypes = {
@@ -24,42 +24,36 @@ export default class PointLayer extends Layer {
     }
 
     initialize(gl) {
-        this.gl = gl;
         // 构造program
         this.program = new Program(
-            this.gl,
+            gl,
             {
                 shaderId: "point",
                 defines: this.getOptions().enablePicked ? ["PICK"] : [],
             },
             this
         );
+
         // 顶点相关数据
-        this.buffer = Buffer.createVertexBuffer({
+        this.vertexBuffer = new VertexBuffer({
             gl: gl,
+            attributes: [
+                {
+                    name: "aPos",
+                    size: 3,
+                },
+                {
+                    name: "aColor",
+                    size: 4,
+                },
+                {
+                    name: "aSize",
+                    size: 1,
+                },
+            ],
         });
-        const attributes = [
-            {
-                name: "aPos",
-                buffer: this.buffer,
-                size: 3,
-            },
-            {
-                name: "aColor",
-                buffer: this.buffer,
-                size: 4,
-            },
-            {
-                name: "aSize",
-                buffer: this.buffer,
-                size: 1,
-            },
-        ];
-        this.vertexArray = new VertexArray({
-            gl: gl,
-            program: this.program,
-            attributes: [...attributes, ...this.getCommonAttributes()],
-        });
+
+        this.vao = new VertexArrayObject();
     }
 
     onChanged(options, dataArray) {
@@ -82,15 +76,18 @@ export default class PointLayer extends Layer {
                     arrayData.push(size * window.devicePixelRatio);
                 }
             }
-            this.buffer.updateData(new Float32Array(arrayData));
 
-            options.enablePicked && this.parsePickData(dataArray);
+            this.vertexBuffer.setData(arrayData);
+            this.vertexBuffers = this.getCommonBuffers({
+                pickData: this.parsePickData(dataArray),
+            });
         }
     }
 
     parsePickData(arrayData) {
         const options = this.getOptions(),
             dataArray = [];
+
         if (options.enablePicked) {
             for (let i = 0; i < arrayData.length; i++) {
                 const k = this.indexToRgb(i);
@@ -102,13 +99,7 @@ export default class PointLayer extends Layer {
                 }
             }
         }
-        if (options.enablePicked) {
-            this.pickBuffer.updateData(dataArray);
-        }
-    }
-
-    onDestroy() {
-        this.gl = this.program = this.buffer = this.vertexArray = null;
+        return dataArray;
     }
 
     render(transferOptions) {
@@ -116,10 +107,16 @@ export default class PointLayer extends Layer {
             matrix = transferOptions.matrix,
             isPickRender = transferOptions.isPickRender;
 
-        if (this.buffer.numberOfVertices === 0) return;
+        if (this.vertexBuffer.numberOfVertices === 0) return;
 
         this.program.use(gl);
-        this.vertexArray.bind();
+
+        this.vao.bind({
+            gl,
+            program: this.program,
+            vertexBuffer: this.vertexBuffer,
+            vertexBuffers: this.vertexBuffers,
+        });
 
         const uniforms = Object.assign(
             this.getCommonUniforms(transferOptions),
@@ -143,6 +140,7 @@ export default class PointLayer extends Layer {
                 gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
             }
         }
-        gl.drawArrays(gl.POINTS, 0, this.buffer.numberOfVertices);
+
+        gl.drawArrays(gl.POINTS, 0, this.vertexBuffer.numberOfVertices);
     }
 }

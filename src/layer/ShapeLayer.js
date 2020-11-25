@@ -1,7 +1,7 @@
 import Layer from "./Layer";
 
-import Buffer from "../core/Buffer";
-import VertexArray from "../core/VertexArray";
+import { IndexBuffer, VertexBuffer } from "../core/Buffer";
+import VertexArrayObject from "../core/VertexArrayObject";
 import Program from "../core/Program";
 
 import { loadTextureImage } from "../helper/texture";
@@ -60,9 +60,11 @@ export default class ShapeLayer extends Layer {
         );
 
         this.initializeTime = new Date();
+
+        this.vao = new VertexArrayObject();
     }
 
-    updateVao(dataMgr, dataDirty) {
+    updateBuffer(dataMgr) {
         const gl = this.gl;
 
         const {
@@ -74,96 +76,77 @@ export default class ShapeLayer extends Layer {
             pickColorVertex,
         } = dataMgr.outBuilding3d;
 
-        // 如果数据没有更新，且已经存在vao
-        if (!dataDirty && this.vao) {
-            this.vertexBuffer.updateData(vertex);
-            this.colorBuffer.updateData(color);
-            this.heightBuffer.updateData(height);
-            this.textureBuffer.updateData(texture);
-            this.indexBuffer.updateData(index);
-
-            if (this.options.enablePicked) {
-                this.pickBuffer.updateData(pickColorVertex);
-            }
-
-            return;
-        }
-
-        // 销毁旧的vao
-        if (this.vao) {
-            this.vao.destroy();
-            this.vao = null;
-        }
-
-        // 生成新的缓冲区和vao
-        this.vertexBuffer = Buffer.createVertexBuffer({
-            gl: gl,
-            data: vertex,
-        });
-        this.colorBuffer = Buffer.createVertexBuffer({
-            gl: gl,
-            data: color,
-        });
-        this.heightBuffer = Buffer.createVertexBuffer({
-            gl: gl,
-            data: height,
-        });
-        this.textureBuffer = Buffer.createVertexBuffer({
-            gl: gl,
-            data: texture,
-        });
-        this.indexBuffer = Buffer.createIndexBuffer({
-            gl: gl,
-            data: index,
-        });
-
-        const attributes = [
-            {
-                name: "a_pos",
-                buffer: this.vertexBuffer,
-                size: 4,
-            },
-            {
-                name: "a_normal",
-                buffer: this.vertexBuffer,
-                size: 3,
-            },
-            {
-                name: "a_color",
-                buffer: this.colorBuffer,
-                size: 4,
-            },
-            {
-                name: "a_pre_color",
-                buffer: this.colorBuffer,
-                size: 4,
-            },
-            {
-                name: "a_height",
-                buffer: this.heightBuffer,
-                size: 1,
-            },
-            {
-                name: "a_pre_height",
-                buffer: this.heightBuffer,
-                size: 1,
-            },
-            {
-                name: "a_texture_coord",
-                buffer: this.textureBuffer,
-                size: 2,
-            },
+        this.vertexBuffers = [
+            // point
+            new VertexBuffer({
+                gl: gl,
+                data: vertex,
+                attributes: [
+                    {
+                        name: "a_pos",
+                        buffer: this.vertexBuffer,
+                        size: 4,
+                    },
+                    {
+                        name: "a_normal",
+                        buffer: this.vertexBuffer,
+                        size: 3,
+                    },
+                ],
+            }),
+            // color
+            new VertexBuffer({
+                gl: gl,
+                data: color,
+                attributes: [
+                    {
+                        name: "a_color",
+                        buffer: this.colorBuffer,
+                        size: 4,
+                    },
+                    {
+                        name: "a_pre_color",
+                        buffer: this.colorBuffer,
+                        size: 4,
+                    },
+                ],
+            }),
+            // height
+            new VertexBuffer({
+                gl: gl,
+                data: height,
+                attributes: [
+                    {
+                        name: "a_height",
+                        buffer: this.heightBuffer,
+                        size: 1,
+                    },
+                    {
+                        name: "a_pre_height",
+                        buffer: this.heightBuffer,
+                        size: 1,
+                    },
+                ],
+            }),
+            // texure
+            new VertexBuffer({
+                gl: gl,
+                data: texture,
+                attributes: [
+                    {
+                        name: "a_texture_coord",
+                        buffer: this.textureBuffer,
+                        size: 2,
+                    },
+                ],
+            }),
+            // pick
+            ...this.getCommonBuffers(pickColorVertex),
         ];
 
-        this.vao = new VertexArray({
+        this.indexBuffer = new IndexBuffer({
             gl: gl,
-            program: this.program,
-            attributes: attributes.concat(
-                this.getCommonAttributes({
-                    pickData: pickColorVertex,
-                })
-            ),
-            indexBuffer: this.indexBuffer,
+            data: index,
         });
     }
 
@@ -171,12 +154,10 @@ export default class ShapeLayer extends Layer {
         if (this.gl) {
             this.loadTextureTime && clearTimeout(this.loadTextureTime);
 
-            const dataDirty = this._dataDirty;
-
             this.loadTextureTime = setTimeout(() => {
                 this.loadTexture(() => {
                     this.dataMgr.parseData(dataArray);
-                    this.updateVao(this.dataMgr, dataDirty);
+                    this.updateBuffer(this.dataMgr);
 
                     this.dataTime = new Date();
                     this.webglLayer.render();
@@ -189,7 +170,7 @@ export default class ShapeLayer extends Layer {
         const gl = transferOptions.gl,
             matrix = transferOptions.matrix;
 
-        if (this.vao && this.vao.numberOfIndices > 0) {
+        if (this.indexBuffer && this.indexBuffer.numberOfIndices > 0) {
             const options = this.getOptions();
 
             const program = this.program;
@@ -265,12 +246,17 @@ export default class ShapeLayer extends Layer {
                     })
                 );
 
-                this.vao.bind();
+                this.vao.bind({
+                    gl,
+                    program,
+                    vertexBuffers: this.vertexBuffers,
+                    indexBuffer: this.indexBuffer,
+                });
 
                 gl.drawElements(
                     gl.TRIANGLES,
-                    this.vao.numberOfIndices,
-                    this.vao.indexDatatype,
+                    this.indexBuffer.numberOfIndices,
+                    this.indexBuffer.indexDatatype,
                     0
                 );
             }

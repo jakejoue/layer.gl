@@ -12,8 +12,8 @@ function getExtension(gl, names) {
 
 export default class Context {
     constructor(gl, webgl2 = false) {
-        this._gl = gl;
-        this._webgl2 = webgl2;
+        this.gl = gl;
+        this.webgl2 = webgl2;
 
         // Query and initialize extensions
         this._elementIndexUint = !!getExtension(gl, ["OES_element_index_uint"]);
@@ -38,13 +38,13 @@ export default class Context {
             const self = this;
 
             glCreateVertexArray = function () {
-                return self._gl.createVertexArray();
+                return self.gl.createVertexArray();
             };
             glBindVertexArray = function (vao) {
-                self._gl.bindVertexArray(vao);
+                self.gl.bindVertexArray(vao);
             };
             glDeleteVertexArray = function (vao) {
-                self._gl.deleteVertexArray(vao);
+                self.gl.deleteVertexArray(vao);
             };
 
             glDrawElementsInstanced = function (
@@ -150,19 +150,19 @@ export default class Context {
     }
 
     get elementIndexUint() {
-        return this._elementIndexUint || this._webgl2;
+        return this._elementIndexUint || this.webgl2;
     }
 
     get vertexArrayObject() {
-        return this._vertexArrayObject || this._webgl2;
+        return this._vertexArrayObject || this.webgl2;
     }
 
     get instancedArrays() {
-        return this._instancedArrays || this._webgl2;
+        return this._instancedArrays || this.webgl2;
     }
 
     get drawBuffers() {
-        return this._drawBuffers || this._webgl2;
+        return this._drawBuffers || this.webgl2;
     }
 
     unbindVAO() {

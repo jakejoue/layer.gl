@@ -1,7 +1,7 @@
 import Layer from "./Layer";
 
-import Buffer from "../core/Buffer";
-import VertexArray from "../core/VertexArray";
+import { VertexBuffer } from "../core/Buffer";
+import VertexArrayObject from "../core/VertexArrayObject";
 import Program from "../core/Program";
 
 export default class SimpleLineLayer extends Layer {
@@ -10,9 +10,8 @@ export default class SimpleLineLayer extends Layer {
     }
 
     initialize(gl) {
-        this.gl = gl;
         this.program = new Program(
-            this.gl,
+            gl,
             {
                 shaderId: "simple_line",
                 defines: this.getOptions().useDash ? ["DASH"] : "",
@@ -20,26 +19,21 @@ export default class SimpleLineLayer extends Layer {
             this
         );
 
-        this.buffer = Buffer.createVertexBuffer({
+        this.vertexBuffer = new VertexBuffer({
             gl: gl,
-        });
-
-        this.vertexArray = new VertexArray({
-            gl: gl,
-            program: this.program,
             attributes: [
                 {
                     name: "aPos",
-                    buffer: this.buffer,
                     size: 3,
                 },
                 {
                     name: "aColor",
-                    buffer: this.buffer,
                     size: 4,
                 },
             ],
         });
+
+        this.vao = new VertexArrayObject();
     }
 
     onChanged(options, data) {
@@ -97,7 +91,7 @@ export default class SimpleLineLayer extends Layer {
                 } else func(coords, color);
             }
 
-            this.buffer.updateData(arrayData);
+            this.vertexBuffer.setData(arrayData);
         }
     }
 
@@ -105,12 +99,17 @@ export default class SimpleLineLayer extends Layer {
         const gl = transferOptions.gl,
             matrix = transferOptions.matrix;
 
-        if (this.buffer.numberOfVertices === 0) return;
+        if (this.vertexBuffer.numberOfVertices === 0) return;
 
         const program = this.program;
         program.use(gl);
 
-        this.vertexArray.bind();
+        this.vao.bind({
+            gl,
+            program,
+            vertexBuffer: this.vertexBuffer,
+        });
+
         program.setUniforms({
             u_matrix: matrix,
         });
@@ -125,7 +124,7 @@ export default class SimpleLineLayer extends Layer {
             gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
         }
 
-        gl.drawArrays(gl.LINES, 0, this.buffer.numberOfVertices);
+        gl.drawArrays(gl.LINES, 0, this.vertexBuffer.numberOfVertices);
         gl.disable(gl.BLEND);
     }
 }

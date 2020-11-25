@@ -1,147 +1,224 @@
-import WebGLConstants from "./WebGLConstants";
 import ComponentDatatype from "./ComponentDatatype";
 import IndexDatatype from "./IndexDatatype";
 
-class Buffer {
-    constructor(options) {
-        this.gl = options.gl;
-        this.target = options.target;
-        this.usage = options.usage;
+function addAttribute(attributes, attribute, buffer) {
+    const { name, size = 1, normalize = false } = attribute;
 
-        this.buffer = this.gl.createBuffer();
+    if (!name) throw new Error("attribute needs name");
 
-        // 缓冲区数组大小
-        this.sizeInBytes = options.sizeInBytes || 0;
+    // 每行数据长度
+    if (buffer.stride === undefined) {
+        buffer.stride = 0;
     }
 
-    _setData(data) {
-        // 如果存在data
+    // 构建新的属性
+    const attr = {
+        name: name,
+        size: size,
+        offset: buffer.stride,
+        normalize,
+    };
+    // 总长度
+    buffer.stride += size * buffer.bytesPerIndex;
+
+    attributes.push(attr);
+}
+
+export class IndexBuffer {
+    constructor({
+        gl,
+        data,
+        sizeInBytes = 0,
+        indexDatatype = IndexDatatype.UNSIGNED_INT,
+        dynamicDraw = false,
+    }) {
+        this.gl = gl;
+        this.buffer = gl.createBuffer();
+        this.dynamicDraw = Boolean(dynamicDraw);
+        this.sizeInBytes = sizeInBytes;
+
+        // 定义其他变量
+        Object.defineProperties(this, {
+            indexDatatype: {
+                get: function () {
+                    return indexDatatype;
+                },
+            },
+        });
+
+        this.setData(data);
+    }
+
+    get bytesPerIndex() {
+        return IndexDatatype.getSizeInBytes(this.indexDatatype);
+    }
+
+    get numberOfIndices() {
+        return this.sizeInBytes / this.bytesPerIndex;
+    }
+
+    getTypeArray(data) {
+        return IndexDatatype.createTypedArray(this.indexDatatype, data);
+    }
+
+    bind() {
+        const gl = this.gl;
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.buffer);
+    }
+
+    setData(data) {
+        const gl = this.gl;
+
         let typeArray;
         if (data) {
             typeArray = this.getTypeArray(data);
             this.sizeInBytes = typeArray.byteLength;
         }
 
-        this.gl._context.unbindVAO();
-
-        // 初次绑定
+        gl.context.unbindVAO();
         this.bind();
-        this.gl.bufferData(
-            this.target,
+
+        gl.bufferData(
+            gl.ELEMENT_ARRAY_BUFFER,
             typeArray ? typeArray : this.sizeInBytes,
-            this.usage
+            this.dynamicDraw ? gl.DYNAMIC_DRAW : gl.STATIC_DRAW
         );
-        this.unBind();
     }
 
-    updateData(typedArray) {
-        typedArray = this.getTypeArray(typedArray);
+    updateData(data) {
+        const gl = this.gl;
 
-        this.gl._context.unbindVAO();
+        if (!this.dynamicDraw) throw new Error();
 
+        gl.context.unbindVAO();
         this.bind();
-        this.gl.bufferSubData(this.target, 0, typedArray);
-        this.unBind();
-    }
-
-    bind(gl) {
-        gl = gl || this.gl;
-        gl.bindBuffer(this.target, this.buffer);
-    }
-
-    unBind(gl) {
-        gl = gl || this.gl;
-        gl.bindBuffer(this.target, null);
+        gl.bufferSubData(gl.ELEMENT_ARRAY_BUFFER, 0, this.getTypeArray(data));
     }
 
     destroy() {
-        this.gl.deleteBuffer(this.buffer, null);
-
-        this.gl = this.buffer = null;
+        const gl = this.gl;
+        if (this.buffer) {
+            gl.deleteBuffer(this.buffer);
+            delete this.buffer;
+        }
     }
 }
 
-Buffer.createVertexBuffer = function (options) {
-    const buffer = new Buffer({
-        gl: options.gl,
-        target: WebGLConstants.ARRAY_BUFFER,
-        usage: options.usage || WebGLConstants.STATIC_DRAW,
-        sizeInBytes: options.sizeInBytes,
-    });
+export class VertexBuffer {
+    constructor({
+        gl,
+        data,
+        attributes,
+        sizeInBytes = 0,
+        componentDatatype = ComponentDatatype.FLOAT,
+        dynamicDraw = false,
+    }) {
+        this.gl = gl;
+        this.buffer = gl.createBuffer();
+        this.dynamicDraw = Boolean(dynamicDraw);
+        this.sizeInBytes = sizeInBytes;
 
-    const componentDatatype =
-        options.componentDatatype || ComponentDatatype.FLOAT;
-    const bytesPerIndex = ComponentDatatype.getSizeInBytes(componentDatatype);
-
-    // 定义其他属性
-    buffer.stride = 0;
-
-    Object.defineProperties(buffer, {
-        componentDatatype: {
-            get() {
-                return componentDatatype;
+        // 定义其他变量
+        Object.defineProperties(this, {
+            componentDatatype: {
+                get: function () {
+                    return componentDatatype;
+                },
             },
-        },
-        bytesPerIndex: {
-            get: function () {
-                return bytesPerIndex;
-            },
-        },
-        numberOfVertices: {
-            get: function () {
-                if (this.stride > 0) {
-                    return this.sizeInBytes / this.stride;
-                }
-                return 0;
-            },
-        },
-    });
-    buffer.getTypeArray = function (data) {
-        return ComponentDatatype.createTypedArray(componentDatatype, data);
-    };
+        });
 
-    // 初始化buffer
-    buffer._setData(options.data);
+        // 顶点相关属性
+        this.stride = 0;
+        this.vaAttributes = [];
 
-    return buffer;
-};
+        for (let i = 0; i < attributes.length; i++) {
+            addAttribute(this.vaAttributes, attributes[i], this);
+        }
 
-Buffer.createIndexBuffer = function (options) {
-    const buffer = new Buffer({
-        gl: options.gl,
-        target: WebGLConstants.ELEMENT_ARRAY_BUFFER,
-        usage: options.usage || WebGLConstants.STATIC_DRAW,
-        sizeInBytes: options.sizeInBytes,
-    });
+        this.setData(data);
+    }
 
-    const indexDatatype = options.indexDatatype || IndexDatatype.UNSIGNED_INT;
-    const bytesPerIndex = IndexDatatype.getSizeInBytes(indexDatatype);
+    get bytesPerIndex() {
+        return ComponentDatatype.getSizeInBytes(this.componentDatatype);
+    }
 
-    Object.defineProperties(buffer, {
-        indexDatatype: {
-            get: function () {
-                return indexDatatype;
-            },
-        },
-        bytesPerIndex: {
-            get: function () {
-                return bytesPerIndex;
-            },
-        },
-        numberOfIndices: {
-            get: function () {
-                return this.sizeInBytes / bytesPerIndex;
-            },
-        },
-    });
-    buffer.getTypeArray = function (data) {
-        return IndexDatatype.createTypedArray(indexDatatype, data);
-    };
+    get numberOfVertices() {
+        if (this.stride > 0) {
+            return this.sizeInBytes / this.stride;
+        }
+        return 0;
+    }
 
-    // 初始化buffer
-    buffer._setData(options.data);
+    getTypeArray(data) {
+        return ComponentDatatype.createTypedArray(this.componentDatatype, data);
+    }
 
-    return buffer;
-};
+    bind() {
+        const gl = this.gl;
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
+    }
 
-export default Buffer;
+    setData(data) {
+        const gl = this.gl;
+
+        // 判断是使用数组还是字节长度
+        let typeArray;
+        if (data) {
+            typeArray = this.getTypeArray(data);
+            this.sizeInBytes = typeArray.byteLength;
+        }
+
+        this.bind();
+
+        gl.bufferData(
+            gl.ARRAY_BUFFER,
+            typeArray ? typeArray : this.sizeInBytes,
+            this.dynamicDraw ? gl.DYNAMIC_DRAW : gl.STATIC_DRAW
+        );
+    }
+
+    updateData(data) {
+        const gl = this.gl;
+
+        this.bind();
+        gl.bufferSubData(gl.ARRAY_BUFFER, 0, this.getTypeArray(data));
+    }
+
+    enableAttributes(gl, program) {
+        for (let j = 0; j < this.vaAttributes.length; j++) {
+            const member = this.vaAttributes[j];
+            const attribIndex = program.attributes[member.name];
+            if (attribIndex !== undefined) {
+                gl.enableVertexAttribArray(attribIndex);
+            }
+        }
+    }
+
+    setVertexAttribPointers(gl, program) {
+        for (let j = 0; j < this.vaAttributes.length; j++) {
+            const member = this.vaAttributes[j];
+            const attribIndex = program.attributes[member.name];
+
+            if (attribIndex !== undefined) {
+                gl.vertexAttribPointer(
+                    attribIndex,
+                    member.size,
+                    this.componentDatatype,
+                    member.normalize,
+                    this.stride,
+                    member.offset
+                );
+            }
+        }
+    }
+
+    destroy() {
+        const gl = this.gl;
+        if (this.buffer) {
+            gl.deleteBuffer(this.buffer);
+            delete this.buffer;
+        }
+    }
+}
+
+export default class Buffer {}
