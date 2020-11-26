@@ -3,7 +3,7 @@ import Layer from "./Layer";
 import { IndexBuffer, VertexBuffer } from "../core/Buffer";
 import VertexArrayObject from "../core/VertexArrayObject";
 import Program from "../core/Program";
-import tesselateSphere from "../geometies/sphere";
+import SphereGeometry from "../geometies/SphereGeometry";
 
 import { mat4 } from "gl-matrix";
 
@@ -79,10 +79,7 @@ export default class ShieldLayer extends Layer {
                 const point = this.normizedPoint([coord[0], coord[1], radius]);
 
                 // 构建半圆球
-                const {
-                    attributes: { POSITION },
-                    indices,
-                } = tesselateSphere({
+                const geometry = new SphereGeometry({
                     nlat: Math.floor(Math.max(radius, 20)),
                     nlong: Math.floor(Math.max(radius, 20) * 2),
                     endLong: Math.PI,
@@ -90,8 +87,8 @@ export default class ShieldLayer extends Layer {
 
                 // 存入多边形
                 this.group.push({
-                    indexData: indices.value,
-                    bufferData: POSITION.value,
+                    indexData: geometry.indices.value,
+                    bufferData: geometry.getAttribute("POSITION").value,
                     color: this.normizedColor(this.getValue("color", data)),
                     point: [point[0], point[1], 0],
                     scale: point[2],

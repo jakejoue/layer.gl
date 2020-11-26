@@ -19,19 +19,24 @@ export default class SphereGeometry extends Geometry {
 // (http://www.opensource.org/licenses/bsd-license.php).
 /* eslint-disable max-statements, complexity */
 function tesselateSphere(props) {
-    const { nlat = 10, nlong = 10 } = props;
+    const {
+        nlat = 10,
+        nlong = 10,
+        startLat = 0,
+        endLat = Math.PI,
+        startLong = 0,
+        endLong = 2 * Math.PI,
+    } = props;
+
     let { radius = 1 } = props;
 
-    const startLat = 0;
-    const endLat = Math.PI;
     const latRange = endLat - startLat;
-    const startLong = 0;
-    const endLong = 2 * Math.PI;
     const longRange = endLong - startLong;
     const numVertices = (nlat + 1) * (nlong + 1);
 
     if (typeof radius === "number") {
         const value = radius;
+        // eslint-disable-next-line no-unused-vars
         radius = (n1, n2, n3, u, v) => value;
     }
 

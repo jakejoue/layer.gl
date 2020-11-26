@@ -53,6 +53,10 @@ export default class Geometry {
             : this.attributes;
     }
 
+    getAttribute(name) {
+        return this.attributes[name];
+    }
+
     // PRIVATE
 
     _print(attributeName) {
