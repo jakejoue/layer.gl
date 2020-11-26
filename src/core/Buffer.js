@@ -1,6 +1,8 @@
 import ComponentDatatype from "./ComponentDatatype";
 import IndexDatatype from "./IndexDatatype";
 
+import assert from "../helper/assert";
+
 function addAttribute(attributes, attribute, buffer) {
     const { name, size = 1, normalize = false } = attribute;
 
@@ -88,7 +90,7 @@ export class IndexBuffer {
     updateData(data, offset = 0) {
         const gl = this.gl;
 
-        if (!this.dynamicDraw) throw new Error();
+        assert(this.dynamicDraw);
 
         gl.context.unbindVAO();
         this.bind();

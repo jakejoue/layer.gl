@@ -6,6 +6,9 @@ export { default as utilCityCenter } from "./src/utils/cityCenter";
 // 入口
 export { default as View } from "./src/View";
 
+// 多边形
+export * as geometry from "./src/geometies/index";
+
 // 图层
 export { default as PointLayer } from "./src/layer/PointLayer";
 export { default as RippleLayer } from "./src/layer/RippleLayer";
