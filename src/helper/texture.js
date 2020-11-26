@@ -9,20 +9,21 @@ export function getContext(gl) {
                 premultipliedAlpha: false,
             });
             if (ctx) break;
+        // eslint-disable-next-line no-empty
         } catch (d) {}
     return ctx;
 }
 
 export function createTexture(gl, texture, param) {
-    param = Object.assign(
-        {
-            TEXTURE_MAG_FILTER: "LINEAR",
-            TEXTURE_MIN_FILTER: "LINEAR",
-            TEXTURE_WRAP_S: "REPEAT",
-            TEXTURE_WRAP_T: "REPEAT",
-        },
-        param
-    );
+    param = {
+        TEXTURE_MAG_FILTER: "LINEAR",
+        TEXTURE_MIN_FILTER: "LINEAR",
+        TEXTURE_WRAP_S: "REPEAT",
+        TEXTURE_WRAP_T: "REPEAT",
+
+        ...param,
+    };
+
     const webglTexture = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, webglTexture);
 

@@ -7,8 +7,8 @@ export default class View {
 
         this.options = {
             autoUpdate: true,
+            ...options
         };
-        Object.assign(this.options, options);
 
         // 联合渲染对象（外部map）
         this.webglLayer = new WebglLayer(options.map, this.options);

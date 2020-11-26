@@ -91,6 +91,7 @@ function getMapBoxGLMap(map) {
             listeners.forEach((l) => {
                 map.off(l.type, l.handler);
             });
+            // eslint-disable-next-line no-func-assign
             map = listen = listeners = null;
         },
     };

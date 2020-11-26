@@ -3,7 +3,7 @@ import Layer from "./Layer";
 import { IndexBuffer, VertexBuffer } from "../core/Buffer";
 import VertexArrayObject from "../core/VertexArrayObject";
 import Program from "../core/Program";
-import tesselateSphere from "../geometry/sphere";
+import tesselateSphere from "../geometies/sphere";
 
 import { mat4 } from "gl-matrix";
 

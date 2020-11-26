@@ -1,6 +1,6 @@
 import Layer from "./Layer";
 
-import { IndexBuffer, VertexBuffer } from "../core/Buffer";
+import { VertexBuffer } from "../core/Buffer";
 import VertexArrayObject from "../core/VertexArrayObject";
 import Program from "../core/Program";
 import { loadTextureImage } from "../helper/texture";

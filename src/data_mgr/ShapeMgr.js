@@ -254,7 +254,7 @@ export default class ShapeMgr {
                 if (i === xy_s.length - 2) j = 0;
                 const n_x = xy_s[j],
                     n_y = xy_s[j + 1];
-                const n_p = (y = [n_x, n_y, z_s[i / 2], 0]),
+                const n_p = [n_x, n_y, z_s[i / 2], 0],
                     n_t_p = [n_x, n_y, z_s[i / 2], 1];
 
                 const ll = Math.sqrt(

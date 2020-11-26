@@ -43,7 +43,7 @@ export default class StateManager {
     setState(state) {
         const gl = this.gl,
             currentState = this.getCurrentState();
-        state = Object.assign(this.getDefaultState(), state);
+        state = { ...this.getDefaultState(), ...state };
 
         if (state.blend !== currentState.blend) {
             state.blend ? gl.enable(gl.BLEND) : gl.disable(gl.BLEND);
