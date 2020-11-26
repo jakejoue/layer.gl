@@ -16,6 +16,8 @@ precision highp float;
 
 #endif
 
+#define StructGeometricContext
+
 // 定义geometry结构体
 struct GeometricContext {
 	vec3 position;

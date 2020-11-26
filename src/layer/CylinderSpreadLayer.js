@@ -3,48 +3,38 @@ import Layer from "./Layer";
 import { IndexBuffer, VertexBuffer } from "../core/Buffer";
 import VertexArrayObject from "../core/VertexArrayObject";
 import Program from "../core/Program";
-import SphereGeometry from "../geometies/SphereGeometry";
+import CylinderGeometry from "../geometies/CylinderGeometry";
 
 import { mat4 } from "gl-matrix";
 
-export default class ShieldLayer extends Layer {
+export default class CylinderSpreadLayer extends Layer {
     constructor(options) {
         super(options);
         this.group = [];
+
+        // 表示该图层是个effect图层
+        this.effectType = "NUM_CYLINDER_SPREADS";
+        this.effectUniformName = "cylinderSpreads";
+
+        this.percent = 0;
+        this.date = new Date();
+        this.autoUpdate = true;
     }
 
     getDefaultOptions() {
         return {
             color: "rgba(25, 25, 250, 1)",
+            height: 5,
+            duration: 2,
             radius: 50,
         };
     }
 
     initialize(gl) {
-        // 构造program
         this.program = new Program(
             gl,
             {
-                vertexShader: `
-                attribute vec3 aPos;
-                uniform mat4 uMatrix;
-                uniform mat4 uObjMatrix;
-                varying vec3 vPos;
-
-                void main() {
-                    gl_Position = uMatrix * uObjMatrix * vec4(aPos.xyz, 1.0);
-                    vPos = aPos;
-                }`,
-                fragmentShader: `
-                uniform vec4 glowColor;
-                varying vec3 vPos;
-
-                void main() {
-                    vec4 color = glowColor;
-                    color.a *= pow(1.0 - vPos.z, 1.3);
-
-                    gl_FragColor = color;
-                }`,
+                shaderId: "cylinder_spread",
             },
             this
         );
@@ -79,21 +69,23 @@ export default class ShieldLayer extends Layer {
 
                 const coord = data.geometry.coordinates;
                 const radius = +this.getValue("radius", data);
+                const height = +this.getValue("height", data);
+                const color = this.normizedColor(this.getValue("color", data));
 
                 const point = this.normizedPoint(coord);
                 const scale = this.normizedHeight(radius, coord);
+                const _height = this.normizedHeight(height, coord);
 
                 // 构建半圆球
-                const geometry = new SphereGeometry({
-                    nlat: Math.floor(Math.max(radius, 20)),
-                    nlong: Math.floor(Math.max(radius, 20) * 2),
-                    endLong: Math.PI,
+                const geometry = new CylinderGeometry({
+                    verticalAxis: "z",
+                    nradial: Math.floor(Math.max(20, radius)),
                 });
 
                 // obj mat4
                 const m = mat4.create();
                 mat4.translate(m, m, point);
-                mat4.scale(m, m, [scale, scale, scale]);
+                mat4.scale(m, m, [scale, scale, _height]);
 
                 // 存入多边形
                 this.group.push({
@@ -101,9 +93,13 @@ export default class ShieldLayer extends Layer {
                     bufferData: geometry.getAttribute("POSITION").value,
                     uniforms: {
                         uObjMatrix: m,
-                        glowColor: this.normizedColor(
-                            this.getValue("color", data)
-                        ),
+                        glowColor: color,
+                    },
+                    effectUniforms: {
+                        center: point,
+                        radius: scale,
+                        height: _height,
+                        color,
                     },
                 });
             }
@@ -132,8 +128,14 @@ export default class ShieldLayer extends Layer {
                 indexBuffer: this.indexBuffer,
             });
 
+            // time uniforms
+            const time = (new Date() - this.date) / 1e3,
+                duration = this.options.duration;
+            this.percent = (time % duration) / duration;
+
             this.program.setUniforms({
                 uMatrix: matrix,
+                uPercent: this.percent,
                 ...uniforms,
             });
 
@@ -148,5 +150,19 @@ export default class ShieldLayer extends Layer {
                 0
             );
         }
+    }
+
+    // 获取当前effect的对象
+    getEffectObjs(transform) {
+        return this.group.map((obj) => {
+            const effObj = obj.effectUniforms;
+            const center = transform(effObj.center);
+
+            return {
+                ...effObj,
+                center,
+                percent: this.percent,
+            };
+        });
     }
 }

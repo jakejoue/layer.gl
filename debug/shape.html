@@ -59,6 +59,22 @@
             });
 
             var groundRippleLayer = new layergl.GroundRippleLayer({
+                data: [
+                    {
+                        properties: {
+                            size: 400,
+                            width: 50,
+                            color: "rgba(255, 255, 255, 0.3)",
+                        },
+                        geometry: {
+                            type: "Point",
+                            coordinates: [
+                                -73.97083632157563,
+                                40.79324495625795,
+                            ],
+                        },
+                    },
+                ],
                 size: function (data) {
                     return data.properties.size;
                 },
@@ -69,40 +85,46 @@
                     return data.properties.color;
                 },
             });
-            groundRippleLayer.setData([
-                {
-                    properties: {
-                        size: 400,
-                        width: 50,
-                        color: "rgba(255, 255, 255, 0.3)",
-                    },
-                    geometry: {
-                        type: "Point",
-                        coordinates: [-73.97083632157563, 40.79324495625795],
-                    },
-                },
-                {
-                    properties: {
-                        size: 350,
-                        width: 100,
-                        color: "rgba(255, 0, 0, 0.8)",
-                    },
-                    geometry: {
-                        type: "Point",
-                        coordinates: [-73.94953261486705, 40.78597536772364],
-                    },
-                },
-            ]);
             view.addLayer(groundRippleLayer);
+
+            var cylinderSpreadLayer = new layergl.CylinderSpreadLayer({
+                data: [
+                    {
+                        properties: {
+                            size: 350,
+                            width: 150,
+                            color: "rgba(255, 255, 255, 1.0)",
+                        },
+                        geometry: {
+                            type: "Point",
+                            coordinates: [
+                                -73.94953261486705,
+                                40.78597536772364,
+                            ],
+                        },
+                    },
+                ],
+                duration: 5,
+                height: function (data) {
+                    return data.properties.width;
+                },
+                radius: function (data) {
+                    return data.properties.size;
+                },
+                color: function (data) {
+                    return data.properties.color;
+                },
+            });
+            view.addLayer(cylinderSpreadLayer);
 
             fetch("./static/central_park.json")
                 .then((response) => response.json())
                 .then((polygons) => {
                     var shapeLayer = new layergl.ShapeLayer({
-                        effects: [groundRippleLayer],
+                        effects: [groundRippleLayer, cylinderSpreadLayer],
                         color: "rgba(194, 147, 75, 1.0)",
                         style: "window",
-                        texture: './static/wall2.png',
+                        texture: "./static/wall2.png",
                         isTextureFull: true,
                         // textureScale: 0.05,
                         useLight: true,

@@ -50,6 +50,9 @@ import shape_frag from "./shader_lib/shape.fragment.glsl";
 import spark_vert from "./shader_lib/spark.vertex.glsl";
 import spark_frag from "./shader_lib/spark.fragment.glsl";
 
+import cylinder_spread_vert from "./shader_lib/cylinder_spread.vertex.glsl";
+import cylinder_spread_frag from "./shader_lib/cylinder_spread.fragment.glsl";
+
 const ShaderChunk = {
     common,
     pick_pars_vert,
@@ -85,6 +88,8 @@ const ShaderChunk = {
     shape_frag,
     spark_vert,
     spark_frag,
+    cylinder_spread_vert,
+    cylinder_spread_frag,
 };
 
 export default ShaderChunk;
