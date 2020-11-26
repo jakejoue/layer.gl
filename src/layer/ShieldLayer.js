@@ -76,7 +76,9 @@ export default class ShieldLayer extends Layer {
 
                 const coord = data.geometry.coordinates;
                 const radius = +this.getValue("radius", data);
-                const point = this.normizedPoint([coord[0], coord[1], radius]);
+
+                const point = this.normizedPoint(coord);
+                const scale = this.normizedHeight(radius, coord);
 
                 // 构建半圆球
                 const geometry = new SphereGeometry({
@@ -85,13 +87,21 @@ export default class ShieldLayer extends Layer {
                     endLong: Math.PI,
                 });
 
+                // obj mat4
+                const m = mat4.create();
+                mat4.translate(m, m, point);
+                mat4.scale(m, m, [scale, scale, scale]);
+
                 // 存入多边形
                 this.group.push({
                     indexData: geometry.indices.value,
                     bufferData: geometry.getAttribute("POSITION").value,
-                    color: this.normizedColor(this.getValue("color", data)),
-                    point: [point[0], point[1], 0],
-                    scale: point[2],
+                    uniforms: {
+                        uObjMatrix: m,
+                        glowColor: this.normizedColor(
+                            this.getValue("color", data)
+                        ),
+                    },
                 });
             }
         }
@@ -107,9 +117,7 @@ export default class ShieldLayer extends Layer {
 
         for (let i = 0; i < this.group.length; i++) {
             // 绑定顶点数据
-            const { indexData, bufferData, point, scale, color } = this.group[
-                i
-            ];
+            const { indexData, bufferData, uniforms } = this.group[i];
 
             this.vertexBuffer.setData(bufferData);
             this.indexBuffer.setData(indexData);
@@ -121,16 +129,10 @@ export default class ShieldLayer extends Layer {
                 indexBuffer: this.indexBuffer,
             });
 
-            const m = mat4.create();
-            mat4.translate(m, m, point);
-            mat4.scale(m, m, [scale, scale, scale]);
-
-            const uniforms = {
+            this.program.setUniforms({
                 uMatrix: matrix,
-                uObjMatrix: m,
-                glowColor: color,
-            };
-            this.program.setUniforms(uniforms);
+                ...uniforms,
+            });
 
             gl.depthMask(false);
             gl.enable(gl.BLEND);
