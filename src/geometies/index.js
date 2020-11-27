@@ -1,3 +1,4 @@
+export { default as Geometry } from "./Geometry";
 export { default as ConeGeometry } from "./ConeGeometry";
 export { default as CubeGeometry } from "./CubeGeometry";
 export { default as CylinderGeometry } from "./CylinderGeometry";
