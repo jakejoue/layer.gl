@@ -82,7 +82,7 @@ function replaceEffectNums(string, effects) {
     const effectMap = effects.map;
 
     for (const key in effectMap) {
-        string = string.replaceAll(key, effectMap[key].size);
+        string = string.replace(new RegExp(key, 'g'), effectMap[key].size);
     }
 
     return string.replace(/NUM_([A-Z]|_)*S/g, 0);
@@ -258,7 +258,7 @@ export default class Program {
         shaderStr = replaceEffectNums(shaderStr, this.effects);
         shaderStr = unrollLoops(shaderStr);
 
-        return shaderStr.replaceAll("#define GLSLIFY 1\n", "");
+        return shaderStr.replace(/#define GLSLIFY 1\n/g, "");
     }
 
     use(gl) {
