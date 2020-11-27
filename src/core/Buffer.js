@@ -194,7 +194,8 @@ export class VertexBuffer {
         for (let j = 0; j < this.vaAttributes.length; j++) {
             const member = this.vaAttributes[j];
             const attribIndex = program.attributes[member.name];
-            if (attribIndex !== undefined) {
+            // 在一些低版本浏览器下，空数据是不被允许写入的
+            if (attribIndex !== undefined && this.sizeInBytes > 0) {
                 gl.enableVertexAttribArray(attribIndex);
             }
         }
@@ -205,7 +206,8 @@ export class VertexBuffer {
             const member = this.vaAttributes[j];
             const attribIndex = program.attributes[member.name];
 
-            if (attribIndex !== undefined) {
+            // 在一些低版本浏览器下，空数据是不被允许写入的
+            if (attribIndex !== undefined && this.sizeInBytes > 0) {
                 gl.vertexAttribPointer(
                     attribIndex,
                     member.size,
