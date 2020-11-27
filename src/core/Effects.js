@@ -1,4 +1,5 @@
 import { vec2, vec3 } from "gl-matrix";
+import { isObjectEmpty } from "../helper/util";
 
 class LayerEffect {
     constructor(id, uniformName) {
@@ -63,6 +64,10 @@ export default class Effects {
         this.map = {};
 
         parseEffect(effects, this);
+    }
+
+    get isEmpty() {
+        return isObjectEmpty(this.map);
     }
 
     update(program) {

@@ -78,8 +78,8 @@ function includeReplacer(match, include) {
 
 // effects
 
-function replaceEffectNums(string, parameters) {
-    const effectMap = parameters.effects.map;
+function replaceEffectNums(string, effects) {
+    const effectMap = effects.map;
 
     for (const key in effectMap) {
         string = string.replaceAll(key, effectMap[key].size);
@@ -242,13 +242,20 @@ export default class Program {
     getShader(shaderStr, type) {
         shaderStr = shaderStr.replace("void main", "void originMain");
 
+        // 如果不存在effects
+        if (this.effects.isEmpty) {
+            shaderStr = shaderStr
+                .replace("#include <effects_pars>", "")
+                .replace("#include <effects_frag_end>", "");
+        }
+
         shaderStr = shaderChunk["_template_" + type].replace(
             "#pragma ORIGIN_MAIN",
             shaderStr
         );
 
         shaderStr = resolveIncludes(shaderStr);
-        shaderStr = replaceEffectNums(shaderStr, this.parameters);
+        shaderStr = replaceEffectNums(shaderStr, this.effects);
         shaderStr = unrollLoops(shaderStr);
 
         return shaderStr.replaceAll("#define GLSLIFY 1\n", "");
