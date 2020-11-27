@@ -16,8 +16,25 @@ export default class WebglLayer {
         const canvas = options.canvas
             ? options.canvas
             : document.createElement("canvas");
+
+        // 解决多版本浏览器获取webgl的问题
+        function getContext(contextAttributes) {
+            const contextNames = ["webgl2", "webgl", "experimental-webgl"];
+
+            for (let i = 0; i < contextNames.length; i++) {
+                const contextName = contextNames[i];
+                const context = canvas.getContext(
+                    contextName,
+                    contextAttributes
+                );
+                if (context !== null) return context;
+            }
+
+            return null;
+        }
+
         this.canvas = canvas;
-        this.gl = options.gl ? options.gl : canvas.getContext("webgl");
+        this.gl = options.gl ? options.gl : getContext(options.glAttributes);
         this.gl.context = new Context(this.gl, false);
         // 修改画布样式
         this.changeSize();
