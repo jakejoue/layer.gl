@@ -175,11 +175,13 @@ export default class GroundRippleLayer extends Layer {
     getEffectObjs(transform) {
         return this.group.map((obj) => {
             const ripple = obj.uniforms.u_ripple;
-
-            const radius = this.percent * ripple.radius;
             const center = transform(ripple.center);
 
-            return Object.assign({}, ripple, { radius, center });
+            return {
+                ...ripple,
+                center,
+                percent: this.percent,
+            };
         });
     }
 }

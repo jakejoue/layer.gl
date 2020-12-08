@@ -26,6 +26,10 @@ void main() {
         blend.rgb *= percent * 2.0 + 1.0;
         blend.a *= 1.0 - pow(1.0 - percent, 0.3);
 
+        if ( u_percent > 0.7 ) {
+            blend.a *= (1.0 - u_percent) / 0.3;
+        }
+
     } else {
         discard;
     }

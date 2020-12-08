@@ -19,6 +19,8 @@ struct GeometricContext {
         float radius;
         float width;
         vec4 color;
+
+        float percent;
     };
 
 	uniform GroundRipple groundRipples[ NUM_GROUND_RIPPLES ];
@@ -26,23 +28,27 @@ struct GeometricContext {
 	void getGroundRippleEffectColor( const in GroundRipple groundRipple, const in GeometricContext geometry, out vec4 color ) {
 
         // 在建筑物之上
-        if (groundRipple.center.z > geometry.position.z) {
+        if ( groundRipple.center.z > geometry.position.z ) {
             return;
         }
 
         // 当前点实际半径
-        float radius = groundRipple.radius;
+        float radius = groundRipple.radius * groundRipple.percent;
 
         // 目标点距离Ripple
         float dis = distance(geometry.position.xy, groundRipple.center.xy);
 
-        if (dis > radius && dis < radius + groundRipple.width) {
+        if ( dis > radius && dis < radius + groundRipple.width ) {
 
             vec4 blend = groundRipple.color;
             float percent = (1.0 - abs(dis - radius) / groundRipple.width);
 
             blend.rgb *= percent * 2.0 + 1.0;
             blend.a *= 1.0 - pow(1.0 - percent, 0.3);
+
+            if ( groundRipple.percent > 0.7 ) {
+                blend.a *= (1.0 - groundRipple.percent) / 0.3;
+            }
 
             vec4 base = color;
 
@@ -84,7 +90,7 @@ struct GeometricContext {
         // 当前实际的高度
         float currentHeight = cylinderSpread.center.z;
 
-        if (percent < 0.7) {
+        if ( percent < 0.7 ) {
             currentHeight += cylinderSpread.height * pow(percent / 0.7, 1.3);
         } else {
             currentHeight += cylinderSpread.height;
