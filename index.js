@@ -22,5 +22,6 @@ export { default as FanLayer } from "./src/layer/FanLayer";
 export { default as ShieldLayer } from "./src/layer/ShieldLayer";
 export { default as ImageCircleLayer } from "./src/layer/ImageCircleLayer";
 export { default as CylinderSpreadLayer } from "./src/layer/CylinderSpreadLayer";
+export { default as DynamicCylinderLayer } from "./src/layer/DynamicCylinderLayer";
 
 export { default as ThreeLayer } from "./src/three/ThreeLayer";

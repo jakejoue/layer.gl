@@ -3,20 +3,15 @@ import Layer from "./Layer";
 import { IndexBuffer, VertexBuffer } from "../core/Buffer";
 import VertexArrayObject from "../core/VertexArrayObject";
 import Program from "../core/Program";
-import CylinderGeometry from "../geometies/CylinderGeometry";
+import TruncatedConeGeometry from "../geometies/TruncatedConeGeometry";
 
 import { mat4 } from "gl-matrix";
 
-export default class CylinderSpreadLayer extends Layer {
+export default class DynamicCylinderLayer extends Layer {
     constructor(options) {
         super(options);
         this.group = [];
 
-        // 表示该图层是个effect图层
-        this.effectType = "NUM_CYLINDER_SPREADS";
-        this.effectUniformName = "cylinderSpreads";
-
-        this.percent = 0;
         this.date = new Date();
         this.autoUpdate = true;
     }
@@ -24,9 +19,10 @@ export default class CylinderSpreadLayer extends Layer {
     getDefaultOptions() {
         return {
             color: "rgba(25, 25, 250, 1)",
-            height: 5,
-            duration: 2,
-            radius: 50,
+            duration: 5,
+            height: 100,
+            topRadius: 0.8,
+            bottomRadius: 8,
         };
     }
 
@@ -34,7 +30,30 @@ export default class CylinderSpreadLayer extends Layer {
         this.program = new Program(
             gl,
             {
-                shaderId: "cylinder_spread",
+                vertexShader: `
+                attribute vec3 aPos;
+                uniform mat4 uMatrix;
+                uniform mat4 uObjMatrix;
+                varying vec3 vPos;
+
+                void main() {
+                    gl_Position = uMatrix * uObjMatrix * vec4(aPos.xyz, 1.0);
+                    vPos = aPos;
+                }`,
+                fragmentShader: `
+                uniform vec4 glowColor;
+                uniform float uPercent;
+                varying vec3 vPos;
+
+                void main() {
+                    vec4 color = glowColor;
+                    color.a *= 1.0 - pow(vPos.z, 0.5);
+
+                    // 循环透明度效果
+                    color.a *= clamp(sin(PI * uPercent), 0.1, 1.0);
+
+                    gl_FragColor = color;
+                }`,
             },
             this
         );
@@ -68,25 +87,33 @@ export default class CylinderSpreadLayer extends Layer {
                 const data = dataArray[i];
 
                 const coord = data.geometry.coordinates;
-                const radius = +this.getValue("radius", data);
+                const topRadius = +this.getValue("topRadius", data);
+                const bottomRadius = +this.getValue("bottomRadius", data);
                 const height = +this.getValue("height", data);
                 const color = this.normizedColor(this.getValue("color", data));
 
                 const point = this.normizedPoint(coord);
-                const scale = this.normizedHeight(radius, coord);
+                const _topRadius = this.normizedHeight(topRadius, coord);
+                const _bottomRadius = this.normizedHeight(bottomRadius, coord);
+
                 const _height = this.normizedHeight(height, coord);
 
-                // 构建半圆球
-                const geometry = new CylinderGeometry({
-                    translate: [0, 0, 0.5],
+                // 构建圆柱体
+                const geometry = new TruncatedConeGeometry({
                     verticalAxis: "z",
-                    nradial: Math.floor(Math.max(20, radius)),
+                    translate: [0, 0, 0.5],
+                    topRadius: _topRadius,
+                    bottomRadius: _bottomRadius,
+                    nradial: Math.floor(
+                        Math.max(20, (topRadius + bottomRadius) / 2)
+                    ),
+                    nvertical: 20,
                 });
 
                 // obj mat4
                 const m = mat4.create();
                 mat4.translate(m, m, point);
-                mat4.scale(m, m, [scale, scale, _height]);
+                mat4.scale(m, m, [1, 1, _height]);
 
                 // 存入多边形
                 this.group.push({
@@ -95,12 +122,6 @@ export default class CylinderSpreadLayer extends Layer {
                     uniforms: {
                         uObjMatrix: m,
                         glowColor: color,
-                    },
-                    effectUniforms: {
-                        center: point,
-                        radius: scale,
-                        height: _height,
-                        color,
                     },
                 });
             }
@@ -132,11 +153,10 @@ export default class CylinderSpreadLayer extends Layer {
             // time uniforms
             const time = (new Date() - this.date) / 1e3,
                 duration = this.options.duration;
-            this.percent = (time % duration) / duration;
 
             this.program.setUniforms({
                 uMatrix: matrix,
-                uPercent: this.percent,
+                uPercent: (time % duration) / duration,
                 ...uniforms,
             });
 
@@ -151,19 +171,5 @@ export default class CylinderSpreadLayer extends Layer {
                 0
             );
         }
-    }
-
-    // 获取当前effect的对象
-    getEffectObjs(transform) {
-        return this.group.map((obj) => {
-            const effObj = obj.effectUniforms;
-            const center = transform(effObj.center);
-
-            return {
-                ...effObj,
-                center,
-                percent: this.percent,
-            };
-        });
     }
 }

@@ -34,6 +34,7 @@ function tesselateTruncatedCone(props) {
         verticalAxis = "y",
         topCap = false,
         bottomCap = false,
+        translate = [0, 0, 0],
     } = props;
 
     const extra = (topCap ? 2 : 0) + (bottomCap ? 2 : 0);
@@ -72,8 +73,7 @@ function tesselateTruncatedCone(props) {
             v = 1;
             ringRadius = topRadius;
         } else {
-            ringRadius =
-                bottomRadius + (topRadius - bottomRadius) * (i / nvertical);
+            ringRadius = bottomRadius + (topRadius - bottomRadius) * (i / nvertical);
         }
         if (i === -2 || i === nvertical + 2) {
             ringRadius = 0;
@@ -84,16 +84,13 @@ function tesselateTruncatedCone(props) {
             const sin = msin((j * mpi * 2) / nradial);
             const cos = mcos((j * mpi * 2) / nradial);
 
-            positions[i3 + indexOffset[0]] = sin * ringRadius;
-            positions[i3 + indexOffset[1]] = y;
-            positions[i3 + indexOffset[2]] = cos * ringRadius;
+            positions[i3 + indexOffset[0]] = sin * ringRadius + translate[indexOffset[0]];
+            positions[i3 + indexOffset[1]] = y + translate[indexOffset[1]];
+            positions[i3 + indexOffset[2]] = cos * ringRadius + translate[indexOffset[2]];
 
-            normals[i3 + indexOffset[0]] =
-                i < 0 || i > nvertical ? 0 : sin * cosSlant;
-            normals[i3 + indexOffset[1]] =
-                i < 0 ? -1 : i > nvertical ? 1 : sinSlant;
-            normals[i3 + indexOffset[2]] =
-                i < 0 || i > nvertical ? 0 : cos * cosSlant;
+            normals[i3 + indexOffset[0]] = i < 0 || i > nvertical ? 0 : sin * cosSlant;
+            normals[i3 + indexOffset[1]] = i < 0 ? -1 : i > nvertical ? 1 : sinSlant;
+            normals[i3 + indexOffset[2]] = i < 0 || i > nvertical ? 0 : cos * cosSlant;
 
             texCoords[i2 + 0] = j / nradial;
             texCoords[i2 + 1] = v;
