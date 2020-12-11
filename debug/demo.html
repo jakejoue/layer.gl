@@ -54,7 +54,7 @@
                 hash: false,
             }));
 
-            const view = new layergl.View({
+            var view = new layergl.View({
                 map: layergl.map.getMapBoxGLMap(map),
             });
 
@@ -138,8 +138,46 @@
             fetch("./static/central_park.json")
                 .then((response) => response.json())
                 .then((polygons) => {
+                    var points = [];
+                    // polygon 转 points
+                    for (var i = 0; i < polygons.length; i++) {
+                        var polygon = polygons[i];
+                        var { height = 0 } = polygon.properties;
+                        var { type, coordinates } = polygon.geometry;
+
+                        if (type === "Polygon") {
+                            coordinates = [coordinates];
+                        }
+
+                        for (var j = 0; j < coordinates.length; j++) {
+                            // 第一层
+                            var coord = coordinates[j];
+
+                            // 第二层
+                            for (var k = 0; k < coord.length; k++) {
+                                var coord1 = coord[k];
+
+                                for (var l = 0; l < coord1.length; l++) {
+                                    var coord2 = coord1[l];
+
+                                    points.push({
+                                        geometry: {
+                                            type: "Point",
+                                            coordinates: [
+                                                coord2[0],
+                                                coord2[1],
+                                                height,
+                                            ],
+                                        },
+                                    });
+                                }
+                            }
+                        }
+                    }
+
                     // 建筑物
                     var shapeLayer = new layergl.ShapeLayer({
+                        data: polygons,
                         effects: [groundRippleLayer, cylinderSpreadLayer],
                         color: "rgba(194, 147, 75, 1.0)",
                         style: "window",
@@ -156,8 +194,17 @@
                         },
                         autoSelect: true,
                     });
-                    shapeLayer.setData(polygons);
                     view.addLayer(shapeLayer);
+
+                    // 点图层
+                    var pointLayer = new layergl.PointLayer({
+                        data: points,
+                        blend: "lighter",
+                        size: 1.5,
+                        shape: "square",
+                        color: "rgba(255, 255, 255, 0.8)",
+                    });
+                    view.addLayer(pointLayer);
 
                     // 圆柱
                     var dynamicCylinderLayer = new layergl.DynamicCylinderLayer(
@@ -197,28 +244,28 @@
                     view.addLayer(shieldLayer);
 
                     // 构造曲线数据
-                    const curve = new layergl.curve.BezierCurve({
+                    var curve = new layergl.curve.BezierCurve({
                         start: [-73.96157342710615, 40.78862769626144, 100],
                         end: [-73.97083632157563, 40.79324495625795],
                     });
-                    const line1 = curve.getPoints(50);
+                    var line1 = curve.getPoints(50);
 
                     curve.setOptions({
                         start: [-73.96157342710615, 40.78862769626144, 100],
                         end: [-73.94953261486705, 40.78597536772364],
                     });
 
-                    const line2 = curve.getPoints(50);
+                    var line2 = curve.getPoints(50);
 
                     curve.setOptions({
                         start: [-73.96157342710615, 40.78862769626144, 100],
                         end: [-73.95208268279788, 40.80320471553378, 150],
                     });
 
-                    const line3 = curve.getPoints(50);
+                    var line3 = curve.getPoints(50);
 
                     // 所有的线数据
-                    const data = [
+                    var data = [
                         {
                             color: "rgb(255, 113, 113, 0.6)",
                             tripColor: "rgb(255, 255, 204)",
