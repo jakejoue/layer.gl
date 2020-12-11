@@ -134,6 +134,7 @@ export default class Layer extends CommonLayer {
             }
         }
         if (this.pointOffset) {
+            this.pointOffset[2] = 0;
             return this.pointOffset.slice();
         } else {
             return [0, 0, 0];
