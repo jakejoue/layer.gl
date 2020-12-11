@@ -158,7 +158,7 @@ function(z) {
         this.min = f.min || 0;
         this.initPalette()
     }
-    function Ta(f) {
+    function BezierCurve(f) {
         this.options = f || {};
         this._initialize()
     }
@@ -167,7 +167,7 @@ function(z) {
         g = 1 - f;
         return e * e * e * c + 3 * g * g * f * a + 3 * (1 - f) * f * f * b + f * f * f * d
     }
-    function $a(f) {
+    function GeodesicCurve(f) {
         this.WORLD_SIZE_MC_HALF = 2.0037726372307256E7;
         this.WORLD_SIZE_MC = 2 * this.WORLD_SIZE_MC_HALF;
         this.options = f || {};
@@ -3859,7 +3859,7 @@ function(z) {
         f < a && (f = a);
         return d + (f - a) / (c - a) * (b - d)
     };
-    Ta.prototype._initialize = function() {
+    BezierCurve.prototype._initialize = function() {
         this.v0 = this._normalizaCoord(this.options.start);
         this.v3 = this._normalizaCoord(this.options.end);
         this.v1 = this._getControlPoint(this.v0, this.v3, 4);
@@ -3867,16 +3867,16 @@ function(z) {
         this.v0[2] || (this.v0[2] = 0);
         this.v3[2] || (this.v3[2] = 0)
     };
-    Ta.prototype.setOptions = function(f) {
+    BezierCurve.prototype.setOptions = function(f) {
         this.options = f || {};
         this._initialize()
     };
-    Ta.prototype.getPoints = function(f) {
+    BezierCurve.prototype.getPoints = function(f) {
         void 0 === f && (f = 20);
         for (var c = [], a = 0; a <= f; a++) c.push(this._getPoint(a / f));
         return c
     };
-    Ta.prototype._normalizaCoord = function(f) {
+    BezierCurve.prototype._normalizaCoord = function(f) {
         if (!f) return [];
         f = ta.convertLL2MC({
             lng: Number(f[0]),
@@ -3884,17 +3884,17 @@ function(z) {
         });
         return [f.lng, f.lat]
     };
-    Ta.prototype._getControlPoint = function(f, c) {
+    BezierCurve.prototype._getControlPoint = function(f, c) {
         var a = 2 < arguments.length && void 0 !== arguments[2] ? arguments[2] : 1;
         return [].concat(Y(this._getQuarter(f, c)), [this._getDistance(f, c) / a])
     };
-    Ta.prototype._getQuarter = function(f, c) {
+    BezierCurve.prototype._getQuarter = function(f, c) {
         return [(3 * f[0] + c[0]) / 4, (3 * f[1] + c[1]) / 4]
     };
-    Ta.prototype._getDistance = function(f, c) {
+    BezierCurve.prototype._getDistance = function(f, c) {
         return Math.sqrt(Math.pow(f[0] - c[0], 2) + Math.pow(f[1] - c[1], 2))
     };
-    Ta.prototype._getPoint = function(f) {
+    BezierCurve.prototype._getPoint = function(f) {
         var c = [],
         a = this.v0,
         b = this.v1,
@@ -3903,7 +3903,7 @@ function(z) {
         c.push(ad(f, a[0], b[0], d[0], e[0]), ad(f, a[1], b[1], d[1], e[1]), ad(f, a[2], b[2], d[2], e[2]));
         return c
     };
-    $a.prototype._initialize = function() {
+    GeodesicCurve.prototype._initialize = function() {
         this.points = this.options.points || this.options.point || [];
         this.greatCirclePoints = [];
         for (var f = [], c = 0; c < this.points.length; c++) {
@@ -3912,15 +3912,15 @@ function(z) {
         }
         this.points = f
     };
-    $a.prototype.setOptions = function(f) {
+    GeodesicCurve.prototype.setOptions = function(f) {
         this.options = f || {};
         this._initialize()
     };
-    $a.prototype.getPoints = function() {
+    GeodesicCurve.prototype.getPoints = function() {
         if (0 === this.greatCirclePoints.length) for (var f = 0; f < this.points.length - 1; f++) this._calcGreatCirclePoints(this.points[f], this.points[f + 1]);
         return this.greatCirclePoints
     };
-    $a.prototype._normalizaCoord = function(f) {
+    GeodesicCurve.prototype._normalizaCoord = function(f) {
         if (!f) return null;
         f instanceof Array && (f = {
             lng: Number(f[0]),
@@ -3931,7 +3931,7 @@ function(z) {
         c.latLng = f;
         return c
     };
-    $a.prototype._calcGreatCirclePoints = function(f, c) {
+    GeodesicCurve.prototype._calcGreatCirclePoints = function(f, c) {
         var a = f.latLng,
         b = c.latLng;
         if (!Yc(a.lng, b.lng) || !Yc(a.lat, b.lat)) {
@@ -3954,14 +3954,14 @@ function(z) {
             }
         }
     };
-    $a.prototype._calcAngularDistance = function(f, c) {
+    GeodesicCurve.prototype._calcAngularDistance = function(f, c) {
         var a = toRadian(f.lat),
         b = toRadian(c.lat);
         f = toRadian(f.lng);
         c = toRadian(c.lng);
         return Math.acos(Math.sin(a) * Math.sin(b) + Math.cos(a) * Math.cos(b) * Math.cos(Math.abs(c - f)))
     };
-    $a.prototype._calcMiddlePoint = function(f, c, a, b) {
+    GeodesicCurve.prototype._calcMiddlePoint = function(f, c, a, b) {
         var d = c.lat,
         e = f.lng;
         c = c.lng;
@@ -3976,7 +3976,7 @@ function(z) {
         f = Math.atan2(c * Math.sin(f) + b * Math.sin(d), Math.sqrt(Math.pow(a, 2) + Math.pow(e, 2)));
         return new za(toAngle(Math.atan2(e, a)), toAngle(f))
     };
-    var fi = function() {
+    var OdCurve = function() {
         function f() {
             var c = 0 < arguments.length && void 0 !== arguments[0] ? arguments[0] : {};
             I(this, f);
@@ -19798,9 +19798,9 @@ default = Lb;
     z.MercatorProjection = ta;
     z.Canvas = $c;
     z.Intensity = oa;
-    z.BezierCurve = Ta;
-    z.GeodesicCurve = $a;
-    z.OdCurve = fi;
+    z.BezierCurve = BezierCurve;
+    z.GeodesicCurve = GeodesicCurve;
+    z.OdCurve = OdCurve;
     z.utilCity = {
         getProvinceNameByCityName: function(a) {
             for (var b = 0; b < ob.length; b++) for (var d = ob[b].n, e = ob[b].cities, g = 0; g < e.length; g++) if (e[g].n == a) return d;
