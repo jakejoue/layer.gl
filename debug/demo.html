@@ -58,6 +58,99 @@
                 map: layergl.map.getMapBoxGLMap(map),
             });
 
+            // 烟花图
+            var point = {
+                lng: -73.96157342710615,
+                lat: 40.78862769626144,
+            };
+            var sparkData1 = [];
+            var sparkData2 = [];
+            var sparkData3 = [];
+            var randomNum = 40;
+            var RANDOM_SIZE = 0.01;
+            for (var i = 0; i < randomNum; i++) {
+                var coord = [
+                    point.lng + RANDOM_SIZE * Math.random() - RANDOM_SIZE / 2,
+                    point.lat + RANDOM_SIZE * Math.random() - RANDOM_SIZE / 2,
+                ];
+                sparkData1.push({
+                    geometry: {
+                        type: "Point",
+                        coordinates: coord,
+                    },
+                    properties: {
+                        height: parseInt(200 * Math.random(), 10),
+                    },
+                });
+            }
+            for (var i = 0; i < randomNum; i++) {
+                var coord = [
+                    point.lng + RANDOM_SIZE * Math.random() - RANDOM_SIZE / 2,
+                    point.lat + RANDOM_SIZE * Math.random() - RANDOM_SIZE / 2,
+                ];
+                sparkData2.push({
+                    geometry: {
+                        type: "Point",
+                        coordinates: coord,
+                    },
+                    properties: {
+                        height: parseInt(200 * Math.random(), 10),
+                    },
+                });
+            }
+            for (var i = 0; i < randomNum; i++) {
+                var coord = [
+                    point.lng + RANDOM_SIZE * Math.random() - RANDOM_SIZE / 2,
+                    point.lat + RANDOM_SIZE * Math.random() - RANDOM_SIZE / 2,
+                ];
+                sparkData3.push({
+                    geometry: {
+                        type: "Point",
+                        coordinates: coord,
+                    },
+                    properties: {
+                        height: parseInt(200 * Math.random(), 10),
+                    },
+                });
+            }
+            var sparkLayer1 = new layergl.SparkLayer({
+                height: function (data) {
+                    return data.properties.height;
+                },
+                step: 0.1,
+                startTime: 1,
+                endTime: 12,
+                color: "rgb(255, 153, 51)",
+            });
+            var sparkLayer2 = new layergl.SparkLayer({
+                height: function (data) {
+                    return data.properties.height;
+                },
+                color: "rgb(255, 0, 255)",
+            });
+            var sparkLayer3 = new layergl.SparkLayer({
+                height: function (data) {
+                    return data.properties.height;
+                },
+                step: 0.1,
+                startTime: 2,
+                endTime: 10,
+                color: "rgb(0, 204, 255)",
+            });
+            view.addLayer(sparkLayer1);
+            view.addLayer(sparkLayer2);
+            view.addLayer(sparkLayer3);
+            sparkLayer1.setData(sparkData1);
+            sparkLayer2.setData(sparkData2);
+            sparkLayer3.setData(sparkData3);
+
+            // 相关坐标点
+            var centerPoint = [-73.96157342710615, 40.78862769626144],
+                leftPoint = [-73.97268764451633, 40.789964956045594],
+                rightPoint = [-73.95296161199616, 40.78237907097798],
+                topPoint = [-73.95208268279788, 40.80320471553378];
+
+            // 波纹圆
             var groundRippleLayer = new layergl.GroundRippleLayer({
                 data: [
                     {
@@ -68,10 +161,7 @@
                         },
                         geometry: {
                             type: "Point",
-                            coordinates: [
-                                -73.97083632157563,
-                                40.79324495625795,
-                            ],
+                            coordinates: leftPoint,
                         },
                     },
                 ],
@@ -87,6 +177,7 @@
             });
             view.addLayer(groundRippleLayer);
 
+            // 圆柱扩散
             var cylinderSpreadLayer = new layergl.CylinderSpreadLayer({
                 data: [
                     {
@@ -97,10 +188,7 @@
                         },
                         geometry: {
                             type: "Point",
-                            coordinates: [
-                                -73.94953261486705,
-                                40.78597536772364,
-                            ],
+                            coordinates: rightPoint,
                         },
                     },
                 ],
@@ -125,10 +213,7 @@
                     {
                         geometry: {
                             type: "Point",
-                            coordinates: [
-                                -73.96157342710615,
-                                40.78862769626144,
-                            ],
+                            coordinates: centerPoint,
                         },
                     },
                 ],
@@ -214,10 +299,7 @@
                                 {
                                     geometry: {
                                         type: "Point",
-                                        coordinates: [
-                                            -73.96157342710615,
-                                            40.78862769626144,
-                                        ],
+                                        coordinates: centerPoint,
                                     },
                                 },
                             ],
@@ -233,10 +315,7 @@
                             {
                                 geometry: {
                                     type: "Point",
-                                    coordinates: [
-                                        -73.95208268279788,
-                                        40.80320471553378,
-                                    ],
+                                    coordinates: topPoint,
                                 },
                             },
                         ],
@@ -244,24 +323,22 @@
                     view.addLayer(shieldLayer);
 
                     // 构造曲线数据
+                    var centerPointWithHeight = centerPoint.concat(100);
+
                     var curve = new layergl.curve.BezierCurve({
-                        start: [-73.96157342710615, 40.78862769626144, 100],
-                        end: [-73.97083632157563, 40.79324495625795],
+                        start: centerPointWithHeight,
+                        end: leftPoint,
                     });
                     var line1 = curve.getPoints(50);
-
                     curve.setOptions({
-                        start: [-73.96157342710615, 40.78862769626144, 100],
-                        end: [-73.94953261486705, 40.78597536772364],
+                        start: centerPointWithHeight,
+                        end: rightPoint,
                     });
-
                     var line2 = curve.getPoints(50);
-
                     curve.setOptions({
-                        start: [-73.96157342710615, 40.78862769626144, 100],
-                        end: [-73.95208268279788, 40.80320471553378, 150],
+                        start: centerPointWithHeight,
+                        end: topPoint.concat(150),
                     });
-
                     var line3 = curve.getPoints(50);
 
                     // 所有的线数据
@@ -291,17 +368,6 @@
                             },
                         },
                     ];
-
-                    // 飞线
-                    var lineTripLayer = new layergl.LineTripLayer({
-                        data: data,
-                        trailLength: 3,
-                        color: function (data) {
-                            return data.tripColor;
-                        },
-                    });
-                    view.addLayer(lineTripLayer);
-
                     // 线颜色
                     var lineLayer = new layergl.SimpleLineLayer({
                         data: data,
@@ -310,7 +376,16 @@
                             return data.color;
                         },
                     });
+                    // 飞线
+                    var lineTripLayer = new layergl.LineTripLayer({
+                        data: data,
+                        trailLength: 3,
+                        color: function (data) {
+                            return data.tripColor;
+                        },
+                    });
                     view.addLayer(lineLayer);
+                    view.addLayer(lineTripLayer);
                 });
         </script>
     </body>
