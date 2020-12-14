@@ -101,7 +101,6 @@ function setValueV2f(gl, v) {
             cache[1] = v.y;
         }
     } else {
-        v = v.slice(0, 2);
         if (arraysEqual(cache, v)) return;
 
         gl.uniform2fv(this.addr, v);
@@ -130,7 +129,6 @@ function setValueV3f(gl, v) {
             cache[2] = v.b;
         }
     } else {
-        v = v.slice(0, 3);
         if (arraysEqual(cache, v)) return;
 
         gl.uniform3fv(this.addr, v);
@@ -171,7 +169,6 @@ function setValueV4f(gl, v) {
             cache[3] = v.a;
         }
     } else {
-        v = v.slice(0, 4);
         if (arraysEqual(cache, v)) return;
 
         gl.uniform4fv(this.addr, v);
@@ -266,8 +263,6 @@ function setValueV1i(gl, v) {
 }
 
 function setValueV2i(gl, v) {
-    v = v.slice(0, 2);
-
     const cache = this.cache;
 
     if (arraysEqual(cache, v)) return;
@@ -278,8 +273,6 @@ function setValueV2i(gl, v) {
 }
 
 function setValueV3i(gl, v) {
-    v = v.slice(0, 3);
-
     const cache = this.cache;
 
     if (arraysEqual(cache, v)) return;
@@ -290,8 +283,6 @@ function setValueV3i(gl, v) {
 }
 
 function setValueV4i(gl, v) {
-    v = v.slice(0, 4);
-
     const cache = this.cache;
 
     if (arraysEqual(cache, v)) return;

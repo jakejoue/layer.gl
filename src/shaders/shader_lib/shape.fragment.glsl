@@ -39,6 +39,12 @@ void main() {
         } else {
             textureColor = texture2D(u_sampler, vec2(v_texture_coord.s, v_texture_coord.t));
         }
+
+        // topColor顶部颜色
+        if (v_position.z == v_height && defines.useTopColor) {
+            textureColor = u_top_color;
+        }
+
         // 光照
         if (defines.useLight) {
             color = vec4(textureColor * v_color * 1.1);

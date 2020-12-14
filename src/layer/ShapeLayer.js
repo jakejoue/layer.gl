@@ -34,7 +34,6 @@ export default class ShapeLayer extends Layer {
             opacity: 1.0,
             isTextureFull: false,
             textureScale: 1,
-            topColor: "rgba(76, 76, 76, 76)",
             useLight: true,
             riseTime: 0,
         };
@@ -169,9 +168,6 @@ export default class ShapeLayer extends Layer {
                 // 渲染类型
                 const style = LayerStyles[options.style] || 0;
 
-                // 顶部颜色
-                const topColor = this.normizedColor(options.topColor);
-
                 // 光照相关参数
                 let light_dir = [0, -1, 2];
                 if (options.lightDir) {
@@ -220,7 +216,7 @@ export default class ShapeLayer extends Layer {
                             useLight: options.useLight,
                             useTexture: this.isUseTexture,
                             useTopTexture: false,
-                            useTopColor: false,
+                            useTopColor: !!options.topColor,
                         },
 
                         // 渲染模式和通用渲染颜色
@@ -229,8 +225,7 @@ export default class ShapeLayer extends Layer {
 
                         // 纹理相关
                         u_sampler: this.texture,
-                        // 顶部相关（贴图模式下生效）
-                        // u_top_color: topColor,
+                        u_top_color: this.normizedColor(options.topColor),
 
                         // 光照相关
                         u_side_light_dir: light_dir,

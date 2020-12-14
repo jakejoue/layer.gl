@@ -33,12 +33,12 @@ export default class FanLayer extends Layer {
                 attribute vec3 aPos;
                 uniform mat4 uMatrix;
                 uniform mat4 uObjMatrix;
-                uniform vec3 glowColor;
+                uniform vec4 glowColor;
                 varying vec4 vFragColor;
 
                 void main() {
                     gl_Position = uMatrix * uObjMatrix * vec4(aPos.xy, 0, 1.0);
-                    vFragColor = vec4(glowColor, pow(aPos.z, 1.3));
+                    vFragColor = glowColor.a * vec4(glowColor.rgb, pow(aPos.z, 1.3));
                 }`,
                 fragmentShader: `
                 varying vec4 vFragColor;

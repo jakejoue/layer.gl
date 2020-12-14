@@ -63,7 +63,7 @@ float getTransitionValue(float pre_value, float to_value) {
 
 void main() {
     vec4 pos = a_pos;
-    pos.z = pos.z + pos.w * getTransitionValue(a_pre_height, a_height);
+    pos.z += pos.w * getTransitionValue(a_pre_height, a_height);
     gl_Position = u_matrix * vec4(pos.xyz, 1.0);
 
     // varing变量赋值
