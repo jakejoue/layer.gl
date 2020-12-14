@@ -13,7 +13,7 @@ uniform float trail;
 
 void main() {
     float d = distance(vFragPosition.xy, vPosition.xy);
-    if(d >= vRadius) {
+    if (d >= vRadius) {
         discard;
     }
     vec4 color = vColor;
@@ -22,21 +22,21 @@ void main() {
     float time = vStartTime + uTime;
     float alpha = sin((R - d) / R * trail * 2.0 * 3.14 + time / duration);
     
-    if(d <= center) {
-        if(d > 0.9 * center && d <= center) {
-            if(alpha >= 0.5) {
+    if (d <= center) {
+        if (d > 0.9 * center && d <= center) {
+            if (alpha >= 0.5) {
                 color.a = 0.9;
             } else {
                 color.a = 1.0 - smoothstep(0.9 * center, center, d);
             }
         }
     } else {
-        if(alpha >= 0.5) {
+        if (alpha >= 0.5) {
             color.a = 0.9;
-            if(alpha >= 0.5 && alpha <= 0.6) {
+            if (alpha >= 0.5 && alpha <= 0.6) {
                 color.a = smoothstep(0.0, 0.1, alpha - 0.5);
             }
-            if(d >= center && d <= R) {
+            if (d >= center && d <= R) {
                 color.a *= 1.0 - smoothstep(center, R, d);
             }
         } else {

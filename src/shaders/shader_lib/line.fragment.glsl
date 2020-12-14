@@ -27,7 +27,7 @@ void main() {
     vec4 color = v_color;
 
     // 抗锯齿
-    if(u_antialias) {
+    if (u_antialias) {
         float blur = 1.0;
         blur = 1.0 - smoothstep(0.9, 1.0, length(v_normal));
         color.a *= blur;
@@ -35,7 +35,7 @@ void main() {
     
     // 动画
     #if defined(USE_LINE_ANIMATION)
-    if(u_animate) {
+    if (u_animate) {
         float alpha = 1.0 - fract(mod(1.0 - v_counter, u_interval) * (1.0 / u_interval) + u_time / u_duration);
         alpha = (alpha + u_trail_length - 1.0) / u_trail_length;
         color.a *= alpha;
@@ -50,7 +50,7 @@ void main() {
     float margin_width_half = margin_width / 2.0;
     float texture_width = u_texture_width * u_zoom_units;
     float delta = mod(v_uv.x, texture_width + margin_width);
-    if(delta >= margin_width_half && delta <= margin_width_half + texture_width) {
+    if (delta >= margin_width_half && delta <= margin_width_half + texture_width) {
         float uvx = (delta - margin_width_half) / texture_width;
         vec4 texture = texture2D(u_sampler, vec2(uvx, v_uv.y));
         color = texture.a >= 0.5 ? texture : color;
@@ -58,7 +58,7 @@ void main() {
     #endif
     
     // 虚线效果
-    if(v_dash_array.y > 0.0) {
+    if (v_dash_array.y > 0.0) {
         float offset = u_dash_offset * u_zoom_units / v_total_distance;
         color.a *= (1.0 - step(v_dash_array.x, mod(v_counter + offset, v_dash_array.x + v_dash_array.y)));
     }

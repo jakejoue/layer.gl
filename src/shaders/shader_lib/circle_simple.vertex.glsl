@@ -18,13 +18,13 @@ void main() {
     float y = aPos.y;
     vSize = aSize * uZoomUnits;
     
-    if(aIndex == 1.0) {
+    if (aIndex == 1.0) {
         x -= vSize;
         y += vSize;
-    } else if(aIndex == 2.0) {
+    } else if (aIndex == 2.0) {
         x += vSize;
         y -= vSize;
-    } else if(aIndex == 3.0) {
+    } else if (aIndex == 3.0) {
         x += vSize;
         y += vSize;
     } else {
@@ -38,7 +38,7 @@ void main() {
     gl_Position = uMatrix * vFragPosition;
     
     #if defined(PICK)
-    if(mapvIsPicked()) {
+    if (mapvIsPicked()) {
         vColor = uSelectedColor;
     }
     #endif

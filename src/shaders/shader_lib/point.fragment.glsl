@@ -3,9 +3,9 @@ uniform int uShape;
 
 void main() {
     vec4 color = vColor;
-    if(uShape == 1) {
+    if (uShape == 1) {
         float d = distance(gl_PointCoord, vec2(0.5, 0.5));
-        if(d > 0.5) {
+        if (d > 0.5) {
             discard;
         }
         float blur = 1.0;

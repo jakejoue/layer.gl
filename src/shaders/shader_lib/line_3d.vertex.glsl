@@ -39,7 +39,7 @@ vec3 getNormalAndWidth(vec2 currentScreen, vec2 previousScreen, vec2 nextScreen,
     vec2 dir = vec2(0.0);
     if (currentScreen == previousScreen) {
         dir = normalize(nextScreen - currentScreen);
-    } else if(currentScreen == nextScreen) {
+    } else if (currentScreen == nextScreen) {
         dir = normalize(currentScreen - previousScreen);
     } else {
         vec2 dirA = normalize(currentScreen - previousScreen);
@@ -72,12 +72,12 @@ void main() {
     #endif
     
     #if defined(PICK)
-    if(mapvIsPicked()) {
+    if (mapvIsPicked()) {
         vColor = uSelectedColor;
     }
     #endif
     
-    if(uFlat) {
+    if (uFlat) {
         float width = thickness * zoomUnits;
         vec3 nw = getNormalAndWidth(position.xy, previous.xy, next.xy, width);
         width = nw.z;

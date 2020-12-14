@@ -1,3 +1,11 @@
+// 一些外部定义的变量
+struct Defines {
+    bool useLight;
+    bool useTexture;
+    bool useTopTexture;
+    bool useTopColor;
+};
+
 attribute vec4 a_pos;
 attribute vec3 a_normal;
 attribute vec4 a_color;
@@ -5,20 +13,23 @@ attribute vec4 a_pre_color;
 attribute float a_height;
 attribute float a_pre_height;
 attribute vec2 a_texture_coord;
-    
-// 基础参数
-uniform mat4 u_matrix;
-uniform float u_alpha;
-uniform float u_zoom_unit;
-// 光照
-uniform vec3 u_side_light_dir;
-uniform bool u_use_lighting;
-// 贴图
-uniform bool u_use_texture;
+
+// 相关变量定义
+uniform Defines defines;
+
 // 时间
 uniform float u_dataTime;
 uniform float u_riseTime;
 
+// 基础参数
+uniform mat4 u_matrix;
+uniform float u_alpha;
+uniform float u_zoom_unit;
+
+// 光照
+uniform vec3 u_side_light_dir;
+
+// 变量
 varying float v_height;
 varying vec4 v_color;
 varying vec3 v_position;
@@ -38,10 +49,10 @@ const vec3 uDirectionalColor = vec3(1.0, 1.0, 1.0);
 float getTransitionValue(float pre_value, float to_value) {
     float result = 0.0;
     
-    if(pre_value == to_value) {
+    if (pre_value == to_value) {
         result = to_value;
     } else {
-        if(u_riseTime > 0.0 && u_dataTime < u_riseTime) {
+        if (u_riseTime > 0.0 && u_dataTime < u_riseTime) {
             result = (pre_value + (to_value - pre_value) * (u_dataTime / u_riseTime));
         } else {
             result = to_value;
@@ -59,7 +70,7 @@ void main() {
     v_position = pos.xyz;
     v_height = a_pos.z + a_height;
 
-    if(u_use_texture) {
+    if (defines.useTexture) {
         v_texture_coord = a_texture_coord;
     }
 
@@ -67,13 +78,13 @@ void main() {
     vec4 icolor = a_color;
 
     #if defined(PICK)
-        if(mapvIsPicked()) {
+        if (mapvIsPicked()) {
             icolor = uSelectedColor;
         }
     #endif
     
     // 如果使用光照
-    if(u_use_lighting) {
+    if (defines.useLight) {
 
         vec3 N = normalize(a_normal);
 
@@ -99,7 +110,7 @@ void main() {
         float lambert_2 = max(0.0, dot(N, -L2));
 
         // 如果顶部颜色和初始颜色相同
-        if(a_pre_color.r == a_color.r && a_pre_color.g == a_color.g && a_pre_color.b == a_color.b) {
+        if (a_pre_color.r == a_color.r && a_pre_color.g == a_color.g && a_pre_color.b == a_color.b) {
 
         } else {
 
@@ -119,7 +130,7 @@ void main() {
         v_color.a = icolor.a;
 
         // 如果是贴图模式
-        if(u_use_texture) {
+        if (defines.useTexture) {
 
             float directionalLightWeighting = max(dot(N, L), 0.0);
 

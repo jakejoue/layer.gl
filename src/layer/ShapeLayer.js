@@ -19,12 +19,13 @@ export default class ShapeLayer extends Layer {
     constructor(options) {
         super(options);
 
-        options = this.getOptions();
-        if ("windowAnimation" === options.style || 0 < options.riseTime) {
+        // 判断是否需要自动更新
+        if (
+            "windowAnimation" === this.options.style ||
+            0 < this.options.riseTime
+        ) {
             this.autoUpdate = true;
         }
-        this.selectedColor = [-1, -1, -1];
-        this.textureCache = {};
     }
 
     getDefaultOptions() {
@@ -40,28 +41,23 @@ export default class ShapeLayer extends Layer {
     }
 
     initialize(gl) {
-        const options = this.getOptions();
-
         this.dataMgr = new ShapeMgr(this, gl);
         this.texture = null;
         this.isUseTexture = false;
 
-        // defines
-        const defines = [];
-        options.enablePicked && defines.push("PICK");
-
+        // program
         this.program = new Program(
             gl,
             {
                 shaderId: "shape",
-                defines: defines,
+                defines: this.options.enablePicked ? ["PICK"] : [],
             },
             this
         );
-
-        this.initializeTime = new Date();
-
+        // vao
         this.vao = new VertexArrayObject();
+        // init Time
+        this.initializeTime = new Date();
     }
 
     updateBuffer(dataMgr) {
@@ -219,17 +215,24 @@ export default class ShapeLayer extends Layer {
                             1,
                             this.map.getCenter()
                         ),
+                        // defines
+                        defines: {
+                            useLight: options.useLight,
+                            useTexture: this.isUseTexture,
+                            useTopTexture: false,
+                            useTopColor: false,
+                        },
+
+                        // 渲染模式和通用渲染颜色
                         u_style: style,
                         u_alpha: parseFloat(options.opacity),
 
                         // 纹理相关
-                        u_use_texture: this.isUseTexture,
                         u_sampler: this.texture,
                         // 顶部相关（贴图模式下生效）
                         // u_top_color: topColor,
 
                         // 光照相关
-                        u_use_lighting: options.useLight,
                         u_side_light_dir: light_dir,
 
                         // 时间相关

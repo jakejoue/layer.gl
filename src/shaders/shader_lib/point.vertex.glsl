@@ -5,7 +5,7 @@ uniform mat4 uMatrix;
 varying vec4 vColor;
 
 void main() {
-    if(aColor.w >= 0.0 && aColor.w <= 1.0) {
+    if (aColor.w >= 0.0 && aColor.w <= 1.0) {
         vColor = aColor;
     } else {
         vColor = vec4(aColor.xyz, 1.0);
@@ -14,7 +14,7 @@ void main() {
     gl_PointSize = aSize;
 
     #if defined(PICK)
-    if(mapvIsPicked()) {
+    if (mapvIsPicked()) {
         vColor = uSelectedColor;
     }
     #endif

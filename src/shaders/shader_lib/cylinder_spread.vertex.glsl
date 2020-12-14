@@ -10,7 +10,7 @@ void main() {
     vec4 pos = vec4(aPos, 1.0);
     pos.xy *= uPercent;
 
-    if( uPercent < 0.7 ) {
+    if ( uPercent < 0.7 ) {
         pos.z *= pow(uPercent / 0.7, 1.3);
     }
 

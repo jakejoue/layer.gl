@@ -35,7 +35,7 @@ void main() {
     #endif
     
     #if defined(PICK)
-    if(mapvIsPicked()) {
+    if (mapvIsPicked()) {
         v_color = uSelectedColor;
     }
     #endif

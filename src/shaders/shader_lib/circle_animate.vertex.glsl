@@ -27,13 +27,13 @@ void main() {
     float x = aPos.x;
     float y = aPos.y;
     float R = vRadius;
-    if(aIndex == 1.0) {
+    if (aIndex == 1.0) {
         x -= R;
         y += R;
-    } else if(aIndex == 2.0) {
+    } else if (aIndex == 2.0) {
         x += R;
         y -= R;
-    } else if(aIndex == 3.0) {
+    } else if (aIndex == 3.0) {
         x += R;
         y += R;
     } else {
@@ -45,7 +45,7 @@ void main() {
     gl_Position = uMatrix * vFragPosition;
     
     #if defined(PICK)
-    if(mapvIsPicked()) {
+    if (mapvIsPicked()) {
         vColor = uSelectedColor;
     }
     #endif

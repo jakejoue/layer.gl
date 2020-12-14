@@ -9,7 +9,7 @@ varying vec3 vPos;
 #endif
 
 void main() {
-    if(aColor.w >= 0.0 && aColor.w <= 1.0) {
+    if (aColor.w >= 0.0 && aColor.w <= 1.0) {
         vColor = aColor;
     } else {
         vColor = vec4(aColor.xyz, 1.0);
