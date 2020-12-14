@@ -137,9 +137,6 @@
                 endTime: 10,
                 color: "rgb(0, 204, 255)",
             });
-            view.addLayer(sparkLayer1);
-            view.addLayer(sparkLayer2);
-            view.addLayer(sparkLayer3);
             sparkLayer1.setData(sparkData1);
             sparkLayer2.setData(sparkData2);
             sparkLayer3.setData(sparkData3);
@@ -175,7 +172,6 @@
                     return data.properties.color;
                 },
             });
-            view.addLayer(groundRippleLayer);
 
             // 圆柱扩散
             var cylinderSpreadLayer = new layergl.CylinderSpreadLayer({
@@ -203,7 +199,6 @@
                     return data.properties.color;
                 },
             });
-            view.addLayer(cylinderSpreadLayer);
 
             // 贴图
             var imageCircleLayer = new layergl.ImageCircleLayer({
@@ -218,7 +213,94 @@
                     },
                 ],
             });
-            view.addLayer(imageCircleLayer);
+
+            // 防护罩
+            var shieldLayer = new layergl.ShieldLayer({
+                color: "rgb(60, 177, 172)",
+                radius: 150,
+                data: [
+                    {
+                        geometry: {
+                            type: "Point",
+                            coordinates: topPoint,
+                        },
+                    },
+                ],
+            });
+
+            // 圆柱
+            var dynamicCylinderLayer = new layergl.DynamicCylinderLayer({
+                color: "rgba(194, 147, 75, 1.0)",
+                data: [
+                    {
+                        geometry: {
+                            type: "Point",
+                            coordinates: centerPoint,
+                        },
+                    },
+                ],
+            });
+
+            // 构造曲线数据
+            var centerPointWithHeight = centerPoint.concat(100);
+            var curve = new layergl.curve.BezierCurve({
+                start: centerPointWithHeight,
+                end: leftPoint,
+            });
+            var line1 = curve.getPoints(50);
+            curve.setOptions({
+                start: centerPointWithHeight,
+                end: rightPoint,
+            });
+            var line2 = curve.getPoints(50);
+            curve.setOptions({
+                start: centerPointWithHeight,
+                end: topPoint.concat(150),
+            });
+            var line3 = curve.getPoints(50);
+            // 所有的线数据
+            var data = [
+                {
+                    color: "rgb(255, 113, 113, 0.6)",
+                    tripColor: "rgb(255, 255, 204)",
+                    geometry: {
+                        type: "LineString",
+                        coordinates: line1,
+                    },
+                },
+                {
+                    color: "rgb(113, 113, 255, 0.6)",
+                    tripColor: "rgb(255, 255, 204)",
+                    geometry: {
+                        type: "LineString",
+                        coordinates: line2,
+                    },
+                },
+                {
+                    color: "rgb(45, 144, 172, 0.6)",
+                    tripColor: "rgb(255, 255, 204)",
+                    geometry: {
+                        type: "LineString",
+                        coordinates: line3,
+                    },
+                },
+            ];
+            // 线颜色
+            var lineLayer = new layergl.SimpleLineLayer({
+                data: data,
+                blend: "lighter",
+                color: function (data) {
+                    return data.color;
+                },
+            });
+            // 飞线
+            var lineTripLayer = new layergl.LineTripLayer({
+                data: data,
+                trailLength: 3,
+                color: function (data) {
+                    return data.tripColor;
+                },
+            });
 
             fetch("./static/central_park.json")
                 .then((response) => response.json())
@@ -227,7 +309,7 @@
                     // polygon 转 points
                     for (var i = 0; i < polygons.length; i++) {
                         var polygon = polygons[i];
-                        var { height = 0 } = polygon.properties;
+                        var { height = 0, min_height = 0 } = polygon.properties;
                         var { type, coordinates } = polygon.geometry;
 
                         if (type === "Polygon") {
@@ -245,6 +327,10 @@
                                 for (var l = 0; l < coord1.length; l++) {
                                     var coord2 = coord1[l];
 
+                                    // 设置最小高度（为面图层）
+                                    coord2[2] = min_height;
+
+                                    // 存入点数据
                                     points.push({
                                         geometry: {
                                             type: "Point",
@@ -279,111 +365,28 @@
                         },
                         autoSelect: true,
                     });
-                    view.addLayer(shapeLayer);
 
                     // 点图层
                     var pointLayer = new layergl.PointLayer({
                         data: points,
                         blend: "lighter",
                         size: 1.5,
-                        shape: "square",
-                        color: "rgba(255, 255, 255, 0.8)",
+                        color: "rgba(255, 200, 200, 0.8)",
                     });
-                    view.addLayer(pointLayer);
 
-                    // 圆柱
-                    var dynamicCylinderLayer = new layergl.DynamicCylinderLayer(
-                        {
-                            color: "rgba(194, 147, 75, 1.0)",
-                            data: [
-                                {
-                                    geometry: {
-                                        type: "Point",
-                                        coordinates: centerPoint,
-                                    },
-                                },
-                            ],
-                        }
-                    );
+                    view.addLayer(groundRippleLayer);
+                    view.addLayer(cylinderSpreadLayer);
+                    view.addLayer(imageCircleLayer);
                     view.addLayer(dynamicCylinderLayer);
 
-                    // 防护罩
-                    var shieldLayer = new layergl.ShieldLayer({
-                        color: "rgb(60, 177, 172)",
-                        radius: 150,
-                        data: [
-                            {
-                                geometry: {
-                                    type: "Point",
-                                    coordinates: topPoint,
-                                },
-                            },
-                        ],
-                    });
+                    view.addLayer(pointLayer);
+                    view.addLayer(shapeLayer);
+
+                    view.addLayer(sparkLayer1);
+                    view.addLayer(sparkLayer2);
+                    view.addLayer(sparkLayer3);
+                    
                     view.addLayer(shieldLayer);
-
-                    // 构造曲线数据
-                    var centerPointWithHeight = centerPoint.concat(100);
-
-                    var curve = new layergl.curve.BezierCurve({
-                        start: centerPointWithHeight,
-                        end: leftPoint,
-                    });
-                    var line1 = curve.getPoints(50);
-                    curve.setOptions({
-                        start: centerPointWithHeight,
-                        end: rightPoint,
-                    });
-                    var line2 = curve.getPoints(50);
-                    curve.setOptions({
-                        start: centerPointWithHeight,
-                        end: topPoint.concat(150),
-                    });
-                    var line3 = curve.getPoints(50);
-
-                    // 所有的线数据
-                    var data = [
-                        {
-                            color: "rgb(255, 113, 113, 0.6)",
-                            tripColor: "rgb(255, 255, 204)",
-                            geometry: {
-                                type: "LineString",
-                                coordinates: line1,
-                            },
-                        },
-                        {
-                            color: "rgb(113, 113, 255, 0.6)",
-                            tripColor: "rgb(255, 255, 204)",
-                            geometry: {
-                                type: "LineString",
-                                coordinates: line2,
-                            },
-                        },
-                        {
-                            color: "rgb(45, 144, 172, 0.6)",
-                            tripColor: "rgb(255, 255, 204)",
-                            geometry: {
-                                type: "LineString",
-                                coordinates: line3,
-                            },
-                        },
-                    ];
-                    // 线颜色
-                    var lineLayer = new layergl.SimpleLineLayer({
-                        data: data,
-                        blend: "lighter",
-                        color: function (data) {
-                            return data.color;
-                        },
-                    });
-                    // 飞线
-                    var lineTripLayer = new layergl.LineTripLayer({
-                        data: data,
-                        trailLength: 3,
-                        color: function (data) {
-                            return data.tripColor;
-                        },
-                    });
                     view.addLayer(lineLayer);
                     view.addLayer(lineTripLayer);
                 });
