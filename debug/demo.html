@@ -30,8 +30,9 @@
         <script>
             var map = (window.map = new mapboxgl.Map({
                 container: "map",
-                zoom: 14,
-                center: [-73.96252891126437, 40.78790687108298],
+                zoom: 15,
+                center: [-73.96135450317462, 40.78853540946085],
+                pitch: 60,
                 style: {
                     version: 8,
                     sources: {
@@ -337,7 +338,7 @@
                                             coordinates: [
                                                 coord2[0],
                                                 coord2[1],
-                                                height,
+                                                min_height + height,
                                             ],
                                         },
                                     });
@@ -371,7 +372,7 @@
                         data: points,
                         blend: "lighter",
                         size: 1.5,
-                        color: "rgba(255, 200, 200, 0.8)",
+                        color: "rgba(255, 250, 240, 0.8)",
                     });
 
                     view.addLayer(groundRippleLayer);
@@ -385,7 +386,7 @@
                     view.addLayer(sparkLayer1);
                     view.addLayer(sparkLayer2);
                     view.addLayer(sparkLayer3);
-                    
+
                     view.addLayer(shieldLayer);
                     view.addLayer(lineLayer);
                     view.addLayer(lineTripLayer);
