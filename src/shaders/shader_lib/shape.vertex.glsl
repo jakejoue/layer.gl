@@ -42,6 +42,7 @@ void main() {
     // varing变量赋值
     v_position = pos.xyz;
     v_height = a_pos.z + a_height;
+    v_height_percent = pos.w;
 
     if (defines.useTexture) {
         v_texture_coord = a_texture_coord;

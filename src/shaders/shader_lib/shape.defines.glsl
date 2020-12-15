@@ -29,6 +29,7 @@ uniform float u_riseTime;
 
 // 变量
 varying float v_height;
+varying float v_height_percent;
 varying vec4 v_color;
 varying vec3 v_position;
 varying vec2 v_texture_coord;

@@ -19,7 +19,7 @@ void main() {
         }
 
         // topColor顶部颜色
-        if (v_position.z == v_height) {
+        if (v_height_percent == 1.0) {
             // 纹理优先
             if (defines.useTopTexture) {
                 textureColor = texture2D(u_top_sampler, vec2(v_texture_coord.s, v_texture_coord.t));

@@ -32,25 +32,7 @@
                 container: "map",
                 zoom: 14,
                 center: [-73.96252891126437, 40.78790687108298],
-                style: {
-                    version: 8,
-                    sources: {
-                        cartodb: {
-                            type: "raster",
-                            tiles: [
-                                "http://b.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png",
-                            ],
-                            tileSize: 256,
-                        },
-                    },
-                    layers: [
-                        {
-                            id: "1",
-                            type: "raster",
-                            source: "cartodb",
-                        },
-                    ],
-                },
+                style: "mapbox://styles/mapbox/dark-v10",
                 hash: false,
             }));
 
@@ -58,30 +40,29 @@
                 map: layergl.map.getMapBoxGLMap(map),
             });
 
-            fetch("./static/central_park.json")
-                .then((response) => response.json())
-                .then((polygons) => {
-                    var shapeLayer = new layergl.ShapeLayer({
-                        color: "rgba(194, 147, 75, 1.0)",
-                        style: "window",
-                        texture: "./static/wall2.png",
-                        topColor: "rgba(76, 76, 76, 1)",
-                        topTexture: "./static/top.jpeg",
-                        isTextureFull: true,
-                        // textureScale: 0.05,
-                        useLight: true,
-                        height: function (data) {
-                            return data.properties.height;
-                        },
-                        enablePicked: true,
-                        onClick: function (evt) {
-                            console.log(evt);
-                        },
-                        autoSelect: true,
-                    });
-                    shapeLayer.setData(polygons);
-                    view.addLayer(shapeLayer);
+            var shapeLayer = new layergl.ShapeLayer({
+                color: "rgba(194, 147, 75, 1.0)",
+                style: "window",
+                texture: "./static/wall2.png",
+                // topColor: "rgba(76, 76, 76, 1)",
+                topTexture: "./static/top.jpeg",
+                isTextureFull: true,
+                riseTime: 3000,
+                height: function (data) {
+                    return data.properties.height;
+                },
+            });
+
+            view.addLayer(shapeLayer);
+
+            map.on("click", function (e) {
+                const features = map.queryRenderedFeatures(e.point, {
+                    layers: ["building"],
                 });
+                if (features.length === 0) return;
+
+                shapeLayer.setData(features);
+            });
         </script>
     </body>
 </html>
