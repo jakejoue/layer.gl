@@ -1,10 +1,4 @@
-// 一些外部定义的变量
-struct Defines {
-    bool useLight;
-    bool useTexture;
-    bool useTopTexture;
-    bool useTopColor;
-};
+#include <shape_defines>
 
 attribute vec4 a_pos;
 attribute vec3 a_normal;
@@ -13,27 +7,6 @@ attribute vec4 a_pre_color;
 attribute float a_height;
 attribute float a_pre_height;
 attribute vec2 a_texture_coord;
-
-// 相关变量定义
-uniform Defines defines;
-
-// 时间
-uniform float u_dataTime;
-uniform float u_riseTime;
-
-// 基础参数
-uniform mat4 u_matrix;
-uniform float u_alpha;
-uniform float u_zoom_unit;
-
-// 光照
-uniform vec3 u_side_light_dir;
-
-// 变量
-varying float v_height;
-varying vec4 v_color;
-varying vec3 v_position;
-varying vec2 v_texture_coord;
 
 // 上光源
 const vec3 point_color = vec3(0.06, 0.06, 0.06);

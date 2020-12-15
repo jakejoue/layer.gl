@@ -262,7 +262,7 @@
             // 所有的线数据
             var data = [
                 {
-                    color: "rgb(255, 113, 113, 0.6)",
+                    color: "rgb(255, 113, 113, 0.8)",
                     tripColor: "rgb(255, 255, 204)",
                     geometry: {
                         type: "LineString",
@@ -270,7 +270,7 @@
                     },
                 },
                 {
-                    color: "rgb(113, 113, 255, 0.6)",
+                    color: "rgb(113, 113, 255, 0.8)",
                     tripColor: "rgb(255, 255, 204)",
                     geometry: {
                         type: "LineString",
@@ -278,7 +278,7 @@
                     },
                 },
                 {
-                    color: "rgb(45, 144, 172, 0.6)",
+                    color: "rgb(45, 144, 172, 0.8)",
                     tripColor: "rgb(255, 255, 204)",
                     geometry: {
                         type: "LineString",
@@ -289,7 +289,6 @@
             // 线颜色
             var lineLayer = new layergl.SimpleLineLayer({
                 data: data,
-                blend: "lighter",
                 color: function (data) {
                     return data.color;
                 },
@@ -351,13 +350,14 @@
                     var shapeLayer = new layergl.ShapeLayer({
                         data: polygons,
                         effects: [groundRippleLayer, cylinderSpreadLayer],
-                        color: "rgba(194, 147, 75, 1.0)",
-                        topColor: "rgba(76, 76, 76, 1)",
                         style: "window",
-                        texture: "./static/wall2.png",
+                        useLight: true,
+                        color: "rgba(194, 147, 75, 1.0)",
                         isTextureFull: true,
                         // textureScale: 0.05,
-                        useLight: true,
+                        texture: "./static/wall2.png",
+                        // topColor: "rgba(76, 76, 76, 1)",
+                        // topTexture: "./static/top.jpeg",
                         height: function (data) {
                             return data.properties.height;
                         },
@@ -371,7 +371,6 @@
                     // 点图层
                     var pointLayer = new layergl.PointLayer({
                         data: points,
-                        blend: "lighter",
                         size: 1.5,
                         color: "rgba(255, 250, 240, 0.8)",
                     });
@@ -381,8 +380,8 @@
                     view.addLayer(imageCircleLayer);
                     view.addLayer(dynamicCylinderLayer);
 
-                    view.addLayer(pointLayer);
                     view.addLayer(shapeLayer);
+                    view.addLayer(pointLayer);
 
                     view.addLayer(sparkLayer1);
                     view.addLayer(sparkLayer2);

@@ -26,6 +26,7 @@ export default class ShapeLayer extends Layer {
         ) {
             this.autoUpdate = true;
         }
+        this.textureLoaded = false;
     }
 
     getDefaultOptions() {
@@ -142,8 +143,11 @@ export default class ShapeLayer extends Layer {
         if (this.gl) {
             this.loadTextureTime && clearTimeout(this.loadTextureTime);
 
+            this.textureLoaded = false;
             this.loadTextureTime = setTimeout(() => {
                 this.loadTexture(() => {
+                    this.textureLoaded = true;
+
                     this.dataMgr.parseData(dataArray);
                     this.updateBuffer(this.dataMgr);
 
@@ -164,7 +168,7 @@ export default class ShapeLayer extends Layer {
             const program = this.program;
             program.use(gl);
 
-            if (!this.isUseTexture || this.texture) {
+            if (!this.isUseTexture || this.textureLoaded) {
                 // 渲染类型
                 const style = LayerStyles[options.style] || 0;
 
@@ -215,7 +219,7 @@ export default class ShapeLayer extends Layer {
                         defines: {
                             useLight: options.useLight,
                             useTexture: this.isUseTexture,
-                            useTopTexture: false,
+                            useTopTexture: !!options.topTexture,
                             useTopColor: !!options.topColor,
                         },
 
@@ -225,6 +229,7 @@ export default class ShapeLayer extends Layer {
 
                         // 纹理相关
                         u_sampler: this.texture,
+                        u_top_sampler: this.topTexture,
                         u_top_color: this.normizedColor(options.topColor),
 
                         // 光照相关
@@ -257,18 +262,43 @@ export default class ShapeLayer extends Layer {
     loadTexture(callBack) {
         const options = this.getOptions();
 
-        if (options.texture) {
+        if (options.texture || options.topTexture) {
             this.isUseTexture = true;
 
-            loadTextureImage(this.gl, options.texture, (texture, image) => {
-                this.image = image;
-                this.texture = texture;
-                callBack && callBack();
-                this.webglLayer.render();
-            });
+            // 回调判断
+            let textureLoaded = false,
+                topTextureLoaded = false;
+            const backHander = () => {
+                if (textureLoaded && topTextureLoaded) {
+                    callBack && callBack();
+                    this.webglLayer.render();
+                }
+            };
+
+            // 侧边纹理
+            if (options.texture) {
+                loadTextureImage(this.gl, options.texture, (texture) => {
+                    this.texture = texture;
+                    textureLoaded = true;
+                    backHander();
+                });
+            } else {
+                textureLoaded = true;
+            }
+
+            // 顶部纹理
+            if (options.topTexture) {
+                loadTextureImage(this.gl, options.topTexture, (texture) => {
+                    this.topTexture = texture;
+                    topTextureLoaded = true;
+                    backHander();
+                });
+            } else {
+                topTextureLoaded = true;
+            }
         } else {
             this.isUseTexture = false;
-            this.image = this.texture = null;
+            this.texture = this.topTexture = null;
             callBack && callBack();
         }
     }

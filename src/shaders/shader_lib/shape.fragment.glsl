@@ -1,26 +1,4 @@
-struct Defines {
-    bool useLight;
-    bool useTexture;
-    bool useTopTexture;
-    bool useTopColor;
-};
-
-varying vec4 v_color;
-varying vec3 v_position;
-varying float v_height;
-varying vec2 v_texture_coord;
-
-// 相关变量定义
-uniform Defines defines;
-
-// 一些常规变量
-uniform float u_style;
-uniform float u_time;
-uniform float u_zoom_unit;
-
-// 顶部颜色等
-uniform sampler2D u_sampler;
-uniform vec4 u_top_color;
+#include <shape_defines>
 
 void main() {
     vec4 color = vec4(v_color);
@@ -41,8 +19,13 @@ void main() {
         }
 
         // topColor顶部颜色
-        if (v_position.z == v_height && defines.useTopColor) {
-            textureColor = u_top_color;
+        if (v_position.z == v_height) {
+            // 纹理优先
+            if (defines.useTopTexture) {
+                textureColor = texture2D(u_top_sampler, vec2(v_texture_coord.s, v_texture_coord.t));
+            } else if (defines.useTopColor) {
+                textureColor = u_top_color;
+            }
         }
 
         // 光照

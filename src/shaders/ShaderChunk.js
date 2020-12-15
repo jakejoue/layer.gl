@@ -44,6 +44,7 @@ import line_3d_frag from "./shader_lib/line_3d.fragment.glsl";
 import line_trip_vert from "./shader_lib/line_trip.vertex.glsl";
 import line_trip_frag from "./shader_lib/line_trip.fragment.glsl";
 
+import shape_defines from "./shader_lib/shape.defines.glsl";
 import shape_vert from "./shader_lib/shape.vertex.glsl";
 import shape_frag from "./shader_lib/shape.fragment.glsl";
 
@@ -85,6 +86,7 @@ const ShaderChunk = {
     line_trip_vert,
     line_trip_frag,
     shape_vert,
+    shape_defines,
     shape_frag,
     spark_vert,
     spark_frag,
