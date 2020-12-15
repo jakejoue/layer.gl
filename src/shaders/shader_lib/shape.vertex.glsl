@@ -105,7 +105,7 @@ void main() {
         // 如果是贴图模式
         if (defines.useTexture) {
 
-            float directionalLightWeighting = max(dot(N, L), 0.0);
+            float directionalLightWeighting = max(0.0, dot(N, L));
 
             v_color = vec4(uAmbientColor + uDirectionalColor * directionalLightWeighting, 1.0);
 
