@@ -123,7 +123,7 @@ export default class LayerManager {
             }
         }
 
-        gl.context.unbindVAO();
+        gl.unbindVAO();
         this.webglLayer.stateManager.restore();
     }
 

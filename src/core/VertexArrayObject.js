@@ -16,7 +16,7 @@ export default class VertexArrayObject {
         indexBuffer = null,
         dynamicVertexBuffers = null,
     }) {
-        const context = (this.context = gl.context);
+        this.gl = gl;
 
         const isFreshBindRequired =
             !this.vao ||
@@ -26,7 +26,7 @@ export default class VertexArrayObject {
             this.boundVertexBuffers !== vertexBuffers ||
             this.boundDynamicVertexBuffers !== dynamicVertexBuffers;
 
-        if (!context.vertexArrayObject || isFreshBindRequired) {
+        if (!gl.vertexArrayObject || isFreshBindRequired) {
             this.freshBind({
                 program,
                 vertexBuffer,
@@ -35,7 +35,7 @@ export default class VertexArrayObject {
                 dynamicVertexBuffers,
             });
         } else {
-            context.glBindVertexArray(this.vao);
+            gl.glBindVertexArray(this.vao);
 
             // 绑定动态更新的数据
             if (dynamicVertexBuffers) {
@@ -57,13 +57,12 @@ export default class VertexArrayObject {
         indexBuffer,
         dynamicVertexBuffers,
     }) {
-        const context = this.context;
-        const gl = context.gl;
+        const gl = this.gl;
 
-        if (context.vertexArrayObject) {
+        if (gl.vertexArrayObject) {
             if (this.vao) this.destroy();
-            this.vao = context.glCreateVertexArray();
-            context.glBindVertexArray(this.vao);
+            this.vao = gl.glCreateVertexArray();
+            gl.glBindVertexArray(this.vao);
 
             // store the arguments so that we can verify them when the vao is bound again
             this.boundProgram = program;
@@ -115,7 +114,7 @@ export default class VertexArrayObject {
 
     destroy() {
         if (this.vao) {
-            this.context.glDeleteVertexArray(this.vao);
+            this.gl.glDeleteVertexArray(this.vao);
             this.vao = null;
         }
     }

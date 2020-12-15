@@ -1,8 +1,24 @@
-import Context from "./core/Context";
+import GL from "./core/GL";
 import StateManager from "./core/StateManager";
 import FrameBuffer from "./core/FrameBuffer";
 
 import { mat4 } from "gl-matrix";
+
+// 解决多版本浏览器获取webgl的问题
+function getContext(canvas, contextAttributes) {
+    const contextNames = ["webgl2", "webgl", "experimental-webgl"];
+
+    for (let i = 0; i < contextNames.length; i++) {
+        const contextName = contextNames[i];
+        const context = canvas.getContext(
+            contextName,
+            contextAttributes
+        );
+        if (context !== null) return context;
+    }
+
+    return null;
+}
 
 export default class WebglLayer {
     constructor(map, options = {}) {
@@ -13,29 +29,9 @@ export default class WebglLayer {
         this.renderArr = [];
 
         // 画布和webgl对象
-        const canvas = options.canvas
-            ? options.canvas
-            : document.createElement("canvas");
+        this.canvas = options.canvas || document.createElement("canvas");
+        this.gl = new GL(options.gl || getContext(this.canvas, options.glAttributes));
 
-        // 解决多版本浏览器获取webgl的问题
-        function getContext(contextAttributes) {
-            const contextNames = ["webgl2", "webgl", "experimental-webgl"];
-
-            for (let i = 0; i < contextNames.length; i++) {
-                const contextName = contextNames[i];
-                const context = canvas.getContext(
-                    contextName,
-                    contextAttributes
-                );
-                if (context !== null) return context;
-            }
-
-            return null;
-        }
-
-        this.canvas = canvas;
-        this.gl = options.gl ? options.gl : getContext(options.glAttributes);
-        this.gl.context = new Context(this.gl, false);
         // 修改画布样式
         this.changeSize();
 
@@ -45,9 +41,7 @@ export default class WebglLayer {
         this.options.onRender && this.renderArr.push(this.options.onRender);
 
         // webgl状态修改器
-        this.stateManager = new StateManager({
-            gl: this.gl,
-        });
+        this.stateManager = new StateManager(this.gl);
 
         // 帧缓存
         this.pickFBO = new FrameBuffer(this.gl);
@@ -62,12 +56,13 @@ export default class WebglLayer {
     bind() {
         const self = this,
             map = this.map;
+        
         // 画布缩放事件
         map.onResize(function () {
             self.changeSize();
             self.render();
         });
-        // 更新时间
+        // 更新事件
         map.onUpdate(this._update);
 
         // 其余可能支持的事件
@@ -171,7 +166,7 @@ export default class WebglLayer {
         if (this.canvas.parentNode) {
             this.canvas.parentNode.removeChild(this.canvas);
         }
-        this.gl.context = this.gl = this.canvas = null;
+        this.gl = this.gl = this.canvas = null;
         this.map.destroy && this.map.destroy();
         this.map = null;
     }

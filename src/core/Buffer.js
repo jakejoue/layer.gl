@@ -77,7 +77,7 @@ export class IndexBuffer {
             this.sizeInBytes = typeArray.byteLength;
         }
 
-        gl.context.unbindVAO();
+        gl.unbindVAO();
         this.bind();
 
         gl.bufferData(
@@ -92,7 +92,7 @@ export class IndexBuffer {
 
         assert(this.dynamicDraw);
 
-        gl.context.unbindVAO();
+        gl.unbindVAO();
         this.bind();
         gl.bufferSubData(
             gl.ELEMENT_ARRAY_BUFFER,

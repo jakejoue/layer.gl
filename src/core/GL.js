@@ -1,3 +1,11 @@
+function extend(obj, extendObj) {
+    while (obj.__proto__.constructor !== Object) {
+        obj = obj.__proto__;
+    }
+
+    obj.__proto__ = extendObj;
+}
+
 function getExtension(gl, names) {
     const length = names.length;
     for (let i = 0; i < length; ++i) {
@@ -10,18 +18,15 @@ function getExtension(gl, names) {
     return undefined;
 }
 
-export default class Context {
-    constructor(gl, webgl2 = false) {
-        this.gl = gl;
-        this.webgl2 = webgl2;
-
-        // Query and initialize extensions
-        this._elementIndexUint = !!getExtension(gl, ["OES_element_index_uint"]);
+export default class GL {
+    constructor(gl) {
+        this.webgl2 = WebGL2RenderingContext && gl instanceof WebGL2RenderingContext;
 
         // starnder api
         let glCreateVertexArray;
         let glBindVertexArray;
         let glDeleteVertexArray;
+        let elementIndexUint;
 
         let glDrawElementsInstanced;
         let glDrawArraysInstanced;
@@ -34,17 +39,15 @@ export default class Context {
         let instancedArrays;
         let drawBuffers;
 
-        if (webgl2) {
-            const self = this;
-
+        if (this.webgl2) {
             glCreateVertexArray = function () {
-                return self.gl.createVertexArray();
+                return this.createVertexArray();
             };
             glBindVertexArray = function (vao) {
-                self.gl.bindVertexArray(vao);
+                this.bindVertexArray(vao);
             };
             glDeleteVertexArray = function (vao) {
-                self.gl.deleteVertexArray(vao);
+                this.deleteVertexArray(vao);
             };
 
             glDrawElementsInstanced = function (
@@ -78,6 +81,9 @@ export default class Context {
                 gl.drawBuffers(buffers);
             };
         } else {
+            // Query and initialize extensions
+            elementIndexUint = !!getExtension(gl, ["OES_element_index_uint"]);
+
             vertexArrayObject = getExtension(gl, ["OES_vertex_array_object"]);
             if (vertexArrayObject) {
                 glCreateVertexArray = function () {
@@ -144,9 +150,15 @@ export default class Context {
 
         this.glDrawBuffers = glDrawBuffers;
 
+        this._elementIndexUint = !!elementIndexUint;
         this._vertexArrayObject = !!vertexArrayObject;
         this._instancedArrays = !!instancedArrays;
         this._drawBuffers = !!drawBuffers;
+
+        // 扩展原生的gl
+        extend(gl, this);
+
+        return gl;
     }
 
     get elementIndexUint() {

@@ -1,7 +1,6 @@
 export default class StateManager {
-    constructor(options = {}) {
-        this.options = options;
-        this.gl = options.gl;
+    constructor(gl) {
+        this.gl = gl;
         this.savedState = [];
         this.currentState = this.getCurrentState();
     }
