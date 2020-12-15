@@ -40,7 +40,6 @@
                 map: layergl.map.getMapBoxGLMap(map),
             });
             var fanLayer = new layergl.FanLayer({
-                color: "rgba(102, 0, 204, 0.6)",
                 radius: function (data) {
                     return data.properties.radius;
                 },
