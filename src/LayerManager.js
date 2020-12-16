@@ -24,8 +24,7 @@ export default class LayerManager {
                 layer.initialize && layer.initialize(threeLayer);
             } else {
                 layer.setWebglLayer(this.webglLayer);
-                layer.commonInitialize &&
-                    layer.commonInitialize(this.webglLayer.gl);
+                layer.commonInitialize && layer.commonInitialize(this.webglLayer.gl);
                 layer.initialize && layer.initialize(this.webglLayer.gl);
                 layer.onOptionsChanged(layer.getOptions(), {});
                 layer.onDataChanged(layer.getData());

@@ -1,9 +1,41 @@
-function extend(obj, extendObj) {
-    while (obj.__proto__.constructor !== Object) {
-        obj = obj.__proto__;
+function defineObj(obj, key, val) {
+    const property = Object.getOwnPropertyDescriptor(obj, key);
+    if (property && property.configurable === false) {
+        return;
     }
+    const getter = property && property.get;
+    const setter = property && property.set;
 
-    obj.__proto__ = extendObj;
+    Object.defineProperty(obj, key, {
+        enumerable: true,
+        configurable: true,
+        get: function reactiveGetter() {
+            return getter ? getter.call(obj) : val;
+        },
+        set: function reactiveSetter(newVal) {
+            const value = getter ? getter.call(obj) : val;
+            if (newVal === value || (newVal !== newVal && value !== value)) {
+                return;
+            }
+
+            newVal = getter ? setter.call(obj, newVal) : newVal;
+        },
+    });
+}
+
+function initGL(GLObj, gl) {
+    for (const key in gl) {
+        let value = gl[key];
+
+        if (typeof value === "function") {
+            value = value.bind(gl);
+        }
+        defineObj(GLObj, key, value);
+    }
+}
+
+function isWebGl2(gl) {
+    return WebGL2RenderingContext && gl instanceof WebGL2RenderingContext;
 }
 
 function getExtension(gl, names) {
@@ -20,7 +52,7 @@ function getExtension(gl, names) {
 
 export default class GL {
     constructor(gl) {
-        this.webgl2 = WebGL2RenderingContext && gl instanceof WebGL2RenderingContext;
+        this.webgl2 = isWebGl2(gl);
 
         // starnder api
         let glCreateVertexArray;
@@ -41,36 +73,19 @@ export default class GL {
 
         if (this.webgl2) {
             glCreateVertexArray = function () {
-                return this.createVertexArray();
+                return gl.createVertexArray();
             };
             glBindVertexArray = function (vao) {
-                this.bindVertexArray(vao);
+                gl.bindVertexArray(vao);
             };
             glDeleteVertexArray = function (vao) {
-                this.deleteVertexArray(vao);
+                gl.deleteVertexArray(vao);
             };
 
-            glDrawElementsInstanced = function (
-                mode,
-                count,
-                type,
-                offset,
-                instanceCount
-            ) {
-                gl.drawElementsInstanced(
-                    mode,
-                    count,
-                    type,
-                    offset,
-                    instanceCount
-                );
+            glDrawElementsInstanced = function (mode, count, type, offset, instanceCount) {
+                gl.drawElementsInstanced(mode, count, type, offset, instanceCount);
             };
-            glDrawArraysInstanced = function (
-                mode,
-                first,
-                count,
-                instanceCount
-            ) {
+            glDrawArraysInstanced = function (mode, first, count, instanceCount) {
                 gl.drawArraysInstanced(mode, first, count, instanceCount);
             };
             glVertexAttribDivisor = function (index, divisor) {
@@ -99,33 +114,11 @@ export default class GL {
 
             instancedArrays = getExtension(gl, ["ANGLE_instanced_arrays"]);
             if (instancedArrays) {
-                glDrawElementsInstanced = function (
-                    mode,
-                    count,
-                    type,
-                    offset,
-                    instanceCount
-                ) {
-                    instancedArrays.drawElementsInstancedANGLE(
-                        mode,
-                        count,
-                        type,
-                        offset,
-                        instanceCount
-                    );
+                glDrawElementsInstanced = function (mode, count, type, offset, instanceCount) {
+                    instancedArrays.drawElementsInstancedANGLE(mode, count, type, offset, instanceCount);
                 };
-                glDrawArraysInstanced = function (
-                    mode,
-                    first,
-                    count,
-                    instanceCount
-                ) {
-                    instancedArrays.drawArraysInstancedANGLE(
-                        mode,
-                        first,
-                        count,
-                        instanceCount
-                    );
+                glDrawArraysInstanced = function (mode, first, count, instanceCount) {
+                    instancedArrays.drawArraysInstancedANGLE(mode, first, count, instanceCount);
                 };
                 glVertexAttribDivisor = function (index, divisor) {
                     instancedArrays.vertexAttribDivisorANGLE(index, divisor);
@@ -156,9 +149,7 @@ export default class GL {
         this._drawBuffers = !!drawBuffers;
 
         // 扩展原生的gl
-        extend(gl, this);
-
-        return gl;
+        initGL(this, gl);
     }
 
     get elementIndexUint() {
