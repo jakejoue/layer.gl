@@ -36,7 +36,7 @@
                 hash: false,
             }));
 
-            const view = new layergl.View({
+            var view = new layergl.View({
                 map: layergl.map.getMapBoxGLMap(map),
             });
 
@@ -56,7 +56,7 @@
             view.addLayer(shapeLayer);
 
             map.on("click", function (e) {
-                const features = map.queryRenderedFeatures(e.point, {
+                var features = map.queryRenderedFeatures(e.point, {
                     layers: ["building"],
                 });
                 if (features.length === 0) return;

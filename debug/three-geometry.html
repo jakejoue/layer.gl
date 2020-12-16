@@ -26,12 +26,13 @@
 
         <script src="./mapbox-gl/mapbox-gl.js"></script>
         <script src="./mapbox-gl/access_token_generated.js"></script>
+        <script src="../node_modules/three/build/three.min.js"></script>
         <script src="../build/layergl.js"></script>
         <script>
             var map = (window.map = new mapboxgl.Map({
                 container: "map",
-                zoom: 11,
-                center: [106.543732, 29.6053115],
+                zoom: 9,
+                center: [117.3869, 34.3443],
                 style: "mapbox://styles/mapbox/dark-v10",
                 hash: false,
             }));
@@ -40,21 +41,8 @@
                 map: layergl.map.getMapBoxGLMap(map),
             });
 
-            fetch("./static/car.csv")
-                .then(function (rs) {
-                    return rs.text();
-                })
-                .then(function (csvstr) {
-                    var data = layergl.csv.getDataArray(csvstr);
-
-                    var lineLayer = new layergl.LineLayer({
-                        style: "road",
-                        width: 10,
-                        color: "rgba(255, 71, 26, 0.8)",
-                    });
-                    view.addLayer(lineLayer);
-                    lineLayer.setData([data[5]]);
-                });
+            var geometry = new layergl.GeometryLayer();
+            view.addLayer(geometry);
         </script>
     </body>
 </html>
