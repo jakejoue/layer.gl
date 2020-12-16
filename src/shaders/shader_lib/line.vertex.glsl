@@ -40,9 +40,9 @@ void main() {
     }
     #endif
     
-    vec2 extrude = a_normal.xy * a_width / 2.0 * u_zoom_units;
-    vec2 offsetXY = a_normal.xy * u_offset;
-    float offsetZ = u_offset * u_zoom_units / 100.0;
+    vec2 extrude = normalize(a_normal.xy) * a_width / 2.0 * u_zoom_units;
+    vec2 offsetXY = normalize(a_normal.xy) * u_offset * u_zoom_units;
+    float offsetZ = u_offset * u_zoom_units;
 
     gl_Position = u_matrix * vec4(a_position.xy + extrude + offsetXY, a_position.z + offsetZ, 1.0);
 }
