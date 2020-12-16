@@ -4,7 +4,6 @@ varying vec4 vFragPosition;
 varying vec4 vColor;
 varying float vStartTime;
 varying float vRadius;
-varying float vWidth;
 
 uniform mat4 uMatrix;
 uniform float uTime;

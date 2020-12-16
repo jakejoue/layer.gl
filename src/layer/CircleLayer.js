@@ -302,14 +302,12 @@ class AnimateCircleLayer extends Layer {
 
         program.use(gl);
 
-        const zoomUnit = this.map.getZoomUnits();
         Object.assign(this.uniforms, this.getCommonUniforms(transferOptions), {
             uTime: (new Date() - this.initializeTime) / 1e3,
             uZoomUnits:
                 "m" === this.options.unit
                     ? this.normizedHeight(1, this.map.getCenter())
-                    : zoomUnit,
-            lineWidth: this.options.lineWidth * zoomUnit,
+                    : this.map.getZoomUnits(),
             uMatrix: matrix,
         });
         program.setUniforms(this.uniforms);

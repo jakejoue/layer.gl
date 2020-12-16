@@ -9,17 +9,14 @@ varying vec4 vColor;
 varying vec4 vPosition;
 varying vec4 vFragPosition;
 varying float vSize;
-varying float vWidth;
 varying float vStartTime;
 varying float vRadius;
 
 uniform mat4 uMatrix;
 uniform float uZoomUnits;
-uniform float lineWidth;
 
 void main() {
     vColor = aColor;
-    vWidth = lineWidth;
     vStartTime = aStartTime;
     vSize = aSize * uZoomUnits;
     vRadius = aRadius * uZoomUnits;
