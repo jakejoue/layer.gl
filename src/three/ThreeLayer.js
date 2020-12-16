@@ -1,7 +1,7 @@
-import Layer from "../layer/Layer";
+import CommonLayer from "../layer/CommonLayer";
 import * as THREE from "three";
 
-export default class ThreeLayer extends Layer {
+export default class ThreeLayer extends CommonLayer {
     constructor(options) {
         super(options);
         this.layerType = "ThreeLayer";
@@ -59,20 +59,6 @@ export default class ThreeLayer extends Layer {
 
     getWorld() {
         return this.world;
-    }
-
-    updatePoint(threeObj, lnglat) {
-        for (
-            let children = this.world.children, i = 0;
-            i < children.length;
-            i++
-        )
-            if (children[i].isGeoGroup && children[i].object === threeObj) {
-                const k = children[i];
-                k.position.x = lnglat.lng;
-                k.position.y = lnglat.lat;
-                k.position.z = threeObj.position.z;
-            }
     }
 
     remove(threeObj) {

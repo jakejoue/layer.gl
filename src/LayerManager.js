@@ -17,19 +17,24 @@ export default class LayerManager {
         }
         if (!flag) {
             layer.map = this.webglLayer.map;
+
+            // 设置webglLayer，进行预处理
+            layer.setWebglLayer(this.webglLayer);
+
+            // 添加ThreeLayer（会公用一个ThreeLayer）
             if ("threeLayer" === layer.layerType) {
-                layer.setWebglLayer(this.webglLayer);
                 const threeLayer = layer.getThreeLayer();
                 this.addLayer(threeLayer);
-                layer.initialize && layer.initialize(threeLayer);
-            } else {
-                layer.setWebglLayer(this.webglLayer);
-                layer.commonInitialize && layer.commonInitialize(this.webglLayer.gl);
-                layer.initialize && layer.initialize(this.webglLayer.gl);
-                layer.onOptionsChanged(layer.getOptions(), {});
-                layer.onDataChanged(layer.getData());
-                layer.onChanged(layer.getOptions(), layer.getData());
             }
+
+            // 图层公共初始化处理
+            layer.commonInitialize && layer.commonInitialize(this.webglLayer.gl);
+            layer.initialize && layer.initialize(this.webglLayer.gl);
+            layer.onOptionsChanged(layer.getOptions(), {});
+            layer.onDataChanged(layer.getData());
+            layer.onChanged(layer.getOptions(), layer.getData());
+
+            // 存入layer
             this.layers.push(layer);
 
             // 开启或者停止动画
