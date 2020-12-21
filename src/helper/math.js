@@ -1,3 +1,7 @@
+export function clamp(val, min, max) {
+    return Math.min(Math.max(val, min), max);
+}
+
 export function toRadian(f) {
     return (f * Math.PI) / 180;
 }
