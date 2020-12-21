@@ -31,7 +31,8 @@
         <script>
             var map = (window.map = new mapboxgl.Map({
                 container: "map",
-                zoom: 4,
+                zoom: 15,
+                center: [114.2643734888029, 30.53202054572708],
                 style: "mapbox://styles/mapbox/dark-v10",
                 hash: false,
             }));
@@ -43,11 +44,15 @@
             var directionalLight = new THREE.DirectionalLight(0xffffff);
             directionalLight.position.set(0, 70, 100).normalize();
 
-            var geometry = new THREE.BoxGeometry(0.01, 0.01, 0.01);
+            var geometry = new THREE.BoxGeometry();
             var material = new THREE.MeshPhongMaterial({ color: 0xeeeeff });
             var cube = new THREE.Mesh(geometry, material);
-            cube.scale.fromArray([1, -1, 1]);
-            cube.position.fromArray([0.5, 0.5, 0]);
+            cube.scale.multiplyScalar(0.00001);
+            cube.position.fromArray([
+                0.8174010374688969,
+                0.4108641399103971,
+                0,
+            ]);
 
             var geometry = new layergl.GeometryLayer({
                 geometies: [directionalLight, cube],

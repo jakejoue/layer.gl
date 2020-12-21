@@ -2,16 +2,58 @@ import CommonLayer from "../layer/CommonLayer";
 import ThreeLayer from "./ThreeLayer";
 import * as THREE from "three";
 
+class LayerGroup {
+    constructor() {
+        this.pointOffset = [0, 0, 0];
+
+        this.threeLayer = null;
+        this.group = new THREE.Group();
+        this.group.isGeoGroup = true;
+    }
+
+    onAdd(threeLayer) {
+        if (this.threeLayer) {
+            this.onRemove(this.threeLayer);
+        }
+        this.threeLayer = threeLayer;
+        this.threeLayer.add(this.group);
+    }
+
+    onRemove(threeLayer) {
+        threeLayer = threeLayer || this.threeLayer;
+        threeLayer.remove(this.group);
+        this.threeLayer = null;
+    }
+
+    // 设置偏移
+    offset(centerPoint) {}
+
+    add(...rest) {
+        this.group.add(...rest);
+        return this;
+    }
+
+    remove(...rest) {
+        this.group.remove(...rest);
+        return this;
+    }
+
+    clear() {
+        this.group.remove(...this.group.children);
+        return this;
+    }
+}
+
 export default class Layer extends CommonLayer {
     constructor(options) {
         super(options);
         this.layerType = "threeLayer";
-        this.group = new THREE.Group();
+        this.group = new LayerGroup();
     }
 
     commonInitialize() {
         // 添加当前group
-        this.threeLayer.add(this.group);
+        this.group.onAdd(this.threeLayer);
     }
 
     setWebglLayer(webglLayer) {
@@ -30,7 +72,7 @@ export default class Layer extends CommonLayer {
     destroy() {
         super.destroy();
         // 移除当前group
-        this.threeLayer.remove(this.group);
+        this.group.onRemove(this.threeLayer);
         this.threeLayer = this.group = null;
     }
 

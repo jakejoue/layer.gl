@@ -6,6 +6,8 @@ export default class GeometryLayer extends Layer {
     }
 
     onChanged(options) {
+        this.group.clear();
+        
         const geometies = options.geometies || [];
         this.group.add(...geometies);
     }

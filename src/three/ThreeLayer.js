@@ -16,8 +16,8 @@ export default class ThreeLayer extends CommonLayer {
             this.camera = new THREE.Camera();
             this.scene = new THREE.Scene();
 
-            const axes = new THREE.AxisHelper(20);
-            this.scene.add(axes);
+            // const axes = new THREE.AxisHelper(20);
+            // this.scene.add(axes);
         }
 
         this.world = new THREE.Group();
