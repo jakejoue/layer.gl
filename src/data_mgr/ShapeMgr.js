@@ -126,14 +126,34 @@ export default class ShapeMgr {
         const isTextureFull = options.isTextureFull;
 
         let t_w = 0,
-            t_h = 0;
-        if (this.shapeLayer.image) {
+            t_h = 0,
+            top_t_w = 0,
+            top_t_h = 0;
+
+        const gl = this.shapeLayer.gl;
+
+        const glTexture = gl.textureManager.get(options.texture);
+        const topGlTexture = gl.textureManager.get(options.topTexture);
+
+        if (glTexture && !isTextureFull) {
             t_w = this.shapeLayer.normizedHeight(
-                this.shapeLayer.image.width * options.textureScale
+                glTexture.width * options.textureScale
             );
             t_h = this.shapeLayer.normizedHeight(
-                this.shapeLayer.image.height * options.textureScale
+                glTexture.height * options.textureScale
             );
+        }
+
+        if (topGlTexture && !isTextureFull) {
+            top_t_w = this.shapeLayer.normizedHeight(
+                topGlTexture.width * options.textureScale
+            );
+            top_t_h = this.shapeLayer.normizedHeight(
+                topGlTexture.height * options.textureScale
+            );
+        } else {
+            top_t_w = t_w;
+            top_t_h = t_h;
         }
 
         const { vertices, holes } = data;
@@ -195,8 +215,10 @@ export default class ShapeMgr {
                             (vertices[i + 1] - bound.minY) / bound.height
                         );
                     } else {
-                        textureArray.push((vertices[i] - bound.minX) / t_w);
-                        textureArray.push((vertices[i + 1] - bound.minY) / t_h);
+                        textureArray.push((vertices[i] - bound.minX) / top_t_w);
+                        textureArray.push(
+                            (vertices[i + 1] - bound.minY) / top_t_h
+                        );
                     }
                 }
                 if (pickColor) {
