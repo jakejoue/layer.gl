@@ -59,29 +59,24 @@ export default class ShapeMgr {
 
                 // 为多边形构建面数据
                 for (let j = 0; j < coords.length; j++) {
-                    const xy_s = [],
-                        z_s = [];
-
-                    coords[j][0].forEach((b) => {
-                        b = this.shapeLayer.normizedPoint(b);
-                        xy_s.push(b[0], b[1]);
-                        z_s.push(b[2]);
-                    });
+                    const coord = coords[j].map((cc) =>
+                        cc.map((b) => this.shapeLayer.normizedPoint(b))
+                    );
+                    const data = earcut.flatten(coord);
 
                     // 高度转换
-                    const coord = coords[j][0][0];
+                    const point = coords[j][0][0];
                     const _height = this.shapeLayer.normizedHeight(
                             height,
-                            coord
+                            point
                         ),
                         _preHeight = this.shapeLayer.normizedHeight(
                             preHeight,
-                            coord
+                            point
                         );
 
                     this.parseBuilding3d(
-                        xy_s,
-                        z_s,
+                        data,
                         _preHeight,
                         _height,
                         preColor,
@@ -92,29 +87,18 @@ export default class ShapeMgr {
                 }
             }
         }
-
-        // this.shapeLayer.vertexBuffer.updateData(this.outBuilding3d.vertex);
-        // this.shapeLayer.colorBuffer.updateData(this.outBuilding3d.color);
-        // this.shapeLayer.heightBuffer.updateData(this.outBuilding3d.height);
-        // this.shapeLayer.textureBuffer.updateData(this.outBuilding3d.texture);
-        // this.shapeLayer.indexBuffer.updateData(this.outBuilding3d.index);
-        // if (options.enablePicked) {
-        //     this.shapeLayer.pickBuffer.updateData(
-        //         this.outBuilding3d.pickColorVertex
-        //     );
-        // }
     }
 
-    getBounds(c) {
-        let minX = c[0],
-            minY = c[1],
-            maxX = c[0],
-            maxY = c[1];
-        for (let i = 0; i < c.length; i += 2) {
-            minX = Math.min(c[i], minX);
-            minY = Math.min(c[i + 1], minY);
-            maxX = Math.max(c[i], maxX);
-            maxY = Math.max(c[i + 1], maxY);
+    getBounds(vertices) {
+        let minX = vertices[0],
+            minY = vertices[1],
+            maxX = vertices[0],
+            maxY = vertices[1];
+        for (let i = 0; i < vertices.length; i += 3) {
+            minX = Math.min(vertices[i], minX);
+            minY = Math.min(vertices[i + 1], minY);
+            maxX = Math.max(vertices[i], maxX);
+            maxY = Math.max(vertices[i + 1], maxY);
         }
         return {
             minX: minX,
@@ -126,16 +110,7 @@ export default class ShapeMgr {
         };
     }
 
-    parseBuilding3d(
-        xy_s,
-        z_s,
-        preHeight,
-        height,
-        preColor,
-        color,
-        pickColor,
-        h
-    ) {
+    parseBuilding3d(data, preHeight, height, preColor, color, pickColor, h) {
         preHeight = preHeight !== undefined ? preHeight : height;
         preColor = preColor !== undefined ? preColor : color;
 
@@ -161,17 +136,19 @@ export default class ShapeMgr {
             );
         }
 
+        const { vertices, holes } = data;
+
         // 房顶
         if ("gradual" !== options.style) {
-            const indices = earcut(xy_s);
+            const indices = earcut(vertices, holes, 3);
 
             const index1 = indices[0],
                 index2 = indices[1],
                 index3 = indices[2];
 
-            const p1 = [xy_s[2 * index1], xy_s[2 * index1 + 1], 1];
-            const p2 = [xy_s[2 * index2], xy_s[2 * index2 + 1], 1];
-            const p3 = [xy_s[2 * index3], xy_s[2 * index3 + 1], 1];
+            const p1 = [vertices[3 * index1], vertices[3 * index1 + 1], 1];
+            const p2 = [vertices[3 * index2], vertices[3 * index2 + 1], 1];
+            const p3 = [vertices[3 * index3], vertices[3 * index3 + 1], 1];
 
             const normal = vec3.normalize(
                 [],
@@ -180,18 +157,18 @@ export default class ShapeMgr {
 
             let bound;
             if (isUseTexture) {
-                bound = this.getBounds(xy_s);
+                bound = this.getBounds(vertices);
             }
 
             // 当前开始的索引
             const startIndex = vertexArray.length / 7;
 
             // 存入顶点信息
-            for (let i = 0; i < xy_s.length; i += 2) {
+            for (let i = 0; i < vertices.length; i += 3) {
                 vertexArray.push(
-                    xy_s[i],
-                    xy_s[i + 1],
-                    z_s[i / 2],
+                    vertices[i],
+                    vertices[i + 1],
+                    vertices[i + 2],
                     1,
                     normal[0],
                     normal[1],
@@ -211,13 +188,15 @@ export default class ShapeMgr {
 
                 if (isUseTexture) {
                     if (isTextureFull) {
-                        textureArray.push((xy_s[i] - bound.minX) / bound.width);
                         textureArray.push(
-                            (xy_s[i + 1] - bound.minY) / bound.height
+                            (vertices[i] - bound.minX) / bound.width
+                        );
+                        textureArray.push(
+                            (vertices[i + 1] - bound.minY) / bound.height
                         );
                     } else {
-                        textureArray.push((xy_s[i] - bound.minX) / t_w);
-                        textureArray.push((xy_s[i + 1] - bound.minY) / t_h);
+                        textureArray.push((vertices[i] - bound.minX) / t_w);
+                        textureArray.push((vertices[i + 1] - bound.minY) / t_h);
                     }
                 }
                 if (pickColor) {
@@ -237,25 +216,30 @@ export default class ShapeMgr {
 
         // 墙面
         if (!(height === preHeight && 0 >= height)) {
-            for (let i = 0; i < xy_s.length; i += 2) {
+            for (let i = 0; i < vertices.length; i += 3) {
                 // 开始的顶点位置
                 const startIndex = vertexArray.length / 7;
 
                 // 当前顶点坐标
-                const x = xy_s[i],
-                    y = xy_s[i + 1];
+                const x = vertices[i],
+                    y = vertices[i + 1],
+                    z = vertices[i + 2];
                 // 顶点坐标和底部坐标
-                const p = [x, y, z_s[i / 2], 0],
-                    t_p = [x, y, z_s[i / 2], 1];
+                const p = [x, y, z, 0],
+                    t_p = [x, y, z, 1];
 
                 // 下个顶点的坐标
-                let j = i + 2;
-                // 如果到了最后的点，取得第一个点坐标
-                if (i === xy_s.length - 2) j = 0;
-                const n_x = xy_s[j],
-                    n_y = xy_s[j + 1];
-                const n_p = [n_x, n_y, z_s[i / 2], 0],
-                    n_t_p = [n_x, n_y, z_s[i / 2], 1];
+                const j = i + 3;
+                const holeIndex = holes.indexOf(j / 3);
+                if (holeIndex !== -1) {
+                    continue;
+                }
+
+                const n_x = vertices[j],
+                    n_y = vertices[j + 1],
+                    n_z = vertices[j + 2];
+                const n_p = [n_x, n_y, n_z, 0],
+                    n_t_p = [n_x, n_y, n_z, 1];
 
                 const ll = Math.sqrt(
                     Math.pow(n_x - x, 2),
