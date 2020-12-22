@@ -3,7 +3,6 @@ import Layer from "./Layer";
 import { VertexBuffer } from "../core/Buffer";
 import VertexArrayObject from "../core/VertexArrayObject";
 import Program from "../core/Program";
-import { loadTextureImage } from "../helper/texture";
 
 import { mat4 } from "gl-matrix";
 
@@ -73,7 +72,6 @@ export default class ImageCircleLayer extends Layer {
 
     onChanged(options, dataArray) {
         this.group = [];
-        this.textureMap = new Map();
 
         if (this.gl) {
             for (let i = 0; i < dataArray.length; i++) {
@@ -99,7 +97,7 @@ export default class ImageCircleLayer extends Layer {
                     scale: point[2],
                 });
 
-                this.loadTexture(textureUrl);
+                this.gl.textureManager.loadAndAdd(null, textureUrl);
             }
         }
     }
@@ -137,7 +135,9 @@ export default class ImageCircleLayer extends Layer {
         for (let i = 0; i < this.group.length; i++) {
             // 绑定顶点数据
             const { bufferData, point, scale, texture, color } = this.group[i];
-            if (!this.textureMap.has(texture)) continue;
+
+            const glTexture = this.gl.textureManager.get(texture);
+            if (!glTexture) continue;
 
             this.vertexBuffer.setData(bufferData);
             this.vao.bind({
@@ -154,7 +154,7 @@ export default class ImageCircleLayer extends Layer {
             const uniforms = {
                 uMatrix: matrix,
                 uObjMatrix: m,
-                uSampler: this.textureMap.get(texture),
+                uSampler: glTexture,
                 glowColor: color,
             };
             this.program.setUniforms(uniforms);
@@ -168,14 +168,5 @@ export default class ImageCircleLayer extends Layer {
 
         this.time += this.options.step / 10;
         1 < this.time && (this.time = 0);
-    }
-
-    loadTexture(textureUrl) {
-        loadTextureImage(this.gl, textureUrl, (texture) => {
-            if (this.textureMap && !this.textureMap.has(textureUrl)) {
-                this.textureMap.set(textureUrl, texture);
-                this.webglLayer && this.webglLayer.render();
-            }
-        });
     }
 }

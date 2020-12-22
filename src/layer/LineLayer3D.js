@@ -5,7 +5,6 @@ import VertexArrayObject from "../core/VertexArrayObject";
 import Program from "../core/Program";
 
 import { road } from "../helper/cavans";
-import { loadTextureImage } from "../helper/texture";
 
 function length(coords) {
     let length = 0;
@@ -387,12 +386,11 @@ export default class LineLayer3D extends Layer {
     loadTexture(callback) {
         const options = this.getOptions();
         options.texture
-            ? loadTextureImage(this.gl, options.texture, (texture, img) => {
-                  this.image = img;
+            ? this.gl.textureManager.load(options.texture, (texture) => {
                   this.texture = texture;
                   callback && callback();
                   this.webglLayer.render();
               })
-            : ((this.image = this.texture = null), callback && callback());
+            : ((this.texture = null), callback && callback());
     }
 }

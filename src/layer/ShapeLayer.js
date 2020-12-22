@@ -4,7 +4,6 @@ import { IndexBuffer, VertexBuffer } from "../core/Buffer";
 import VertexArrayObject from "../core/VertexArrayObject";
 import Program from "../core/Program";
 
-import { loadTextureImage } from "../helper/texture";
 import ShapeMgr from "../data_mgr/ShapeMgr";
 
 // 渲染类型
@@ -42,7 +41,6 @@ export default class ShapeLayer extends Layer {
 
     initialize(gl) {
         this.dataMgr = new ShapeMgr(this, gl);
-        this.texture = null;
         this.isUseTexture = false;
 
         // program
@@ -228,8 +226,10 @@ export default class ShapeLayer extends Layer {
                         u_alpha: parseFloat(options.opacity),
 
                         // 纹理相关
-                        u_sampler: this.texture,
-                        u_top_sampler: this.topTexture,
+                        u_sampler: this.gl.textureManager.get(options.texture),
+                        u_top_sampler: this.gl.textureManager.get(
+                            options.topTexture
+                        ),
                         u_top_color: this.normizedColor(options.topColor),
 
                         // 光照相关
@@ -265,40 +265,15 @@ export default class ShapeLayer extends Layer {
         if (options.texture || options.topTexture) {
             this.isUseTexture = true;
 
-            // 回调判断
-            let textureLoaded = false,
-                topTextureLoaded = false;
-            const backHander = () => {
-                if (textureLoaded && topTextureLoaded) {
+            this.gl.textureManager.loadAndAdd(
+                () => {
                     callBack && callBack();
-                    this.webglLayer.render();
-                }
-            };
-
-            // 侧边纹理
-            if (options.texture) {
-                loadTextureImage(this.gl, options.texture, (texture) => {
-                    this.texture = texture;
-                    textureLoaded = true;
-                    backHander();
-                });
-            } else {
-                textureLoaded = true;
-            }
-
-            // 顶部纹理
-            if (options.topTexture) {
-                loadTextureImage(this.gl, options.topTexture, (texture) => {
-                    this.topTexture = texture;
-                    topTextureLoaded = true;
-                    backHander();
-                });
-            } else {
-                topTextureLoaded = true;
-            }
+                },
+                options.texture,
+                options.topTexture
+            );
         } else {
             this.isUseTexture = false;
-            this.texture = this.topTexture = null;
             callBack && callBack();
         }
     }

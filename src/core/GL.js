@@ -1,3 +1,5 @@
+import TextureManager from './TextureManager';
+
 function defineObj(obj, key, val) {
     const property = Object.getOwnPropertyDescriptor(obj, key);
     if (property && property.configurable === false) {
@@ -147,6 +149,9 @@ export default class GL {
         this._vertexArrayObject = !!vertexArrayObject;
         this._instancedArrays = !!instancedArrays;
         this._drawBuffers = !!drawBuffers;
+
+        // 全局纹理管理器
+        this.textureManager = new TextureManager(gl);
 
         // 扩展原生的gl
         initGL(this, gl);

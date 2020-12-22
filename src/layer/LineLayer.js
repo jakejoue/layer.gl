@@ -5,7 +5,6 @@ import VertexArrayObject from "../core/VertexArrayObject";
 import Program from "../core/Program";
 
 import LineMgr from "../data_mgr/LineMgr";
-import { loadTextureImage } from "../helper/texture";
 import { road, arrow } from "../helper/cavans";
 
 const LineStyles = {
@@ -315,12 +314,11 @@ export default class LineLayer extends Layer {
     loadTexture(callback) {
         const options = this.getOptions();
         options.texture
-            ? loadTextureImage(this.gl, options.texture, (texture, img) => {
-                  this.image = img;
+            ? this.gl.textureManager.load(options.texture, (texture) => {
                   this.texture = texture;
                   callback && callback();
                   this.webglLayer.render();
               })
-            : ((this.image = this.texture = null), callback && callback());
+            : ((this.texture = null), callback && callback());
     }
 }
