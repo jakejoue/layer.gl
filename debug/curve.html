@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Mapbox GL JS debug page</title>
+        <meta charset="utf-8" />
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1.0, user-scalable=no"
+        />
+        <link rel="stylesheet" href="./mapbox-gl/mapbox-gl.css" />
+        <style>
+            body {
+                margin: 0;
+                padding: 0;
+            }
+            html,
+            body,
+            #map {
+                height: 100%;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div id="map"></div>
+
+        <script src="./mapbox-gl/mapbox-gl.js"></script>
+        <script src="./mapbox-gl/access_token_generated.js"></script>
+        <script src="../build/layergl.js"></script>
+        <script>
+            var map = (window.map = new mapboxgl.Map({
+                container: "map",
+                zoom: 15,
+                center: [-73.96135450317462, 40.78853540946085],
+                pitch: 60,
+                style: {
+                    version: 8,
+                    sources: {
+                        cartodb: {
+                            type: "raster",
+                            tiles: [
+                                "http://b.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png",
+                            ],
+                            tileSize: 256,
+                        },
+                    },
+                    layers: [
+                        {
+                            id: "1",
+                            type: "raster",
+                            source: "cartodb",
+                        },
+                    ],
+                },
+                hash: false,
+            }));
+
+            var view = new layergl.View({
+                map: layergl.map.getMapBoxGLMap(map),
+            });
+
+            var bezierCurve = new layergl.curve.BezierCurve();
+            var geodesicCurve = new layergl.curve.GeodesicCurve();
+            var odCurve = new layergl.curve.OdCurve();
+
+            // 相关坐标点
+            var centerPoint = [-73.96157342710615, 40.78862769626144],
+                leftPoint = [-73.97268764451633, 40.789964956045594],
+                rightPoint = [0, 0],
+                topPoint = [-73.95208268279788, 40.80320471553378];
+
+            var centerPointWithHeight = centerPoint.concat(100);
+            // bezierCurve
+            bezierCurve.setOptions({
+                start: centerPointWithHeight,
+                end: leftPoint,
+            });
+            var line1 = bezierCurve.getPoints(50);
+
+            // geodesicCurve
+            geodesicCurve.setOptions({
+                points: [rightPoint, centerPointWithHeight],
+            });
+            var line2 = geodesicCurve.getPoints();
+
+            // odCurve
+            odCurve.setOptions({
+                points: [topPoint, centerPointWithHeight],
+            });
+            var line3 = odCurve.getPoints(50);
+
+            // 所有的线数据
+            var data = [
+                {
+                    color: "rgb(255, 113, 113, 0.8)",
+                    tripColor: "rgb(255, 255, 204)",
+                    geometry: {
+                        type: "LineString",
+                        coordinates: line1,
+                    },
+                },
+                {
+                    color: "rgb(113, 113, 255, 0.8)",
+                    tripColor: "rgb(255, 255, 204)",
+                    geometry: {
+                        type: "LineString",
+                        coordinates: line2,
+                    },
+                },
+                {
+                    color: "rgb(45, 144, 172, 0.8)",
+                    tripColor: "rgb(255, 255, 204)",
+                    geometry: {
+                        type: "LineString",
+                        coordinates: line3,
+                    },
+                },
+            ];
+            // 线颜色
+            var lineLayer = new layergl.SimpleLineLayer({
+                data: data,
+                color: function (data) {
+                    return data.color;
+                },
+            });
+
+            view.addLayer(lineLayer);
+        </script>
+    </body>
+</html>
