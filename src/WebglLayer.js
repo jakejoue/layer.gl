@@ -1,6 +1,6 @@
 import GL from "./core/GL";
 import StateManager from "./core/StateManager";
-import FrameBuffer from "./core/FrameBuffer";
+import FrameBufferObject from "./core/FrameBufferObject";
 
 import { mat4 } from "gl-matrix";
 
@@ -44,7 +44,7 @@ export default class WebglLayer {
         this.stateManager = new StateManager(this.gl);
 
         // 帧缓存
-        this.pickFBO = new FrameBuffer(this.gl);
+        this.pickFBO = new FrameBufferObject(this.gl);
 
         // 绘画相关参数
         this.transferOptions = {};
@@ -157,8 +157,7 @@ export default class WebglLayer {
     }
 
     clear() {
-        this.gl.clearColor(0, 0, 0, 0);
-        this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT);
+        this.gl.clearCanvas();
     }
 
     destroy() {

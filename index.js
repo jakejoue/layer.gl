@@ -4,6 +4,9 @@ export * from "./src/utils";
 // 入口
 export { default as View } from "./src/View";
 
+// effect
+export { default as BloomEffect } from "./src/effect/BloomEffect";
+
 // 多边形
 export * from "./src/geometies/index";
 

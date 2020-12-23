@@ -6015,7 +6015,7 @@ function(z) {
         }]);
         return f
     } (),
-    xa = function d(c, a, b) {
+    FrameBufferObject = function d(c, a, b) {
         I(this, d);
         a = a || c.canvas.width;
         b = b || c.canvas.height;
@@ -6038,7 +6038,7 @@ function(z) {
         a = c.checkFramebufferStatus(c.FRAMEBUFFER);
         c.FRAMEBUFFER_COMPLETE === a && (c.bindFramebuffer(c.FRAMEBUFFER, null), c.bindTexture(c.TEXTURE_2D, null), c.bindRenderbuffer(c.RENDERBUFFER, null), this.framebuffer = e)
     },
-    Lc = function() {
+    Effect = function() {
         function c(a) {
             I(this, c);
             this.options = {};
@@ -6142,8 +6142,8 @@ function(z) {
             }
         }]);
         return a
-    } (Lc),
-    ii = function(c) {
+    } (Effect),
+    BloomEffect = function(c) {
         function a(b) {
             I(this, a);
             return Q(this, (a.__proto__ || N(a)).call(this, b))
@@ -6174,15 +6174,15 @@ function(z) {
         {
             key: "onResize",
             value: function(b) {
-                this.collectBrightBuffer = new xa(b);
-                this.bloomBuffer = new xa(b)
+                this.collectBrightBuffer = new FrameBufferObject(b);
+                this.bloomBuffer = new FrameBufferObject(b)
             }
         },
         {
             key: "getExtraFbo",
             value: function(b) {
-                this.collectBrightBuffer || (this.collectBrightBuffer = new xa(b));
-                this.bloomBuffer || (this.bloomBuffer = new xa(b));
+                this.collectBrightBuffer || (this.collectBrightBuffer = new FrameBufferObject(b));
+                this.bloomBuffer || (this.bloomBuffer = new FrameBufferObject(b));
                 return {
                     collectBrightBuffer: this.collectBrightBuffer.framebuffer,
                     bloomBuffer: this.bloomBuffer.framebuffer
@@ -6272,7 +6272,7 @@ function(z) {
             }
         }]);
         return a
-    } (Lc),
+    } (Effect),
     ji = function(c) {
         function a(b) {
             I(this, a);
@@ -6304,15 +6304,15 @@ function(z) {
         {
             key: "onResize",
             value: function(b) {
-                this.collectBrightBuffer = new xa(b);
-                this.bloomBuffer = new xa(b)
+                this.collectBrightBuffer = new FrameBufferObject(b);
+                this.bloomBuffer = new FrameBufferObject(b)
             }
         },
         {
             key: "getExtraFbo",
             value: function(b) {
-                this.collectBrightBuffer || (this.collectBrightBuffer = new xa(b));
-                this.bloomBuffer || (this.bloomBuffer = new xa(b));
+                this.collectBrightBuffer || (this.collectBrightBuffer = new FrameBufferObject(b));
+                this.bloomBuffer || (this.bloomBuffer = new FrameBufferObject(b));
                 return {
                     collectBrightBuffer: this.collectBrightBuffer.framebuffer,
                     bloomBuffer: this.bloomBuffer.framebuffer
@@ -6406,7 +6406,7 @@ function(z) {
             }
         }]);
         return a
-    } (Lc),
+    } (Effect),
     ki = function(c) {
         function a(b) {
             I(this, a);
@@ -6448,8 +6448,8 @@ function(z) {
             }
         }]);
         return a
-    } (Lc),
-    xf = function() {
+    } (Effect),
+    EffectManager = function() {
         function c(a) {
             I(this, c);
             this.gl = a;
@@ -6488,7 +6488,7 @@ function(z) {
             key: "initFbo",
             value: function() {
                 var a = this.gl;
-                this.fbo = [new xa(a), new xa(a)]
+                this.fbo = [new FrameBufferObject(a), new FrameBufferObject(a)]
             }
         },
         {
@@ -15508,7 +15508,7 @@ default = Lb;
             this.stateManager = new wf({
                 gl: this.gl
             });
-            this.pickFBO = new xa(this.gl);
+            this.pickFBO = new FrameBufferObject(this.gl);
             this.transferOptions = {};
             this.bind()
         }
@@ -19241,9 +19241,9 @@ default = Lb;
                 this.gl = a;
                 var c = this.getOptions();
                 this.inverseMatrix = E.create(Float64Array);
-                this.frameBuffer = new xa(a);
+                this.frameBuffer = new FrameBufferObject(a);
                 this.webglLayer.map.onResize(function() {
-                    b.frameBuffer = new xa(a)
+                    b.frameBuffer = new FrameBufferObject(a)
                 });
                 this.circle = Vg(64);
                 this.circleTexture = tb(a, this.circle, {
@@ -19624,7 +19624,7 @@ default = Lb;
                 autoUpdate: this.options.autoUpdate,
                 webglLayer: this.webglLayer
             });
-            this.effectManager = new xf(this.webglLayer.gl);
+            this.effectManager = new EffectManager(this.webglLayer.gl);
             this.webglRender = {
                 render: function() {}
             };
@@ -19782,14 +19782,14 @@ default = Lb;
     z.GltfLayer = wg;
     z.HeatmapLayer = Fj;
     z.BlurEffect = hi;
-    z.BloomEffect = ii;
+    z.BloomEffect = BloomEffect;
     z.BrightEffect = ji;
     z.DepthEffect = ki;
-    z.EffectManager = xf;
+    z.EffectManager = EffectManager;
     z.getContext = he;
     z.createTexture = tb;
     z.loadTextureImage = Ma;
-    z.FrameBufferObject = xa;
+    z.FrameBufferObject = FrameBufferObject;
     z.Program = Program;
     z.StateManager = wf;
     z.Buffer = Buffer;

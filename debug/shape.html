@@ -56,6 +56,7 @@
 
             var view = new layergl.View({
                 map: layergl.map.getMapBoxGLMap(map),
+                effects: [new layergl.BloomEffect()]
             });
 
             var groundRippleLayer = new layergl.GroundRippleLayer({

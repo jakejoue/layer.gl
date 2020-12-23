@@ -1,5 +1,6 @@
 import WebglLayer from "./WebglLayer";
 import LayerManager from "./LayerManager";
+import EffectManager from "./core/EffectManager";
 
 export default class View {
     constructor(options) {
@@ -7,17 +8,26 @@ export default class View {
 
         this.options = {
             autoUpdate: true,
-            ...options
+            ...options,
         };
 
         // 联合渲染对象（外部map）
         this.webglLayer = new WebglLayer(options.map, this.options);
+        this.effectManager = new EffectManager(this.webglLayer.gl);
 
         // 图层管理器
         this.layerManager = new LayerManager({
             autoUpdate: this.options.autoUpdate,
             webglLayer: this.webglLayer,
         });
+
+        this.webglRender = {
+            render: function () {},
+        };
+
+        if (this.options.effects) {
+            this.effectManager.setEffects([this.webglRender].concat(this.options.effects));
+        }
 
         // 同步相关事件
         this.webglLayer.onRender(function (evt) {
@@ -60,9 +70,19 @@ export default class View {
      * @param {*} transferOptions
      */
     _render(transferOptions) {
-        this.webglLayer.saveFramebuffer();
-        this.renderCanvas(transferOptions);
-        this.webglLayer.restoreFramebuffer();
+        const self = this,
+            effects = this.options.effects;
+
+        if (effects && effects.length > 0) {
+            this.webglRender.render = function () {
+                self.renderCanvas(transferOptions);
+            };
+            this.effectManager.render();
+        } else {
+            this.webglLayer.saveFramebuffer();
+            this.renderCanvas(transferOptions);
+            this.webglLayer.restoreFramebuffer();
+        }
     }
 
     onRender(func) {

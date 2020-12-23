@@ -178,4 +178,9 @@ export default class GL {
             this.glBindVertexArray(null);
         }
     }
+    
+    clearCanvas() {
+        this.clearColor(0, 0, 0, 0);
+        this.clear(this.COLOR_BUFFER_BIT | this.DEPTH_BUFFER_BIT);
+    }
 }
