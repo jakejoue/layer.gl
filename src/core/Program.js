@@ -82,7 +82,7 @@ function replaceEffectNums(string, effects) {
     const effectMap = effects.map;
 
     for (const key in effectMap) {
-        string = string.replace(new RegExp(key, 'g'), effectMap[key].size);
+        string = string.replace(new RegExp(key, "g"), effectMap[key].size);
     }
 
     return string.replace(/NUM_([A-Z]|_)*S/g, 0);
@@ -240,24 +240,26 @@ export default class Program {
     }
 
     getShader(shaderStr, type) {
+        // 替换 originMain
         shaderStr = shaderStr.replace("void main", "void originMain");
+        shaderStr = shaderChunk["_template_" + type].replace(
+            "#pragma ORIGIN_MAIN",
+            shaderStr
+        );
 
-        // 如果不存在effects
+        // 如果不存在effects（删除相关引用）
         if (this.effects.isEmpty) {
             shaderStr = shaderStr
                 .replace("#include <effects_pars>", "")
                 .replace("#include <effects_frag_end>", "");
         }
 
-        shaderStr = shaderChunk["_template_" + type].replace(
-            "#pragma ORIGIN_MAIN",
-            shaderStr
-        );
-
+        // 解析include相关
         shaderStr = resolveIncludes(shaderStr);
         shaderStr = replaceEffectNums(shaderStr, this.effects);
         shaderStr = unrollLoops(shaderStr);
 
+        // 剔除无效的定义
         return shaderStr.replace(/#define GLSLIFY 1\n/g, "");
     }
 

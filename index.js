@@ -5,6 +5,7 @@ export * from "./src/utils";
 export { default as View } from "./src/View";
 
 // effect
+export { default as BlurEffect } from "./src/effect/BlurEffect";
 export { default as BloomEffect } from "./src/effect/BloomEffect";
 
 // 多边形

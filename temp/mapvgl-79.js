@@ -6082,7 +6082,7 @@ function(z) {
         }]);
         return c
     } (),
-    hi = function(c) {
+    BlurEffect = function(c) {
         function a(b) {
             I(this, a);
             return Q(this, (a.__proto__ || N(a)).call(this, b))
@@ -19781,7 +19781,7 @@ default = Lb;
     z.TrafficLayer = Ej;
     z.GltfLayer = wg;
     z.HeatmapLayer = Fj;
-    z.BlurEffect = hi;
+    z.BlurEffect = BlurEffect;
     z.BloomEffect = BloomEffect;
     z.BrightEffect = ji;
     z.DepthEffect = ki;

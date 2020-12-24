@@ -57,6 +57,7 @@
 
             var view = new layergl.View({
                 map: layergl.map.getMapBoxGLMap(map),
+                effects: [new layergl.BlurEffect()]
             });
 
             // 烟花图
@@ -388,10 +389,11 @@
                     view.addLayer(groundRippleLayer);
                     view.addLayer(cylinderSpreadLayer);
                     view.addLayer(imageCircleLayer);
-                    view.addLayer(dynamicCylinderLayer);
-
+                    
                     view.addLayer(shapeLayer);
                     view.addLayer(pointLayer);
+                    
+                    view.addLayer(dynamicCylinderLayer);
 
                     view.addLayer(sparkLayer1);
                     view.addLayer(sparkLayer2);
