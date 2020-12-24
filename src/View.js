@@ -26,8 +26,14 @@ export default class View {
         };
 
         if (this.options.effects) {
-            this.effectManager.setEffects([this.webglRender].concat(this.options.effects));
+            this.effectManager.setEffects(
+                [this.webglRender].concat(this.options.effects)
+            );
         }
+        // effect resize
+        this.webglLayer.map.onResize(function () {
+            self.effectManager.onResize();
+        });
 
         // 同步相关事件
         this.webglLayer.onRender(function (evt) {
