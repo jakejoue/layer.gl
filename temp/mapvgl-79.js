@@ -6273,7 +6273,7 @@ function(z) {
         }]);
         return a
     } (Effect),
-    ji = function(c) {
+    BrightEffect = function(c) {
         function a(b) {
             I(this, a);
             return Q(this, (a.__proto__ || N(a)).call(this, b))
@@ -19783,7 +19783,7 @@ default = Lb;
     z.HeatmapLayer = Fj;
     z.BlurEffect = BlurEffect;
     z.BloomEffect = BloomEffect;
-    z.BrightEffect = ji;
+    z.BrightEffect = BrightEffect;
     z.DepthEffect = ki;
     z.EffectManager = EffectManager;
     z.getContext = he;

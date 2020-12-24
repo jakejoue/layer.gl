@@ -7,6 +7,7 @@ export { default as View } from "./src/View";
 // effect
 export { default as BlurEffect } from "./src/effect/BlurEffect";
 export { default as BloomEffect } from "./src/effect/BloomEffect";
+export { default as BrightEffect } from "./src/effect/BrightEffect";
 
 // 多边形
 export * from "./src/geometies/index";

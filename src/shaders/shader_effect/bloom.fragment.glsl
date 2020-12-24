@@ -1,7 +1,6 @@
 precision mediump float;
 
 uniform sampler2D uSampler;
-
 uniform bool isVertical;
 uniform vec2 canvasSize;
 uniform float blurSize;
@@ -28,7 +27,7 @@ void main() {
     if (isVertical) {
         for (int i = 1; i < 10; ++i) {
             result += texture2D(uSampler, vTextureCoord + vec2(0.0, offset.y * float(i))) * weight[i];
-            result += texture2D(uSampler, vTextureCoord - vec2(0.0,offset.y * float(i))) * weight[i];
+            result += texture2D(uSampler, vTextureCoord - vec2(0.0, offset.y * float(i))) * weight[i];
         }
     } else {
         for(int i = 1; i < 10; ++i) {
@@ -36,6 +35,6 @@ void main() {
             result += texture2D(uSampler, vTextureCoord - vec2(offset.x * float(i), 0.0)) * weight[i];
         }
     }
-
+    
     gl_FragColor = result;
 }

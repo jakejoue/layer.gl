@@ -6,22 +6,20 @@ import FrameBufferObject from "../core/FrameBufferObject";
 
 import ShaderEffect from "../shaders/shaderEffect";
 
-export default class BloomEffect extends Effect {
+export default class BrightEffect extends Effect {
     getProgram(gl) {
         if (!this.programBright) {
             this.programBright = new Program(gl, {
                 vertexShader: ShaderEffect.common_vert,
-                fragmentShader: ShaderEffect.bloom_bright_frag,
+                fragmentShader: ShaderEffect.bright_bright_frag,
             });
         }
-
         if (!this.programBloom) {
             this.programBloom = new Program(gl, {
                 vertexShader: ShaderEffect.common_vert,
                 fragmentShader: ShaderEffect.bloom_frag,
             });
         }
-
         if (!this.programResult) {
             this.programResult = new Program(gl, {
                 vertexShader: ShaderEffect.common_vert,
@@ -101,6 +99,10 @@ export default class BloomEffect extends Effect {
             texture = renderOptions.texture,
             fbo = renderOptions.fbo,
             options = this.getOptions();
+
+        let toneScale = "clarity" in options ? options.clarity : 1;
+        toneScale = Math.max(0, toneScale);
+        toneScale = Math.min(1, toneScale);
 
         gl.clearCanvas();
 
@@ -182,7 +184,7 @@ export default class BloomEffect extends Effect {
         programResult.setUniforms({
             originalTexture: texture,
             bloomTexture: collectBrightBuffer.texture,
-            toneScale: 1,
+            toneScale: toneScale,
         });
         gl.drawArrays(gl.TRIANGLES, 0, this.vertex.length / 3);
 
