@@ -52,9 +52,9 @@ void main() {
     vec4 icolor = a_color;
 
     #if defined(PICK)
-        if (mapvIsPicked()) {
-            icolor = uSelectedColor;
-        }
+    if (mapvIsPicked()) {
+        icolor = uSelectedColor;
+    }
     #endif
     
     // 如果使用光照
