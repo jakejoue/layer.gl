@@ -57,7 +57,19 @@
 
             var view = new layergl.View({
                 map: layergl.map.getMapBoxGLMap(map),
-                effects: [new layergl.BlurEffect()]
+                effects: [
+                    // new layergl.BlurEffect(),
+                    // new layergl.DepthEffect(),
+                    new layergl.BrightEffect({
+                        blurSize: 2,
+                        threshold: 0.3,
+                        clarity: 1,
+                    }),
+                    // new layergl.BloomEffect({
+                    //     blurSize: 2,
+                    //     threshold: 0,
+                    // }),
+                ],
             });
 
             // 烟花图
@@ -389,10 +401,10 @@
                     view.addLayer(groundRippleLayer);
                     view.addLayer(cylinderSpreadLayer);
                     view.addLayer(imageCircleLayer);
-                    
+
                     view.addLayer(shapeLayer);
                     view.addLayer(pointLayer);
-                    
+
                     view.addLayer(dynamicCylinderLayer);
 
                     view.addLayer(sparkLayer1);

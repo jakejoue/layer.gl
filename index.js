@@ -6,6 +6,7 @@ export { default as View } from "./src/View";
 
 // effect
 export { default as BlurEffect } from "./src/effect/BlurEffect";
+export { default as DepthEffect } from "./src/effect/DepthEffect";
 export { default as BloomEffect } from "./src/effect/BloomEffect";
 export { default as BrightEffect } from "./src/effect/BrightEffect";
 

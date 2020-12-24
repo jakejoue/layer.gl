@@ -6407,7 +6407,7 @@ function(z) {
         }]);
         return a
     } (Effect),
-    ki = function(c) {
+    DepthEffect = function(c) {
         function a(b) {
             I(this, a);
             return Q(this, (a.__proto__ || N(a)).call(this, b))
@@ -19784,7 +19784,7 @@ default = Lb;
     z.BlurEffect = BlurEffect;
     z.BloomEffect = BloomEffect;
     z.BrightEffect = BrightEffect;
-    z.DepthEffect = ki;
+    z.DepthEffect = DepthEffect;
     z.EffectManager = EffectManager;
     z.getContext = he;
     z.createTexture = tb;
