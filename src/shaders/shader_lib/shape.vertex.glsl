@@ -4,6 +4,7 @@ attribute vec4 a_pos;
 attribute vec3 a_normal;
 attribute vec4 a_color;
 attribute vec4 a_pre_color;
+attribute float a_base_height;
 attribute float a_height;
 attribute float a_pre_height;
 attribute vec2 a_texture_coord;
@@ -36,12 +37,12 @@ float getTransitionValue(float pre_value, float to_value) {
 
 void main() {
     vec4 pos = a_pos;
-    pos.z += pos.w * getTransitionValue(a_pre_height, a_height);
+    pos.z += a_base_height + pos.w * getTransitionValue(a_pre_height, a_height);
     gl_Position = u_matrix * vec4(pos.xyz, 1.0);
 
     // varing变量赋值
     v_position = pos.xyz;
-    v_height = a_pos.z + a_height;
+    v_height = a_pos.z + a_base_height + a_height;
     v_height_percent = pos.w;
 
     if (defines.useTexture) {

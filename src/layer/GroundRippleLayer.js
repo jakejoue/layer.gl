@@ -144,9 +144,9 @@ export default class GroundRippleLayer extends Layer {
         });
 
         // blend
+        gl.depthMask(false);
         gl.enable(gl.BLEND);
-        gl.blendFunc(gl.SRC_ALPHA, gl.DST_ALPHA);
-        gl.blendEquation(gl.FUNC_ADD);
+        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
         for (let i = 0; i < this.group.length; i++) {
             const { indexData, bufferData, uniforms } = this.group[i];

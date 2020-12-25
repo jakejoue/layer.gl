@@ -56,7 +56,7 @@ void main() {
     }
     // 渐变色
     else if (u_style == 3.0) {
-        color.a = 1.0 - pow(v_position.z / v_height, 0.3);
+        color.a = 1.0 - pow(v_height_percent, 0.3);
     }
     
     gl_FragColor = color;

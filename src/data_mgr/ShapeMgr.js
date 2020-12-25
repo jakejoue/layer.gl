@@ -31,10 +31,9 @@ export default class ShapeMgr {
             const data = dataArray[i];
 
             // 高度和颜色
+            const baseHeight = +this.shapeLayer.getValue("baseHeight", data) || 0;
             const height = +this.shapeLayer.getValue("height", data) || 0;
-            const color = this.shapeLayer.normizedColor(
-                this.shapeLayer.getValue("color", data)
-            );
+            const color = this.shapeLayer.normizedColor(this.shapeLayer.getValue("color", data));
 
             // 选中的颜色
             let pickColor;
@@ -44,9 +43,7 @@ export default class ShapeMgr {
             let preHeight, preColor;
             if (options.riseTime) {
                 preHeight = +this.shapeLayer.getValue("preHeight", data) || 0;
-                preColor = this.shapeLayer.normizedColor(
-                    this.shapeLayer.getValue("preColor", data)
-                );
+                preColor = this.shapeLayer.normizedColor(this.shapeLayer.getValue("preColor", data));
             }
 
             let coords = data.geometry.coordinates;
@@ -66,18 +63,14 @@ export default class ShapeMgr {
 
                     // 高度转换
                     const point = coords[j][0][0];
-                    const _height = this.shapeLayer.normizedHeight(
-                            height,
-                            point
-                        ),
-                        _preHeight = this.shapeLayer.normizedHeight(
-                            preHeight,
-                            point
-                        );
+                    const _baseHeight = this.shapeLayer.normizedHeight(baseHeight, point),
+                        _height = this.shapeLayer.normizedHeight(height, point),
+                        _preHeight = this.shapeLayer.normizedHeight(preHeight, point);
 
                     this.parseBuilding3d(
                         data,
                         _preHeight,
+                        _baseHeight,
                         _height,
                         preColor,
                         color,
@@ -110,7 +103,7 @@ export default class ShapeMgr {
         };
     }
 
-    parseBuilding3d(data, preHeight, height, preColor, color, pickColor, h) {
+    parseBuilding3d(data, preHeight, baseHeight, height, preColor, color, pickColor, h) {
         preHeight = preHeight !== undefined ? preHeight : height;
         preColor = preColor !== undefined ? preColor : color;
 
@@ -204,21 +197,15 @@ export default class ShapeMgr {
                     preColor[2],
                     preColor[3]
                 );
-                heightArray.push(height, preHeight);
+                heightArray.push(baseHeight, height, preHeight);
 
                 if (isUseTexture) {
                     if (isTextureFull) {
-                        textureArray.push(
-                            (vertices[i] - bound.minX) / bound.width
-                        );
-                        textureArray.push(
-                            (vertices[i + 1] - bound.minY) / bound.height
-                        );
+                        textureArray.push((vertices[i] - bound.minX) / bound.width);
+                        textureArray.push((vertices[i + 1] - bound.minY) / bound.height);
                     } else {
                         textureArray.push((vertices[i] - bound.minX) / top_t_w);
-                        textureArray.push(
-                            (vertices[i + 1] - bound.minY) / top_t_h
-                        );
+                        textureArray.push((vertices[i + 1] - bound.minY) / top_t_h);
                     }
                 }
                 if (pickColor) {
@@ -236,150 +223,126 @@ export default class ShapeMgr {
             }
         }
 
+        // 无效高度（负值高度）
+        if (height === preHeight && height <= 0) {
+            return;
+        }
+
         // 墙面
-        if (!(height === preHeight && 0 >= height)) {
-            for (let i = 0; i < vertices.length; i += 3) {
-                // 开始的顶点位置
-                const startIndex = vertexArray.length / 7;
+        for (let i = 0; i < vertices.length; i += 3) {
+            // 开始的顶点位置
+            const startIndex = vertexArray.length / 7;
 
-                // 当前顶点坐标
-                const x = vertices[i],
-                    y = vertices[i + 1],
-                    z = vertices[i + 2];
-                // 顶点坐标和底部坐标
-                const p = [x, y, z, 0],
-                    t_p = [x, y, z, 1];
+            // 当前顶点坐标
+            const x = vertices[i],
+                y = vertices[i + 1],
+                z = vertices[i + 2];
+            // 顶点坐标和底部坐标
+            const p = [x, y, z, 0],
+                t_p = [x, y, z, 1];
 
-                // 下个顶点的坐标
-                const j = i + 3;
-                const holeIndex = holes.indexOf(j / 3);
-                if (holeIndex !== -1) {
-                    continue;
+            // 下个顶点的坐标
+            const j = i + 3;
+            const holeIndex = holes.indexOf(j / 3);
+            if (holeIndex !== -1) {
+                continue;
+            }
+
+            const n_x = vertices[j],
+                n_y = vertices[j + 1],
+                n_z = vertices[j + 2];
+            const n_p = [n_x, n_y, n_z, 0],
+                n_t_p = [n_x, n_y, n_z, 1];
+
+            const ll = Math.sqrt(Math.pow(n_x - x, 2), Math.pow(n_y - y, 2));
+
+            let normal = vec3.normalize(
+                [],
+                vec3.cross([], vec3.sub([], n_p, p), vec3.sub([], t_p, p))
+            );
+            // 如果是无方向向量
+            if (normal[0] === 0 && normal[1] === 0 && normal[1] === 0) {
+                normal = vec3.normalize([], vec3.sub([], n_p, p));
+                normal = [normal[1], -normal[0], 0];
+            }
+
+            // 顶点
+            vertexArray.push(p[0], p[1], p[2], p[3]);
+            vertexArray.push(normal[0], normal[1], normal[2]);
+            vertexArray.push(t_p[0], t_p[1], t_p[2], t_p[3]);
+            vertexArray.push(normal[0], normal[1], normal[2]);
+            vertexArray.push(n_p[0], n_p[1], n_p[2], n_p[3]);
+            vertexArray.push(normal[0], normal[1], normal[2]);
+            vertexArray.push(n_t_p[0], n_t_p[1], n_t_p[2], n_t_p[3]);
+            vertexArray.push(normal[0], normal[1], normal[2]);
+
+            // 颜色
+            colorArray.push(color[0], color[1], color[2], color[3]);
+            colorArray.push(preColor[0], preColor[1], preColor[2], preColor[3]);
+            colorArray.push(color[0], color[1], color[2], color[3]);
+            colorArray.push(preColor[0], preColor[1], preColor[2], preColor[3]);
+            colorArray.push(color[0], color[1], color[2], color[3]);
+            colorArray.push(preColor[0], preColor[1], preColor[2], preColor[3]);
+            colorArray.push(color[0], color[1], color[2], color[3]);
+            colorArray.push(preColor[0], preColor[1], preColor[2], preColor[3]);
+
+            // 高度
+            heightArray.push(baseHeight, height, preHeight);
+            heightArray.push(baseHeight, height, preHeight);
+            heightArray.push(baseHeight, height, preHeight);
+            heightArray.push(baseHeight, height, preHeight);
+
+            // 纹理
+            if (isUseTexture) {
+                if (isTextureFull) {
+                    textureArray.push(0, 0);
+                    textureArray.push(0, 1);
+                    textureArray.push(1, 0);
+                    textureArray.push(1, 1);
+                } else {
+                    textureArray.push(0, 0);
+                    textureArray.push(0, height / t_h);
+                    textureArray.push(ll / t_w, 0);
+                    textureArray.push(ll / t_w, height / t_h);
                 }
+            }
 
-                const n_x = vertices[j],
-                    n_y = vertices[j + 1],
-                    n_z = vertices[j + 2];
-                const n_p = [n_x, n_y, n_z, 0],
-                    n_t_p = [n_x, n_y, n_z, 1];
-
-                const ll = Math.sqrt(
-                    Math.pow(n_x - x, 2),
-                    Math.pow(n_y - y, 2)
+            // pick用颜色
+            if (pickColor) {
+                pickColorVertexArray.push(
+                    pickColor[0] / 255,
+                    pickColor[1] / 255,
+                    pickColor[2] / 255
                 );
-
-                let normal = vec3.normalize(
-                    [],
-                    vec3.cross([], vec3.sub([], n_p, p), vec3.sub([], t_p, p))
+                pickColorVertexArray.push(
+                    pickColor[0] / 255,
+                    pickColor[1] / 255,
+                    pickColor[2] / 255
                 );
-                // 如果是无方向向量
-                if (normal[0] === 0 && normal[1] === 0 && normal[1] === 0) {
-                    normal = vec3.normalize([], vec3.sub([], n_p, p));
-                    normal = [normal[1], -normal[0], 0];
-                }
-
-                // 顶点
-                vertexArray.push(p[0], p[1], p[2], p[3]);
-                vertexArray.push(normal[0], normal[1], normal[2]);
-                vertexArray.push(t_p[0], t_p[1], t_p[2], t_p[3]);
-                vertexArray.push(normal[0], normal[1], normal[2]);
-                vertexArray.push(n_p[0], n_p[1], n_p[2], n_p[3]);
-                vertexArray.push(normal[0], normal[1], normal[2]);
-                vertexArray.push(n_t_p[0], n_t_p[1], n_t_p[2], n_t_p[3]);
-                vertexArray.push(normal[0], normal[1], normal[2]);
-
-                // 颜色
-                colorArray.push(color[0], color[1], color[2], color[3]);
-                colorArray.push(
-                    preColor[0],
-                    preColor[1],
-                    preColor[2],
-                    preColor[3]
+                pickColorVertexArray.push(
+                    pickColor[0] / 255,
+                    pickColor[1] / 255,
+                    pickColor[2] / 255
                 );
-                colorArray.push(color[0], color[1], color[2], color[3]);
-                colorArray.push(
-                    preColor[0],
-                    preColor[1],
-                    preColor[2],
-                    preColor[3]
-                );
-                colorArray.push(color[0], color[1], color[2], color[3]);
-                colorArray.push(
-                    preColor[0],
-                    preColor[1],
-                    preColor[2],
-                    preColor[3]
-                );
-                colorArray.push(color[0], color[1], color[2], color[3]);
-                colorArray.push(
-                    preColor[0],
-                    preColor[1],
-                    preColor[2],
-                    preColor[3]
-                );
-
-                // 高度
-                heightArray.push(height);
-                heightArray.push(preHeight);
-                heightArray.push(height);
-                heightArray.push(preHeight);
-                heightArray.push(height);
-                heightArray.push(preHeight);
-                heightArray.push(height);
-                heightArray.push(preHeight);
-
-                // 纹理
-                if (isUseTexture) {
-                    if (isTextureFull) {
-                        textureArray.push(0, 0);
-                        textureArray.push(0, 1);
-                        textureArray.push(1, 0);
-                        textureArray.push(1, 1);
-                    } else {
-                        textureArray.push(0, 0);
-                        textureArray.push(0, height / t_h);
-                        textureArray.push(ll / t_w, 0);
-                        textureArray.push(ll / t_w, height / t_h);
-                    }
-                }
-
-                // pick用颜色
-                if (pickColor) {
-                    pickColorVertexArray.push(
-                        pickColor[0] / 255,
-                        pickColor[1] / 255,
-                        pickColor[2] / 255
-                    );
-                    pickColorVertexArray.push(
-                        pickColor[0] / 255,
-                        pickColor[1] / 255,
-                        pickColor[2] / 255
-                    );
-                    pickColorVertexArray.push(
-                        pickColor[0] / 255,
-                        pickColor[1] / 255,
-                        pickColor[2] / 255
-                    );
-                    pickColorVertexArray.push(
-                        pickColor[0] / 255,
-                        pickColor[1] / 255,
-                        pickColor[2] / 255
-                    );
-                }
-
-                // 多边形索引
-                // 1 --- 3
-                // |     |
-                // 0 --- 2
-                indexArray.push(
-                    startIndex,
-                    startIndex + 2,
-                    startIndex + 3,
-                    startIndex,
-                    startIndex + 3,
-                    startIndex + 1
+                pickColorVertexArray.push(
+                    pickColor[0] / 255,
+                    pickColor[1] / 255,
+                    pickColor[2] / 255
                 );
             }
+
+            // 多边形索引
+            // 1 --- 3
+            // |     |
+            // 0 --- 2
+            indexArray.push(
+                startIndex,
+                startIndex + 2,
+                startIndex + 3,
+                startIndex,
+                startIndex + 3,
+                startIndex + 1
+            );
         }
     }
 }

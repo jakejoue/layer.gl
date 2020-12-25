@@ -107,6 +107,10 @@ export default class ShapeLayer extends Layer {
                 data: height,
                 attributes: [
                     {
+                        name: "a_base_height",
+                        size: 1,
+                    },
+                    {
                         name: "a_height",
                         size: 1,
                     },

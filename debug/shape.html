@@ -56,7 +56,7 @@
 
             var view = new layergl.View({
                 map: layergl.map.getMapBoxGLMap(map),
-                effects: [new layergl.BloomEffect()]
+                // effects: [new layergl.BloomEffect()]
             });
 
             var groundRippleLayer = new layergl.GroundRippleLayer({
@@ -124,11 +124,14 @@
                     var shapeLayer = new layergl.ShapeLayer({
                         effects: [groundRippleLayer, cylinderSpreadLayer],
                         color: "rgba(194, 147, 75, 1.0)",
-                        style: "window",
+                        style: "gradual",
                         texture: "./static/wall2.png",
                         isTextureFull: true,
                         // textureScale: 0.05,
                         useLight: true,
+                        baseHeight: function (data) {
+                            return data.properties.min_height;
+                        },
                         height: function (data) {
                             return data.properties.height;
                         },
