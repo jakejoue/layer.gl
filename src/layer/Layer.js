@@ -53,15 +53,17 @@ export default class Layer extends CommonLayer {
         if (options.enablePicked) {
             const pickedColor = options.autoSelect
                 ? this.pickedColor
-                : this.indexToRgb(options.selectedIndex || -1);
+                : this.indexToRgb(
+                      options.selectedIndex >= 0 ? options.selectedIndex : -1
+                  );
 
             uniforms = Object.assign(uniforms, {
-                uSelectedColor: this.normizedColor(options.selectedColor),
+                uEnablePicked: options.enablePicked,
+                uIsPickRender: !!isPickRender,
                 uPickedColor: pickedColor.map(function (a) {
                     return a / 255;
                 }),
-                uEnablePicked: options.enablePicked,
-                uIsPickRender: !!isPickRender,
+                uSelectedColor: this.normizedColor(options.selectedColor),
             });
         }
         return uniforms;
@@ -191,8 +193,8 @@ export default class Layer extends CommonLayer {
     }
 
     // 根据color获取index
-    rgbToIndex(colorArray) {
-        return colorArray[0] + 256 * colorArray[1] + 65536 * colorArray[2] - 1;
+    rgbToIndex(rgb) {
+        return rgb[0] + 256 * rgb[1] + 65536 * rgb[2] - 1;
     }
 
     // repeat模式添加相关点

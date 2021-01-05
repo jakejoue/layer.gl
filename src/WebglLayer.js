@@ -10,10 +10,7 @@ function getContext(canvas, contextAttributes) {
 
     for (let i = 0; i < contextNames.length; i++) {
         const contextName = contextNames[i];
-        const context = canvas.getContext(
-            contextName,
-            contextAttributes
-        );
+        const context = canvas.getContext(contextName, contextAttributes);
         if (context !== null) return context;
     }
 
@@ -30,7 +27,9 @@ export default class WebglLayer {
 
         // 画布和webgl对象
         this.canvas = options.canvas || document.createElement("canvas");
-        this.gl = new GL(options.gl || getContext(this.canvas, options.glAttributes));
+        this.gl = new GL(
+            options.gl || getContext(this.canvas, options.glAttributes)
+        );
 
         // 修改画布样式
         this.changeSize();
@@ -56,7 +55,7 @@ export default class WebglLayer {
     bind() {
         const self = this,
             map = this.map;
-        
+
         // 画布缩放事件
         map.onResize(function () {
             self.changeSize();
@@ -116,12 +115,11 @@ export default class WebglLayer {
             canvas.width = size.width * devicePixelRatio;
             canvas.height = size.height * devicePixelRatio;
             style.cssText =
-                "position: absolute;left:0;top:0;width:" +
+                "position: absolute; left: 0; top: 0; width:" +
                 size.width +
-                "px;height:" +
+                "px; height:" +
                 size.height +
-                "px;z-index:2;";
-            style.pointerEvents = "none";
+                "px; z-index: 2; pointer-events: none;";
             this.gl.viewport(0, 0, canvas.width, canvas.height);
         }
     }

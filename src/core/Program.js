@@ -247,13 +247,6 @@ export default class Program {
             shaderStr
         );
 
-        // 如果不存在effects（删除相关引用）
-        if (this.effects.isEmpty) {
-            shaderStr = shaderStr
-                .replace("#include <effects_pars>", "")
-                .replace("#include <effects_frag_end>", "");
-        }
-
         // 解析include相关
         shaderStr = resolveIncludes(shaderStr);
         shaderStr = replaceEffectNums(shaderStr, this.effects);
