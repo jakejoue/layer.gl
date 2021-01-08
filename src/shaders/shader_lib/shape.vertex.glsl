@@ -123,6 +123,10 @@ void main() {
     v_color *= u_alpha;
 
     // 传递 effect 需要的值
+    #if defined(HAS_EFFECTS)
+
     vGeometryPosition = pos.xyz;
     vGeometryNormal = a_normal;
+
+    #endif
 }

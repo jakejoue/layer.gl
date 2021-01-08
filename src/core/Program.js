@@ -247,6 +247,14 @@ export default class Program {
             shaderStr
         );
 
+        // 没有effects相关时
+        if (this.effects.isEmpty) {
+            shaderStr = shaderStr.replace(
+                new RegExp("#include <effects_[a-zA-Z_]*>", "g"),
+                ""
+            );
+        }
+
         // 解析include相关
         shaderStr = resolveIncludes(shaderStr);
         shaderStr = replaceEffectNums(shaderStr, this.effects);
