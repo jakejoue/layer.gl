@@ -1,0 +1,30 @@
+<?js
+var self = this;
+?>
+<h2 class="applicationName"><a href="index.html"><?js= env.conf.templates.applicationName ?></a></h2>
+
+<div class="search">
+    <input id="search" type="text" placeholder="搜索文档">
+</div>
+
+<!-- 命名空间分组 -->
+<ul class="list">
+<?js
+this.nav.namespaces.forEach(function (item) {
+?>
+    <li class="item">
+        <?js= self.linkto(item.longname, item.title) ?>
+    </li>
+<?js }); ?>
+</ul>
+
+<!-- 类分组 -->
+<ul class="class-list" style="display: none;">
+<?js
+this.nav.classes.forEach(function (item) {
+?>
+    <li class="item" data-name="<?js= item.longname ?>">
+        <?js= self.linkto(item.longname, item.title) ?>
+    </li>
+<?js }); ?>
+</ul>

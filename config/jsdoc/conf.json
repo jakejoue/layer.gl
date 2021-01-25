@@ -1,0 +1,26 @@
+{
+  "opts": {
+    "recurse": true,
+    "template": "config/jsdoc/template"
+  },
+  "tags": {
+    "allowUnknownTags": true
+  },
+  "source": {
+    "includePattern": ".+\\.js$",
+    "excludePattern": "(^|\\/|\\\\)_",
+    "include": ["src"]
+  },
+  "plugins": [],
+  "templates": {
+    "cleverLinks": true,
+    "monospaceLinks": true,
+    "default": {
+      "useLongnameInNav": true,
+      "outputSourceFiles": false
+    },
+    "applicationName": "LayerGL",
+    "navPos": "left"
+  },
+  "jsVersion": 180
+}

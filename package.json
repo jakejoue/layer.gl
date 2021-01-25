@@ -5,7 +5,8 @@
   "main": "build/layergl.js",
   "scripts": {
     "mini": "npm run build && uglifyjs build/layergl.js --source-map -c -m -o build/layergl.min.js",
-    "build": "rollup -c"
+    "build": "rollup -c",
+    "build-docs": "jsdoc -c config/jsdoc/conf.json -d docs"
   },
   "repository": {
     "type": "git",
@@ -19,6 +20,7 @@
     "@rollup/plugin-node-resolve": "^9.0.0",
     "babel-eslint": "^10.1.0",
     "eslint": "^7.14.0",
+    "jsdoc": "^3.6.6",
     "rollup": "^2.28.1",
     "rollup-plugin-glslify": "^1.2.0",
     "uglify-js": "^3.1.9"
