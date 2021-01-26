@@ -5,7 +5,11 @@ import VertexArrayObject from "../core/VertexArrayObject";
 
 import ShaderEffect from "../shaders/shaderEffect";
 
-export default class DepthEffect extends Effect {
+/**
+ * @classdesc
+ * 景深后处理特效
+ */
+class DepthEffect extends Effect {
     init(gl) {
         if (!this.program) {
             this.program = new Program(gl, {
@@ -62,3 +66,5 @@ export default class DepthEffect extends Effect {
         gl.drawArrays(gl.TRIANGLES, 0, this.vertex.length / 3);
     }
 }
+
+export default DepthEffect;

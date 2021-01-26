@@ -5,7 +5,11 @@ import VertexArrayObject from "../core/VertexArrayObject";
 
 import ShaderEffect from "../shaders/shaderEffect";
 
-export default class BlurEffect extends Effect {
+/**
+ * @classdesc
+ * 虚化处理特效
+ */
+class BlurEffect extends Effect {
     init(gl) {
         if (!this.program) {
             this.program = new Program(gl, {
@@ -39,6 +43,7 @@ export default class BlurEffect extends Effect {
             this.vao = new VertexArrayObject();
         }
     }
+
     render(renderOptions) {
         const gl = renderOptions.gl,
             texture = renderOptions.texture;
@@ -60,3 +65,5 @@ export default class BlurEffect extends Effect {
         gl.drawArrays(gl.TRIANGLES, 0, this.vertex.length / 3);
     }
 }
+
+export default BlurEffect;

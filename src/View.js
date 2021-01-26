@@ -8,11 +8,14 @@ import EffectManager from "./core/EffectManager";
  *
  * @param {Object} options
  * @param {Object} options.map 同步用的地图对象
- * @param {Boolean} [options.autoUpdate=true] 是否开启自动更新
+ * @param {Boolean=} [options.autoUpdate=true] 是否开启自动更新
+ * @param {Array=} options.effects 后处理特效
  *
  * @example
  * var view = new layergl.View({
- *     map: layergl.map.getMapBoxGLMap(map)
+ *     map: layergl.map.getMapBoxGLMap(map),
+ *     autoUpdate: true,
+ *     effects: [new layergl.BloomEffect()]
  * });
  */
 class View {

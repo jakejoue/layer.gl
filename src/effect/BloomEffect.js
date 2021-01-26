@@ -6,7 +6,15 @@ import FrameBufferObject from "../core/FrameBufferObject";
 
 import ShaderEffect from "../shaders/shaderEffect";
 
-export default class BloomEffect extends Effect {
+/**
+ * @classdesc
+ * 眩光后处理特效
+ * 
+ * @param {Object=} options
+ * @param {Number=} [options.threshold=0] 效果门槛阈值，范围 `0.0~1.0`，值越低，亮部越多
+ * @param {Number=} [options.blurSize=2] 炫光模糊值，默认2，是原图形半径的2倍
+ */
+class BloomEffect extends Effect {
     getProgram(gl) {
         if (!this.programBright) {
             this.programBright = new Program(gl, {
@@ -190,3 +198,5 @@ export default class BloomEffect extends Effect {
         gl.useProgram(null);
     }
 }
+
+export default BloomEffect;
