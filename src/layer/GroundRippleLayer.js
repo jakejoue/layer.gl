@@ -4,7 +4,7 @@ import { IndexBuffer, VertexBuffer } from "../core/Buffer";
 import VertexArrayObject from "../core/VertexArrayObject";
 import Program from "../core/Program";
 
-export default class GroundRippleLayer extends Layer {
+class GroundRippleLayer extends Layer {
     constructor(options) {
         super(options);
 
@@ -185,3 +185,5 @@ export default class GroundRippleLayer extends Layer {
         });
     }
 }
+
+export default GroundRippleLayer;

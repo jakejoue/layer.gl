@@ -14,7 +14,7 @@ const LayerStyles = {
     water: 6,
 };
 
-export default class ShapeLayer extends Layer {
+class ShapeLayer extends Layer {
     constructor(options) {
         super(options);
 
@@ -282,3 +282,5 @@ export default class ShapeLayer extends Layer {
         }
     }
 }
+
+export default ShapeLayer;

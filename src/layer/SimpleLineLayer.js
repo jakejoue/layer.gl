@@ -4,7 +4,7 @@ import { VertexBuffer } from "../core/Buffer";
 import VertexArrayObject from "../core/VertexArrayObject";
 import Program from "../core/Program";
 
-export default class SimpleLineLayer extends Layer {
+class SimpleLineLayer extends Layer {
     constructor(options) {
         super(options);
     }
@@ -128,3 +128,5 @@ export default class SimpleLineLayer extends Layer {
         gl.disable(gl.BLEND);
     }
 }
+
+export default SimpleLineLayer;

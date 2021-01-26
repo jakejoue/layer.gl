@@ -13,7 +13,7 @@ const LineStyles = {
     arrow: arrow,
 };
 
-export default class LineLayer extends Layer {
+class LineLayer extends Layer {
     constructor(options) {
         super(options);
     }
@@ -322,3 +322,5 @@ export default class LineLayer extends Layer {
             : ((this.texture = null), callback && callback());
     }
 }
+
+export default LineLayer;

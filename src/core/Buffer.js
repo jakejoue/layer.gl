@@ -228,5 +228,3 @@ export class VertexBuffer {
         }
     }
 }
-
-export default class Buffer {}

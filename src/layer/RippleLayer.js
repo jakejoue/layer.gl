@@ -4,7 +4,7 @@ import { VertexBuffer } from "../core/Buffer";
 import VertexArrayObject from "../core/VertexArrayObject";
 import Program from "../core/Program";
 
-export default class RippleLayer extends Layer {
+class RippleLayer extends Layer {
     constructor(options) {
         super(options);
 
@@ -136,3 +136,5 @@ export default class RippleLayer extends Layer {
         gl.drawArrays(gl.POINTS, 0, this.vertexBuffer.numberOfVertices);
     }
 }
+
+export default RippleLayer;

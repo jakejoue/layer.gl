@@ -44,7 +44,7 @@ class LayerGroup {
     }
 }
 
-export default class Layer extends CommonLayer {
+class Layer extends CommonLayer {
     constructor(options) {
         super(options);
         this.layerType = "threeLayer";
@@ -98,3 +98,5 @@ export default class Layer extends CommonLayer {
         return this.map.normizedPoint([point[0], point[1], height])[2];
     }
 }
+
+export default Layer;

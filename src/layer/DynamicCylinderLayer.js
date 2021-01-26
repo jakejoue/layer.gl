@@ -7,7 +7,7 @@ import TruncatedConeGeometry from "../geometies/TruncatedConeGeometry";
 
 import { mat4 } from "gl-matrix";
 
-export default class DynamicCylinderLayer extends Layer {
+class DynamicCylinderLayer extends Layer {
     constructor(options) {
         super(options);
         this.group = [];
@@ -173,3 +173,5 @@ export default class DynamicCylinderLayer extends Layer {
         }
     }
 }
+
+export default DynamicCylinderLayer;

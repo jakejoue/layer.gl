@@ -7,7 +7,7 @@ import CylinderGeometry from "../geometies/CylinderGeometry";
 
 import { mat4 } from "gl-matrix";
 
-export default class CylinderSpreadLayer extends Layer {
+class CylinderSpreadLayer extends Layer {
     constructor(options) {
         super(options);
         this.group = [];
@@ -167,3 +167,5 @@ export default class CylinderSpreadLayer extends Layer {
         });
     }
 }
+
+export default CylinderSpreadLayer;

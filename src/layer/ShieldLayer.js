@@ -7,7 +7,7 @@ import SphereGeometry from "../geometies/SphereGeometry";
 
 import { mat4 } from "gl-matrix";
 
-export default class ShieldLayer extends Layer {
+class ShieldLayer extends Layer {
     constructor(options) {
         super(options);
         this.group = [];
@@ -150,3 +150,5 @@ export default class ShieldLayer extends Layer {
         }
     }
 }
+
+export default ShieldLayer;

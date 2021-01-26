@@ -7,6 +7,7 @@
  * and [WebGL 2.0]{@link https://www.khronos.org/registry/webgl/specs/latest/2.0/}
  * specifications.
  *
+ * @private
  * @enum {Number}
  */
 const WebGLConstants = {

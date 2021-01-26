@@ -4,7 +4,7 @@ import { VertexBuffer } from "../core/Buffer";
 import VertexArrayObject from "../core/VertexArrayObject";
 import Program from "../core/Program";
 
-export default class LineTripLayer extends Layer {
+class LineTripLayer extends Layer {
     constructor(options) {
         super(options);
         this.autoUpdate = true;
@@ -139,3 +139,5 @@ export default class LineTripLayer extends Layer {
         this.time > this.endTime && (this.time = this.startTime);
     }
 }
+
+export default LineTripLayer;

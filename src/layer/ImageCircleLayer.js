@@ -6,7 +6,7 @@ import Program from "../core/Program";
 
 import { mat4 } from "gl-matrix";
 
-export default class ImageCircleLayer extends Layer {
+class ImageCircleLayer extends Layer {
     constructor(options) {
         super(options);
 
@@ -170,3 +170,5 @@ export default class ImageCircleLayer extends Layer {
         1 < this.time && (this.time = 0);
     }
 }
+
+export default ImageCircleLayer;

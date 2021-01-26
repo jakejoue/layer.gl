@@ -84,7 +84,7 @@ const LineStyle = {
     road: road(),
 };
 
-export default class LineLayer3D extends Layer {
+class LineLayer3D extends Layer {
     constructor(options) {
         super(options);
         this.initData();
@@ -394,3 +394,5 @@ export default class LineLayer3D extends Layer {
             : ((this.texture = null), callback && callback());
     }
 }
+
+export default LineLayer3D;

@@ -332,10 +332,12 @@ class AnimateCircleLayer extends Layer {
     }
 }
 
-export default class CircleLayer {
+class CircleLayer {
     constructor(options) {
         return ["wave", "bubble"].includes(options.type)
             ? new AnimateCircleLayer(options)
             : new SimpleCircleLayer(options);
     }
 }
+
+export default CircleLayer;

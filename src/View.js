@@ -2,7 +2,20 @@ import WebglLayer from "./WebglLayer";
 import LayerManager from "./LayerManager";
 import EffectManager from "./core/EffectManager";
 
-export default class View {
+/**
+ * @classdesc
+ * View是用于生成和map同步的cavans对象类，它是所有的图层增减的入口
+ *
+ * @param {Object} options
+ * @param {Object} options.map 同步用的地图对象
+ * @param {Boolean} [options.autoUpdate=true] 是否开启自动更新
+ *
+ * @example
+ * var view = new layergl.View({
+ *     map: layergl.map.getMapBoxGLMap(map)
+ * });
+ */
+class View {
     constructor(options) {
         const self = this;
 
@@ -54,8 +67,8 @@ export default class View {
     }
 
     /**
-     * @private
      * 渲染图层内容
+     * @private
      * @param {*} transferOptions
      */
     renderCanvas(transferOptions) {
@@ -65,7 +78,7 @@ export default class View {
     }
 
     /**
-     * 派发 webglLayer render 事件
+     * 主动调用的 render 接口
      */
     render() {
         this.webglLayer.render();
@@ -73,7 +86,8 @@ export default class View {
 
     /**
      * 渲染事件，包括增强器
-     * @param {*} transferOptions
+     * @private
+     * @param {Object} transferOptions
      */
     _render(transferOptions) {
         const self = this,
@@ -91,41 +105,76 @@ export default class View {
         }
     }
 
+    /**
+     * 自定义渲染后事件
+     * @param {Function} func
+     */
     onRender(func) {
         this.webglLayer.onRender(func);
     }
 
+    /**
+     * 销毁 view 对象
+     */
     destroy() {
         this.stopAnimation();
         this.layerManager.removeAllLayers();
         this.webglLayer.destroy();
     }
 
+    /**
+     * 当前是否开启了动画模式
+     * @returns {Boolean}
+     */
     isRequestAnimation() {
         return this.layerManager.isRequestAnimation();
     }
 
+    /**
+     * 开启动画模式
+     */
     startAnimation() {
         this.webglLayer.startAnimation();
     }
 
+    /**
+     * 关闭动画模式
+     */
     stopAnimation() {
         this.webglLayer.stopAnimation();
     }
 
+    /**
+     * 添加图层
+     * @param {CommonLayer} layer
+     */
     addLayer(layer) {
         this.layerManager.addLayer(layer);
     }
 
+    /**
+     * 移除图层
+     * @param {CommonLayer} layer
+     */
     removeLayer(layer) {
         this.layerManager.removeLayer(layer);
     }
 
+    /**
+     * 获取所有图层
+     * @returns {Array.<CommonLayer>}
+     */
     getAllLayers() {
         return this.layerManager.getAllLayers();
     }
 
+    /**
+     * 获取所有使用Threejs实现的图层
+     * @returns {Array.<ThreeLayer>}
+     */
     getAllThreeLayers() {
         return this.layerManager.getAllThreeLayers();
     }
 }
+
+export default View;

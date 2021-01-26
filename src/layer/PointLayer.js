@@ -9,7 +9,7 @@ const PointShapeTypes = {
     square: 2,
 };
 
-export default class PointLayer extends Layer {
+class PointLayer extends Layer {
     constructor(options) {
         super(options);
     }
@@ -144,3 +144,5 @@ export default class PointLayer extends Layer {
         gl.drawArrays(gl.POINTS, 0, this.vertexBuffer.numberOfVertices);
     }
 }
+
+export default PointLayer;

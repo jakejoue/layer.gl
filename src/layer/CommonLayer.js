@@ -1,4 +1,17 @@
-export default class CommonLayer {
+/**
+ * @typedef {Object} Feature
+ * @property {Object} geometry 多边形信息
+ * @property {String} geometry.type 多边形信息
+ * @property {Array} geometry.coordinates 多边形信息
+ * @property {Object} properties 坐标信息
+ */
+
+/**
+ * 图层基类，定义一些标准化的接口
+ *
+ * @interface
+ */
+class CommonLayer {
     constructor(options) {
         this.options = Object.assign(
             this.getCommonDefaultOptions(),
@@ -18,14 +31,27 @@ export default class CommonLayer {
         }
     }
 
+    /**
+     * 获取公共默认配置信息，需要继承实现
+     * @abstract
+     */
     getCommonDefaultOptions() {
         return {};
     }
 
+    /**
+     * 获取默认配置信息，需要继承实现
+     * @abstract
+     */
     getDefaultOptions() {
         return {};
     }
 
+    /**
+     * 初始化接口
+     * @abstract
+     * @param {WebGLRenderingContext | WebGL2RenderingContext} gl
+     */
     initialize(gl) {}
 
     destroy() {
@@ -33,8 +59,21 @@ export default class CommonLayer {
         this.onDestroy();
     }
 
-    render() {}
+    /**
+     * 渲染接口
+     * @abstract
+     * @param {Object} transferOptions
+     */
+    render(transferOptions) {}
 
+    /**
+     * 设置和更新数据的接口
+     *
+     * @api
+     * @param {Array.<Feature>} data
+     * @param {Object=} options
+     * @param {Boolean=} [options.autoRender=true] 是否自动更新图层渲染
+     */
     setData(data, options = {}) {
         this._dataDirty = true;
 
@@ -99,3 +138,5 @@ export default class CommonLayer {
         return this.autoUpdate;
     }
 }
+
+export default CommonLayer;

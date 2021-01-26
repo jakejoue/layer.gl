@@ -6,7 +6,7 @@ import Program from "../core/Program";
 
 import { mat4 } from "gl-matrix";
 
-export default class FanLayer extends Layer {
+class FanLayer extends Layer {
     constructor(options) {
         super(options);
 
@@ -168,3 +168,5 @@ export default class FanLayer extends Layer {
         1 < this.time && (this.time = 0);
     }
 }
+
+export default FanLayer;

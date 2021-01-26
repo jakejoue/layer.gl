@@ -4,7 +4,7 @@ import { VertexBuffer } from "../core/Buffer";
 import VertexArrayObject from "../core/VertexArrayObject";
 import Program from "../core/Program";
 
-export default class SparkLayer extends Layer {
+class SparkLayer extends Layer {
     constructor(options) {
         super(options);
 
@@ -120,3 +120,5 @@ export default class SparkLayer extends Layer {
         this.time > 1.5 * this.endTime && (this.time = this.startTime);
     }
 }
+
+export default SparkLayer;

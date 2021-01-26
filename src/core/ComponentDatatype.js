@@ -1,5 +1,10 @@
 import WebGLConstants from "./WebGLConstants.js";
 
+/**
+ * 顶点数据的相关类型
+ * 
+ * @private
+ */
 const ComponentDatatype = {
     /**
      * 8-bit signed byte corresponding to <code>gl.BYTE</code> and the type

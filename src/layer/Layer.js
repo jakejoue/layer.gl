@@ -4,7 +4,7 @@ import Color from "color";
 
 import { translateTransferOptions } from "../helper/offset";
 
-export default class Layer extends CommonLayer {
+class Layer extends CommonLayer {
     constructor(options) {
         super(options);
         this.pickedColor = [-1, -1, -1];
@@ -225,3 +225,5 @@ export default class Layer extends CommonLayer {
         }
     }
 }
+
+export default Layer;

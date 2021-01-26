@@ -1,7 +1,7 @@
 import CommonLayer from "../layer/CommonLayer";
 import * as THREE from "three";
 
-export default class ThreeLayer extends CommonLayer {
+class ThreeLayer extends CommonLayer {
     constructor(options) {
         super(options);
         this.layerType = "ThreeLayer";
@@ -87,3 +87,5 @@ export default class ThreeLayer extends CommonLayer {
         } else this.update();
     }
 }
+
+export default ThreeLayer;

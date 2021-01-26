@@ -1,5 +1,10 @@
 import WebGLConstants from "./WebGLConstants.js";
 
+/**
+ * 顶点索引数据的相关类型
+ * 
+ * @private
+ */
 const IndexDatatype = {
     /**
      * 8-bit unsigned byte corresponding to <code>UNSIGNED_BYTE</code> and the type
