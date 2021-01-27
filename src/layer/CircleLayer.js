@@ -332,6 +332,32 @@ class AnimateCircleLayer extends Layer {
     }
 }
 
+/**
+ * @classdesc
+ *
+ * 以贴地圆的方式展示点数据，支持设置多种圆环动画效果，继承自 Layer
+ * 
+ * @extends Layer
+ *
+ * @param {Object} options
+ * @param {String=} [options.type='simple']
+ * 可选值： <br/>
+ * simple，默认值，普通圆，扩散效果的相关设置对其无效 <br/>
+ * wave，带波纹扩散效果的圆 <br/>
+ * bubble，带冒泡扩散效果的圆 <br/>
+ * @param {String | Function=} [options.color='blue'] 颜色
+ * @param {Number | Function=} [options.size=10] 圆的半径大小，带扩散效果时指的是中心圆的半径大小
+ * @param {Number | Function=} [options.radius=(size) => 2 * size] 扩散效果的半径大小，设置值时需要比 size 的值大，否则看不出扩散效果，也可设置为函数，传入参数为中心圆半径
+ * @param {Number=} [options.duration=1]
+ * 解释：扩散效果的动画周期 <br/>
+ * wave类型时duration影响的是波纹的扩散速度，越小越快 <br/>
+ * bubble类型时duration是扩散开始到最大半径的时间，越大越长 <br/>
+ * @param {Number=} [options.trail=1]
+ * 解释：扩散效果的间隔时间 <br/>
+ * wave类型时trial影响的是波纹数，越大越多 <br/>
+ * bubble类型时trial是扩散最大半径到消失的时间，越大越长 <br/>
+ * @param {Boolean=} [options.random=true] 扩散效果的开始时间是否随机，设置为‘false’则表现为节奏一致
+ */
 class CircleLayer {
     constructor(options) {
         return ["wave", "bubble"].includes(options.type)

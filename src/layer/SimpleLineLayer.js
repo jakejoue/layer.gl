@@ -4,9 +4,26 @@ import { VertexBuffer } from "../core/Buffer";
 import VertexArrayObject from "../core/VertexArrayObject";
 import Program from "../core/Program";
 
+/**
+ * @classdesc
+ *
+ * 用来展示大数据量的简单线图层，继承自 Layer
+ *
+ * @extends Layer
+ *
+ * @param {Object} options
+ * @param {String | Function=} [options.color='rgba(25, 25, 250, 1)'] 颜色
+ * @param {String=} options.blend 线叠加模式，可选lighter
+ */
 class SimpleLineLayer extends Layer {
     constructor(options) {
         super(options);
+    }
+
+    getDefaultOptions() {
+        return {
+            color: "rgba(25, 25, 250, 1)",
+        };
     }
 
     initialize(gl) {
@@ -14,7 +31,6 @@ class SimpleLineLayer extends Layer {
             gl,
             {
                 shaderId: "simple_line",
-                defines: this.getOptions().useDash ? ["DASH"] : "",
             },
             this
         );

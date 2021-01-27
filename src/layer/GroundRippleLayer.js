@@ -4,6 +4,20 @@ import { IndexBuffer, VertexBuffer } from "../core/Buffer";
 import VertexArrayObject from "../core/VertexArrayObject";
 import Program from "../core/Program";
 
+/**
+ * @classdesc
+ *
+ * 圆形扩散效果，继承自 Layer，该图层支持作为后处理灯光效果影响 ShapeLayer
+ * 
+ * @extends Layer
+ *
+ * @param {Object} options
+ * @param {String | Function=} [options.color='rgba(25, 25, 250, 1)'] 颜色
+ * @param {Number | Function=} [options.size=100] 内半径最大值
+ * @param {Number | Function=} [options.width=400] 圆环外半径
+ * @param {Number | Function=} [options.segs=90] 圆环点数，数值越大越精细，但是性能消耗也越大
+ * @param {Number=} [options.duration=2] 动画效果周期
+ */
 class GroundRippleLayer extends Layer {
     constructor(options) {
         super(options);
@@ -21,7 +35,7 @@ class GroundRippleLayer extends Layer {
 
     getDefaultOptions() {
         return {
-            color: [0.1, 0.1, 0.9, 1],
+            color: "rgba(25, 25, 250, 1)",
             size: 1000,
             segs: 90,
             duration: 2,

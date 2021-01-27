@@ -13,6 +13,38 @@ const LineStyles = {
     arrow: arrow,
 };
 
+/**
+ * @classdesc
+ * 
+ * WebGL 默认绘制线的模式 gl.LINES 只能画一像素的线，无法指定线的宽度，该图层用来展示可指定宽度的线图层，继承自 Layer。
+ * 如果只需要绘制简单的一像素的线，可以使用 SimpleLineLayer。
+ * 该图层可使用鼠标拾取 Pick。
+ * 
+ * @extends Layer
+ * 
+ * @param {Object} options
+ * @param {String=} [options.style='normal']
+ * 解释：设置该参数，可以在线上叠加一些图形来适用于一些场景。注意，该属性只在初始化时读取一次，实例化后不可通过setOptions方法来重置 </br>
+ * 可选值： </br>
+ * road，叠加路况箭头，可用于道路场景的展示 </br>
+ * arrow，叠加尖箭头图形，可用于OD场景的展示 </br>
+ * @param {Object=} [options.styleOptions={}] 控制贴图的样式，对象具有color和width属性
+ * @param {String=} [options.color='rgba(25, 25, 250, 1)'] 颜色
+ * @param {String=} [options.blend='normal'] 线叠加模式，可选lighter
+ * @param {String=} [options.lineJoin='miter'] 线的连接拐角，可选 `miter` 尖角、`bevel` 平角、`round` 圆角
+ * @param {String=} [options.lineCap='butt'] 线的端头，可选 `butt` 平头、`square` 方头、`round` 圆头
+ * @param {Number=} [options.width=4] 线的宽度
+ * @param {Number=} [options.offset=0] 沿法线方向的偏移，几乎很少使用到，设置该属性后只能用 `butt`端头和 `miter`连接，不然会出现问题
+ * @param {Boolean=} [options.antialias=false] 抗锯齿，默认关闭为 `false`
+ * @param {Array.<Number>=} [options.dashArray=[0, 0]] 定义虚线间隔的数组，数组长度为2。数组的两位分别表示实线和虚线的长度，单位像素，如[10, 20]表示实线10px，虚线20px
+ * @param {Number=} [options.dashOffset=0] 虚线偏移量，单位像素，可以通过实时改变该值来实现动画
+ * @param {Boolean=} [options.animation=false] 设置该参数来实现蝌蚪线动画，下面的属性生效依赖该值为 true。注意，该属性只在初始化时读取一次，实例化后不可通过setOptions方法来重置
+ * @param {Number=} [options.interval=0.1] 该参数指定每条线段的长度，值为粒子长度占数据中最长的线整体长度的比例
+ * @param {Number=} [options.duration=2] 动画的循环时间，单位为秒
+ * @param {Number=} [options.trailLength=0.5] 拖尾长度占间隔的比例
+ * @param {Number=} [options.minZoom=4] 地图视野大于等于一定级别时开启动画
+ * @param {Number=} [options.maxZoom=21] 地图视野小于等于一定级别时开启动画
+ */
 class LineLayer extends Layer {
     constructor(options) {
         super(options);

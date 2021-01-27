@@ -6,7 +6,7 @@
   "scripts": {
     "mini": "npm run build && uglifyjs build/layergl.js --source-map -c -m -o build/layergl.min.js",
     "build": "rollup -c",
-    "build-docs": "jsdoc -c config/jsdoc/conf.json -d docs"
+    "build-docs": "rmdir /s/q docs && jsdoc -c config/jsdoc/conf.json -d docs"
   },
   "repository": {
     "type": "git",

@@ -7,6 +7,19 @@ import CylinderGeometry from "../geometies/CylinderGeometry";
 
 import { mat4 } from "gl-matrix";
 
+/**
+ * @classdesc
+ *
+ * 圆柱扩散效果，继承自 Layer，该图层支持作为后处理灯光效果影响 ShapeLayer
+ * 
+ * @extends Layer
+ *
+ * @param {Object} options
+ * @param {String | Function=} [options.color='rgba(25, 25, 250, 1)'] 颜色
+ * @param {Number | Function=} [options.height=5] 圆柱高度
+ * @param {Number | Function=} [options.radius=50] 扩散效果的半径大小
+ * @param {Number=} [options.duration=2] 扩散效果周期
+ */
 class CylinderSpreadLayer extends Layer {
     constructor(options) {
         super(options);

@@ -9,6 +9,24 @@ const PointShapeTypes = {
     square: 2,
 };
 
+/**
+ * @classdesc
+ * 
+ * 用来展示大数据量的简单点图层，继承自 Layer
+ * 可使用鼠标拾取 Pick
+ * 
+ * @extends Layer
+ * 
+ * @param {Object} options
+ * @param {String | Function=} [options.color='rgba(25, 25, 250, 1)'] 颜色
+ * @param {Number=} [options.shape='circle']
+ * 解释：展示点的形状 <br/>
+ * 可选值： <br/>
+ * circle，默认值，圆形 <br/>
+ * square，正方形 <br/>
+ * @param {Number=} [options.size=5] 点大小
+ * @param {String=} [options.blend='normal'] 点叠加模式，可选lighter
+ */
 class PointLayer extends Layer {
     constructor(options) {
         super(options);

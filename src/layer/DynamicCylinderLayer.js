@@ -7,6 +7,20 @@ import TruncatedConeGeometry from "../geometies/TruncatedConeGeometry";
 
 import { mat4 } from "gl-matrix";
 
+/**
+ * @classdesc
+ * 
+ * 动态圆柱体效果，继承自 Layer
+ * 
+ * @extends Layer
+ * 
+ * @param {Object} options
+ * @param {String | Function=} [options.color='blue'] 颜色
+ * @param {Number | Function=} [options.height=100] 圆柱高度
+ * @param {Number | Function=} [options.topRadius=0.8] 顶部半径
+ * @param {Number | Function=} [options.bottomRadius=8] 底部半径
+ * @param {Number=} [options.duration=5] 动画效果周期
+ */
 class DynamicCylinderLayer extends Layer {
     constructor(options) {
         super(options);

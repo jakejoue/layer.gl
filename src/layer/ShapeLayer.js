@@ -14,6 +14,36 @@ const LayerStyles = {
     water: 6,
 };
 
+/**
+ * @classdesc
+ * 
+ * 用来展示大数据的立体多边形，继承自 Layer
+ * 可使用鼠标拾取 Pick
+ * 
+ * @extends Layer
+ * 
+ * @param {Object} options
+ * @param {Number | Function=} [options.baseHeight=0] 基准高度
+ * @param {Number | Function=} [options.height=0] 高度
+ * @param {String | Function=} [options.color='rgba(25, 25, 250, 1)'] 颜色
+ * @param {String} options.topColor 顶部颜色
+ * @param {Number=} [options.opacity=1] 整体透明度
+ * @param {String | HTMLImageElement=} options.texture 默认贴图
+ * @param {String | HTMLImageElement=} options.topTexture 顶部贴图
+ * @param {Boolean=} [options.isTextureFull=false] 是否为整面贴图
+ * @param {Number=} [options.textureScale=1] 贴图缩放比例，只对非整面贴图模式有效
+ * @param {String=} options.blend 颜色叠加模式，可选lighter
+ * @param {Number=} [options.riseTime=0] 楼块初始化升起动画的时间，单位毫秒
+ * @param {String=} [options.style='normal']
+ * 解释：一些特效 </br>
+ * 可选值： </br>
+ * normal，默认，正常 </br>
+ * window，窗户效果 </br>
+ * windowAnimation，窗户动画效果 </br>
+ * gradual，渐变效果 </br>
+ * @param {Boolean=} [options.useLight=true] 是否使用光照效果
+ * @param {Array.<Number>=} [options.lightDir=[0, -1, 2]] 侧面光照方位向量
+ */
 class ShapeLayer extends Layer {
     constructor(options) {
         super(options);

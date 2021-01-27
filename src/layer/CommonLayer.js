@@ -34,6 +34,7 @@ class CommonLayer {
     /**
      * 获取公共默认配置信息，需要继承实现
      * @abstract
+     * @returns {Object} 键值对对象
      */
     getCommonDefaultOptions() {
         return {};
@@ -42,6 +43,7 @@ class CommonLayer {
     /**
      * 获取默认配置信息，需要继承实现
      * @abstract
+     * @returns {Object} 键值对对象
      */
     getDefaultOptions() {
         return {};
@@ -94,6 +96,12 @@ class CommonLayer {
         return this.data || [];
     }
 
+    /**
+     * 设置更新配置信息，options内容由相关图层定义
+     * @abstract
+     * @param {Object} options
+     * @param {Array.<Feature>=} options.data 存在该信息会自动调用 setData 接口
+     */
     setOptions(options = {}) {
         this._optionsDirty = true;
 

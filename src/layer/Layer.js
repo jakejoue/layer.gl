@@ -4,6 +4,22 @@ import Color from "color";
 
 import { translateTransferOptions } from "../helper/offset";
 
+/**
+ * @classdesc
+ * 
+ * 自定义图层基类，继承自 CommonLayer </br>
+ * 实现了一些图层功能实现需要的公用接口和方法，包括pick功能，颜色转换，坐标转换等 <br/>
+ * 具体是否支持相关功能要看继承的图层是否实现了相关参数的初始化 <br/>
+ * 
+ * @extends CommonLayer
+ * 
+ * @param {Object} options
+ * @param {Boolean=} [options.repeat=false] 是否添加重复的坐标，为了实现小缩放下连续的地图效果
+ * @param {Boolean=} [options.enablePicked=false] 是否开启拾取
+ * @param {Boolean=} [options.autoSelect=false] 是否开启自动拾取
+ * @param {Number=} [options.selectedIndex=-1] 当前选中元素的索引
+ * @param {String=} [options.selectedColor='rgba(20, 20, 200, 1.0)'] 选中后的颜色
+ */
 class Layer extends CommonLayer {
     constructor(options) {
         super(options);

@@ -4,6 +4,20 @@ import { VertexBuffer } from "../core/Buffer";
 import VertexArrayObject from "../core/VertexArrayObject";
 import Program from "../core/Program";
 
+/**
+ * @classdesc
+ * 
+ * 用来展示轨迹飞线图层，继承自 `Layer`
+ * 
+ * @extends Layer
+ * 
+ * @param {Object} options
+ * @param {String | Function=} [options.color='rgba(255, 5, 5, 1)'] 颜色
+ * @param {Number=} [options.startTime=0] 动画开始时间
+ * @param {Number=} [options.endTime=data的长度] 动画结束时间
+ * @param {Number=} [options.step=0.1] 执行每次动画的步长
+ * @param {Number=} [options.trailLength=3] 动画的拖尾时长
+ */
 class LineTripLayer extends Layer {
     constructor(options) {
         super(options);

@@ -6,6 +6,19 @@ import Program from "../core/Program";
 
 import { mat4 } from "gl-matrix";
 
+/**
+ * @classdesc
+ * 
+ * 雷达扫描效果，继承自 Layer
+ * 
+ * @extends Layer
+ * 
+ * @param {Object} options
+ * @param {String | Function=} [options.color='blue'] 颜色
+ * @param {Number | Function=} [options.totalRadian=Math.PI] 弧度
+ * @param {Number | Function=} [options.radius=50] 半径
+ * @param {Number=} [options.step=0.1] 执行每次动画的步长
+ */
 class FanLayer extends Layer {
     constructor(options) {
         super(options);

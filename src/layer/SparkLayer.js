@@ -4,6 +4,20 @@ import { VertexBuffer } from "../core/Buffer";
 import VertexArrayObject from "../core/VertexArrayObject";
 import Program from "../core/Program";
 
+/**
+ * @classdesc
+ *
+ * 用来展示烟花动画的图层，继承自 Layer
+ *
+ * @extends Layer
+ *
+ * @param {Object} options
+ * @param {String | Function=} [options.color='rgba(250, 25, 25, 1)'] 颜色
+ * @param {Number | Function=} [options.height=100] 颜色
+ * @param {Number=} [options.step=0.1] 动画的速度
+ * @param {Number=} [options.startTime=0] 动画开始时间
+ * @param {Number=} [options.endTime=10] 动画结束时间
+ */
 class SparkLayer extends Layer {
     constructor(options) {
         super(options);

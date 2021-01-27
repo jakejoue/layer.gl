@@ -4,6 +4,24 @@ import { VertexBuffer } from "../core/Buffer";
 import VertexArrayObject from "../core/VertexArrayObject";
 import Program from "../core/Program";
 
+/**
+ * @classdesc
+ * 
+ * 用来展波纹动画的图层，继承自 Layer
+ * 可使用鼠标拾取 Pick
+ * 
+ * @extends Layer
+ * 
+ * @param {Object} options
+ * @param {String | Function=} [options.color='rgba(25, 25, 250, 1)'] 颜色
+ * @param {Number=} [options.shape='circle']
+ * 解释：展示点的形状 <br/>
+ * 可选值： <br/>
+ * circle，默认值，圆形 <br/>
+ * square，正方形 <br/>
+ * @param {Number | Function=} [options.size=5] 点大小
+ * @param {String=} [options.blend='normal'] 点叠加模式，可选lighter
+ */
 class RippleLayer extends Layer {
     constructor(options) {
         super(options);

@@ -6,6 +6,20 @@ import Program from "../core/Program";
 
 import { mat4 } from "gl-matrix";
 
+
+/**
+ * @classdesc
+ *
+ * 贴图画圆效果，继承自 Layer
+ * 
+ * @extends Layer
+ *
+ * @param {Object} options
+ * @param {String | HTMLImageElement | Function} [options.texture] 贴图
+ * @param {String | Function=} [options.color='rgb(255, 255, 255)'] 颜色
+ * @param {Number | Function=} [options.radius=50] 半径
+ * @param {Number=} [options.step=0.1] 执行每次动画的步长
+ */
 class ImageCircleLayer extends Layer {
     constructor(options) {
         super(options);
@@ -17,7 +31,6 @@ class ImageCircleLayer extends Layer {
 
     getDefaultOptions() {
         return {
-            totalRadian: Math.PI,
             color: [1, 1, 1, 1],
             radius: 50,
             step: 0.1,

@@ -7,6 +7,17 @@ import SphereGeometry from "../geometies/SphereGeometry";
 
 import { mat4 } from "gl-matrix";
 
+/**
+ * @classdesc
+ *
+ * 防护罩图层，继承自 Layer
+ * 
+ * @extends Layer
+ *
+ * @param {Object} options
+ * @param {String | Function=} [options.color='rgba(25, 25, 250, 1)'] 颜色
+ * @param {Number | Function=} [options.radius=50] 半径
+ */
 class ShieldLayer extends Layer {
     constructor(options) {
         super(options);
