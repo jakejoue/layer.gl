@@ -1,8 +1,16 @@
 /**
  * @author kyle / http://nikai.us/
+ * @module csv
  */
 
 export default {
+    /**
+     * CSV字符串转为数组
+     * 
+     * @param {String} strData csv字符串
+     * @param {String=} [strDelimiter=','] 切割字符标识
+     * @returns {Array}
+     */
     CSVToArray: function(strData, strDelimiter) {
         // Check to see if the delimiter is defined. If not,
         // then default to comma.
@@ -87,6 +95,13 @@ export default {
         return( arrData );
     },
 
+    /**
+     * csv字符串专为featrue数组，需要数据有geometry，properties等属性
+     * 
+     * @param {String} csvStr csv字符串
+     * @param {String=} [split=','] 切割字符标识
+     * @returns {Array}
+     */
     getDataArray: function (csvStr, split) {
 
         const arr = this.CSVToArray(csvStr, split || ',');

@@ -1,3 +1,7 @@
+/**
+ * @module curve
+ */
+
 import MercatorProjection, { LngLat } from "../helper/MercatorProjection";
 import { toRadian, toAngle } from "../helper/math";
 
@@ -21,6 +25,20 @@ function ge(f, c) {
         : 0;
 }
 
+/**
+ * @classdesc
+ * 通过传入起点和终点，生成带高度的贝塞尔曲线坐标集，可以用来生成飞线数据
+ *
+ * @param {Object} options
+ * @param {Array} options.start 起点坐标
+ * @param {Array} options.end 终点坐标
+ *
+ * @example
+ * var curve = new layergl.curve.BezierCurve({
+ *     start: [12946640.989, 4846560.296],
+ *     end: [12946348.509, 4846401.146]
+ * });
+ */
 export class BezierCurve {
     constructor(options) {
         this.options = options || {};
@@ -34,11 +52,19 @@ export class BezierCurve {
         this.v2 = this._getControlPoint(this.v3, this.v0, 5);
     }
 
+    /**
+     * 修改起点、终点坐标等属性
+     * @param {Object} options
+     */
     setOptions(options) {
         this.options = options || {};
         this._initialize();
     }
 
+    /**
+     * 获取生成的曲线坐标集，传入的字段为曲线的分段数
+     * @param {Number} [size=20]
+     */
     getPoints(size = 20) {
         const points = [];
 
@@ -94,6 +120,18 @@ export class BezierCurve {
     }
 }
 
+/**
+ * @classdesc
+ * 通过传入2个以上的坐标点，来依次生成大地线坐标集，可以用来生成地球模式的大圆曲线
+ *
+ * @param {Object} options
+ * @param {Array} options.points 传入经过点的坐标数组
+ *
+ * @example
+ * var curve = new layergl.curve.GeodesicCurve({
+ *     points: [[116.392394, 39.910683],[10.2345234, 22.453211],[101.432322, 70.222315]]
+ * });
+ */
 export class GeodesicCurve {
     constructor(f) {
         this.WORLD_SIZE_MC_HALF = 2.0037726372307256e7;
@@ -114,11 +152,18 @@ export class GeodesicCurve {
         this.points = f;
     }
 
-    setOptions(f) {
-        this.options = f || {};
+    /**
+     * 修改坐标数组等属性
+     * @param {Object} options
+     */
+    setOptions(options) {
+        this.options = options || {};
         this._initialize();
     }
 
+    /**
+     * 获取生成的大地曲线坐标集，分段数按实际距离自动设定，无需传入参数
+     */
     getPoints() {
         if (0 === this.greatCirclePoints.length) {
             for (let f = 0; f < this.points.length - 1; f++) {
@@ -221,6 +266,19 @@ export class GeodesicCurve {
     }
 }
 
+/**
+ * @classdesc
+ * 通过传入2个或2个以上的坐标点，来依次生成od曲线坐标集。
+ * 该曲线为2D弯曲方式，且不同于大地曲线，大地曲是根据球面最短距离来计算的，距离太近的2个点基本不会弯曲，而这个Od曲线的生成算法不同，即使很短的距离也会弯曲。
+ *
+ * @param {Object} options
+ * @param {Array} options.points 传入经过点的坐标数组
+ *
+ * @example
+ * var curve = new layergl.curve.OdCurve({
+ *     points: [[116.392394, 39.910683],[111.432322, 40.222315]]
+ * });
+ */
 export class OdCurve {
     constructor(options = {}) {
         this.options = options;
@@ -249,7 +307,11 @@ export class OdCurve {
         this._initialize();
     }
 
-    getPoints(c) {
+    /**
+     * 获取生成的Od曲线坐标集，传入的字段为曲线的分段数，默认值是20
+     * @param {Number=} [size=20]
+     */
+    getPoints(size) {
         const a = [],
             b = this.points;
 
@@ -257,7 +319,7 @@ export class OdCurve {
             const f = this.getCurveByTwoPoints(
                 this._normalizaCoord(b[d]),
                 this._normalizaCoord(b[d + 1]),
-                c
+                size
             );
             if (f && 0 < f.length) {
                 a.push(...f);

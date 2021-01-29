@@ -155,6 +155,9 @@ nav ul a, nav ul a:visited, nav ul a:active {
 
 nav h3 {
     margin-top: 12px;
+    font-size: 15px;
+    letter-spacing: 0.5px;
+    font-weight: bold;
 }
 
 nav li {

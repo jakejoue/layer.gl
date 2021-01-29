@@ -18,6 +18,23 @@ this.nav.namespaces.forEach(function (item) {
 <?js }); ?>
 </ul>
 
+<!-- toc 分组 -->
+<ul class="list">
+<?js env.conf.templates.toc.forEach(function (item) { ?>
+    <?js
+    if(typeof(item) === 'string') {
+        var lastIndex = Math.max(item.lastIndexOf(':'), item.lastIndexOf('.')) + 1;
+        var linkText = item.substring(lastIndex);
+    ?>
+    <li class="item" data-name="<?js= item ?>">
+        <?js= self.linkto(item, linkText) ?>
+    </li>
+    <?js } else { ?>
+    <h3><?js= item.name ?></h3>
+    <?js } ?>
+<?js }); ?>
+</ul>
+
 <!-- 类分组 -->
 <ul class="class-list" style="display: none;">
 <?js

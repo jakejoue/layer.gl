@@ -20,7 +20,37 @@
       "outputSourceFiles": false
     },
     "applicationName": "LayerGL",
-    "navPos": "left"
+    "navPos": "left",
+    "toc": [
+      "View",
+      "Layer",
+      { "name": "可视化图层", "description": "可视化图层" },
+      "CircleLayer",
+      "CylinderSpreadLayer",
+      "DynamicCylinderLayer",
+      "FanLayer",
+      "GroundRippleLayer",
+      "ImageCircleLayer",
+      "LineLayer",
+      "LineTripLayer",
+      "PointLayer",
+      "RippleLayer",
+      "ShapeLayer",
+      "ShieldLayer",
+      "SimpleLineLayer",
+      "SparkLayer",
+      { "name": "后处理器", "description": "后处理器" },
+      "BloomEffect",
+      "BlurEffect",
+      "BrightEffect",
+      "DepthEffect",
+      { "name": "内置工具", "description": "内置工具" },
+      "module:map",
+      "module:csv",
+      "module:curve.BezierCurve",
+      "module:curve.GeodesicCurve",
+      "module:curve.OdCurve"
+    ]
   },
   "jsVersion": 180
 }

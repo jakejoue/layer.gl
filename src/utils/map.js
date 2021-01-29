@@ -1,5 +1,16 @@
+/**
+ * @module map
+ * @description
+ * 获取一个封装过的map对象，用于实现和layergl的地图联动。
+ * 该地图对象需要实现一些必要的接口，如事件绑定，坐标转换，矩阵计算等。
+ */
+
 import { mat4 } from "gl-matrix";
 
+/**
+ * 封装一个mapboxgl的地图对象
+ * @param {mapboxgl.Map} map mapbox地图
+ */
 function getMapBoxGLMap(map) {
     const transform = map.transform;
 
