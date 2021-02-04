@@ -53,7 +53,7 @@ export function circle(diameter) {
     ctx.shadowColor = "black";
     ctx.shadowOffsetX = ctx.shadowOffsetY = 1e4;
     ctx.beginPath();
-    ctx.arc(a - 1e4, a - 1e4, diameter, 0, 2 * Math.PI, !0);
+    ctx.arc(a - 1e4, a - 1e4, diameter, 0, 2 * Math.PI, true);
     ctx.closePath();
     ctx.fill();
 

@@ -29,6 +29,7 @@ export { default as ShieldLayer } from "./src/layer/ShieldLayer";
 export { default as ImageCircleLayer } from "./src/layer/ImageCircleLayer";
 export { default as CylinderSpreadLayer } from "./src/layer/CylinderSpreadLayer";
 export { default as DynamicCylinderLayer } from "./src/layer/DynamicCylinderLayer";
+export { default as HeatmapLayer } from "./src/layer/HeatmapLayer";
 
 export { default as GeometryLayer } from "./src/three/GeometryLayer";
 
