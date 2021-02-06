@@ -2,8 +2,6 @@ import GL from "./core/GL";
 import StateManager from "./core/StateManager";
 import FrameBufferObject from "./core/FrameBufferObject";
 
-import { mat4 } from "gl-matrix";
-
 // 解决多版本浏览器获取webgl的问题
 function getContext(canvas, contextAttributes) {
     const contextNames = ["webgl2", "webgl", "experimental-webgl"];
@@ -130,17 +128,11 @@ export default class WebglLayer {
 
     render() {
         if (this.map) {
-            const projectionMatrix = this.map.getProjectionMatrix().slice();
-            const viewMatrix = this.map.getViewMatrix().slice();
-            const matrix = mat4.multiply([], projectionMatrix, viewMatrix);
-
             // 更新渲染参数
             this.transferOptions = {
                 gl: this.gl,
-                projectionMatrix,
-                viewMatrix,
-                matrix,
                 stateManager: this.stateManager,
+                ...this.map.updateMatrixs(),
             };
 
             // 是否为手动更新

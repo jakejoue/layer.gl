@@ -88,13 +88,17 @@ function getMapBoxGLMap(map) {
             );
             return [mCoords.x, mCoords.y, mCoords.z];
         },
-        // 视图矩阵
-        getProjectionMatrix() {
-            return mat4.create();
-        },
-        // 可视化矩阵
-        getViewMatrix() {
-            return transform.mercatorMatrix.slice();
+        updateMatrixs() {
+            const projectionMatrix = mat4.create();
+            const viewMatrix = transform.mercatorMatrix.slice();
+            const pixelToViewMatrix = transform.pixelMatrix.slice();
+
+            return {
+                projectionMatrix,
+                viewMatrix,
+                pixelToViewMatrix,
+                matrix: mat4.multiply([], projectionMatrix, viewMatrix),
+            };
         },
         /* **************** 销毁接口 ***************** */
         // 销毁方法

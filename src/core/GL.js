@@ -179,8 +179,11 @@ export default class GL {
         }
     }
     
-    clearCanvas() {
-        this.clearColor(0, 0, 0, 0);
-        this.clear(this.COLOR_BUFFER_BIT | this.DEPTH_BUFFER_BIT);
+    clearCanvas({ color, mask } = {}) {
+        color = color || [0, 0, 0, 0];
+        mask = mask || this.COLOR_BUFFER_BIT | this.DEPTH_BUFFER_BIT;
+
+        this.clearColor(...color);
+        this.clear(mask);
     }
 }

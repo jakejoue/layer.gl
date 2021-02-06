@@ -62,7 +62,6 @@ class HeatmapLayer extends Layer {
 
                 varying vec2 vOffset;
                 varying float vCount;
-                varying vec3 vPosition;
                 
                 void main() {
                     vOffset = aOffset;
@@ -70,13 +69,10 @@ class HeatmapLayer extends Layer {
                     
                     vec2 pos = aPos.xy + aOffset.xy * aSize * uZoomUnits / 2.0;
                     gl_Position = uMatrix * vec4(pos, 0.0, 1.0);
-                    
-                    vPosition = vec3(gl_Position.z / gl_Position.w);
                 }`,
                 fragmentShader: `
                 varying vec2 vOffset;
                 varying float vCount;
-                varying vec3 vPosition;
                 
                 uniform sampler2D uCircle;
                 
@@ -88,7 +84,7 @@ class HeatmapLayer extends Layer {
                         discard;
                     }
 
-                    gl_FragColor = vec4(vPosition, intensity);
+                    gl_FragColor = vec4(.0, .0, .0, intensity);
                 }`,
             },
             this
@@ -264,17 +260,14 @@ class HeatmapLayer extends Layer {
     render(transferOptions) {
         const gl = transferOptions.gl,
             matrix = transferOptions.matrix,
-            pixelToViewMatrix =
-                transferOptions.pixelToViewMatrix || mat4.create(),
-            projectionMatrix =
-                transferOptions.projectionMatrix || mat4.create();
+            pixelToViewMatrix = transferOptions.pixelToViewMatrix,
+            projectionMatrix = transferOptions.projectionMatrix;
 
         if (this.offlineBufferData && !(0 >= this.offlineBufferData.length)) {
             const options = this.getOptions();
 
             // 绑定缓冲区，进行离屛渲染
             gl.bindFramebuffer(gl.FRAMEBUFFER, this.frameBuffer.framebuffer);
-            
             gl.clearCanvas();
 
             gl.enable(gl.BLEND);
@@ -304,11 +297,14 @@ class HeatmapLayer extends Layer {
                 gl.UNSIGNED_INT,
                 0
             );
+
             gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
+            gl.depthMask(false);
+            gl.enable(gl.BLEND);
+            gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+
             this.program.use(gl);
-            gl.enable(gl.DEPTH_TEST);
-            gl.disable(gl.BLEND);
             const inverseMatrix = mat4.create();
             mat4.multiply(inverseMatrix, projectionMatrix, pixelToViewMatrix);
             mat4.invert(inverseMatrix, inverseMatrix);
