@@ -91,7 +91,16 @@ function getMapBoxGLMap(map) {
         updateMatrixs() {
             const projectionMatrix = mat4.create();
             const viewMatrix = transform.mercatorMatrix.slice();
-            const pixelToViewMatrix = transform.pixelMatrix.slice();
+            const pixelToViewMatrix = mat4.create();
+
+            const zoomUnits = this.getZoomUnits();
+            const { x, y } = transform.point;
+            mat4.scale(pixelToViewMatrix, viewMatrix, [
+                zoomUnits,
+                zoomUnits,
+                zoomUnits,
+            ]);
+            mat4.translate(pixelToViewMatrix, pixelToViewMatrix, [x, y, 0]);
 
             return {
                 projectionMatrix,

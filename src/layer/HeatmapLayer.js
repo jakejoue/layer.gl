@@ -300,7 +300,8 @@ class HeatmapLayer extends Layer {
 
             gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
-            gl.depthMask(false);
+            gl.enable(gl.DEPTH_TEST);
+            gl.depthMask(true);
             gl.enable(gl.BLEND);
             gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
