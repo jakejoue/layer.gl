@@ -30,6 +30,7 @@
       "DynamicCylinderLayer",
       "FanLayer",
       "GroundRippleLayer",
+      "HeatmapLayer",
       "ImageCircleLayer",
       "LineLayer",
       "LineTripLayer",
