@@ -60,11 +60,21 @@ const shaderLibs = {
         vertexShader: shaderChunk.spark_vert,
         fragmentShader: shaderChunk.spark_frag,
     },
-    
+
     cylinder_spread: {
         vertexShader: shaderChunk.cylinder_spread_vert,
         fragmentShader: shaderChunk.cylinder_spread_frag,
-    }
+    },
+
+    heatmap_offline: {
+        vertexShader: shaderChunk.heatmap_offline_vert,
+        fragmentShader: shaderChunk.heatmap_offline_frag,
+    },
+
+    heatmap: {
+        vertexShader: shaderChunk.heatmap_vert,
+        fragmentShader: shaderChunk.heatmap_frag,
+    },
 };
 
 export default shaderLibs;

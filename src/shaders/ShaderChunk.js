@@ -54,6 +54,11 @@ import spark_frag from "./shader_lib/spark.fragment.glsl";
 import cylinder_spread_vert from "./shader_lib/cylinder_spread.vertex.glsl";
 import cylinder_spread_frag from "./shader_lib/cylinder_spread.fragment.glsl";
 
+import heatmap_offline_vert from "./shader_lib/heatmap_offline.vertex.glsl";
+import heatmap_offline_frag from "./shader_lib/heatmap_offline.fragment.glsl";
+import heatmap_vert from "./shader_lib/heatmap.vertex.glsl";
+import heatmap_frag from "./shader_lib/heatmap.fragment.glsl";
+
 const ShaderChunk = {
     common,
     pick_pars_vert,
@@ -92,6 +97,10 @@ const ShaderChunk = {
     spark_frag,
     cylinder_spread_vert,
     cylinder_spread_frag,
+    heatmap_offline_vert,
+    heatmap_offline_frag,
+    heatmap_vert,
+    heatmap_frag,
 };
 
 export default ShaderChunk;

@@ -11,6 +11,22 @@ import { circle } from "../helper/cavans";
 
 import { mat4 } from "gl-matrix";
 
+/**
+ * @classdesc
+ * 
+ * 3D热力图，继承自 Layer
+ * 
+ * @extends Layer
+ * 
+ * @param {Object} options
+ * @param {Number | Function=} [options.size=13] 单个点绘制大小
+ * @param {String=} [options.unit='px'] 单位，m:米，px: 像素
+ * @param {Number=} [options.height=0] 最大高度，默认为0
+ * @param {Number=} [options.max=100] 最大阈值
+ * @param {Number=} [options.min=5] 最小阈值
+ * @param {Number | Function=} [options.count=1] 权重信息，配合阈值确定颜色值
+ * @param {Object=} [options.gradient={0.0: 'rgb(50, 50, 256)', 0.1: 'rgb(50, 250, 56)', 0.5: 'rgb(250, 250, 56)',1.0: 'rgb(250, 50, 56)'}] 渐变色
+ */
 class HeatmapLayer extends Layer {
     getDefaultOptions() {
         return {
@@ -48,45 +64,7 @@ class HeatmapLayer extends Layer {
         // init program
         this.offlineProgram = new Program(
             gl,
-            {
-                vertexShader: `
-                uniform mat4 uMatrix;
-                uniform float uMax;
-                uniform float uMin;
-                uniform float uZoomUnits;
-                
-                attribute vec3 aPos;
-                attribute vec2 aOffset;
-                attribute float aCount;
-                attribute float aSize;
-
-                varying vec2 vOffset;
-                varying float vCount;
-                
-                void main() {
-                    vOffset = aOffset;
-                    vCount = (aCount - uMin) / (uMax - uMin);
-                    
-                    vec2 pos = aPos.xy + aOffset.xy * aSize * uZoomUnits / 2.0;
-                    gl_Position = uMatrix * vec4(pos, 0.0, 1.0);
-                }`,
-                fragmentShader: `
-                varying vec2 vOffset;
-                varying float vCount;
-                
-                uniform sampler2D uCircle;
-                
-                void main() {
-                    vec4 circle = texture2D(uCircle, (vOffset + 1.0) / 2.0);
-                    float intensity = circle.a * vCount;
-
-                    if (intensity <= 0.0) {
-                        discard;
-                    }
-
-                    gl_FragColor = vec4(.0, .0, .0, intensity);
-                }`,
-            },
+            { shaderId: "heatmap_offline" },
             this
         );
 
@@ -115,57 +93,7 @@ class HeatmapLayer extends Layer {
         this.offlineVAO = new VertexArrayObject();
 
         // init program2
-        this.program = new Program(
-            gl,
-            {
-                vertexShader: `
-                attribute vec2 aPos;
-                
-                varying vec2 vPos;
-
-                uniform float uHeight;
-                uniform mat4 pixelToViewMatrix;
-                uniform mat4 projectionMatrix;
-                uniform mat4 inverseMatrix;
-                uniform sampler2D uSampler;
-                
-                void main() {
-                    vPos = aPos;
-                    
-                    if (uHeight <= 0.0) {
-                        gl_Position = vec4(aPos, 0.0, 1.0);
-                    } else {
-                        vec4 gray = texture2D(uSampler, (aPos + 1.0) / 2.0);
-                        vec4 m0 = inverseMatrix * vec4(aPos.xy, 0.0, 1.0);
-                        vec4 m1 = inverseMatrix * vec4(aPos.xy, 1.0, 1.0);
-                        m0 /= m0.w;
-                        m1 /= m1.w;
-                        vec4 pixel = m0 + (-m0.z / (m1.z - m0.z)) * (m1 - m0);
-                        pixel.z = uHeight * gray.a;
-                        gl_Position = projectionMatrix * pixelToViewMatrix * vec4(pixel.xyz, 1.0);
-                    }
-                }`,
-                fragmentShader: `
-                uniform sampler2D uSampler;
-                uniform sampler2D uSamplerPalette;
-                uniform float uHeight;
-                
-                varying vec2 vPos;
-                
-                void main() {
-                    vec4 gray = texture2D(uSampler, (vPos + 1.0) / 2.0);
-                    float grayAlpha = gray.a;
-                    
-                    if (grayAlpha <= 0.0) {
-                        discard;
-                    }
-                    
-                    vec4 color = texture2D(uSamplerPalette, vec2(grayAlpha, 1.0));
-                    gl_FragColor = vec4(color.rgb, grayAlpha);
-                }`,
-            },
-            this
-        );
+        this.program = new Program(gl, { shaderId: "heatmap" }, this);
 
         // 构建三角网
         const bufferData = [],
