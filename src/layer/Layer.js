@@ -163,9 +163,10 @@ class Layer extends CommonLayer {
 
     /* ************** 通用方法接口 ************** */
     // 获取对象的方法
-    getValue(key, data) {
+    getValue(key, data = {}) {
         const v = this.options[key];
 
+        // 外部方法
         if (typeof v === "function") {
             return v(data);
         }

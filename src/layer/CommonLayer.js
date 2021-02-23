@@ -1,9 +1,9 @@
 /**
  * @typedef {Object} Feature
- * @property {Object} geometry 多边形信息
- * @property {String} geometry.type 多边形信息
- * @property {Array} geometry.coordinates 多边形信息
- * @property {Object} properties 坐标信息
+ * @property {Object} geometry 多边形
+ * @property {String} geometry.type 类型
+ * @property {Array} geometry.coordinates 坐标
+ * @property {Object} properties 属性
  */
 
 /**
