@@ -1,3 +1,5 @@
+#define HAS_EFFECTS
+
 // 必须的变量
 varying vec3 vGeometryPosition;
 varying vec3 vGeometryNormal;

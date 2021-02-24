@@ -1,6 +1,3 @@
-
-#define HAS_EFFECTS
-
 // 初始化变量
 GeometricContext geometry;
 geometry.position = vGeometryPosition;
